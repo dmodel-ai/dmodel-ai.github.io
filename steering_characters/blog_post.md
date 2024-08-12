@@ -66,7 +66,7 @@ prompting or fine-tuning. In particular, we’re going to look at the following 
 improve your prompts:
 
 - Fine-grained control over personalities  
-- Creativity with companions  
+- Improved creativity
 - Conformance with archetypes
 
 
@@ -105,7 +105,7 @@ increases to Amalia’s “obsessiveness”.
 
 **![](images_blogpost_1/image2_amalia_prompt_only.png)**
 
-## Creativity with companions
+## Improved creativity with characters
 
 Another problem with prompting is that the more the model instruction-follows
 a prompt, the less creative it is. This makes for a less interesting experience
@@ -141,7 +141,7 @@ out as much coldness.
 
 ![](images_blogpost_1/image5_edric_nuanced.png)
 
-## Conformance with Archetypes
+## Conformance with archetypes
 
 Control vectors can be extended to archetypes, beliefs, etc. Characters are
 often described using tropes derived from anime and manga. The Amalia character

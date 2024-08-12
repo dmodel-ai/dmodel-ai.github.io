@@ -6,23 +6,25 @@ tl;dr : We think you can make better characters with steering vectors. Try it
 out in [this
 notebook](https://gist.github.com/atondwal/06c4aa91960667517a5f2f079825eaec)
 
-Here at d_model, we’re focused on understanding and steering models using
+Here at $d_{model}$, we’re focused on understanding and steering models using
 interpretability techniques. We're hearing a lot of excitement in this space,
 but we're also hearing a lot of folks wondering how they compare to traditional
 methods like prompting or fine tuning. This ground isn’t really well-covered:
 the best resource we found was [this paragraph](https://vgel.me/posts/representation-engineering/#Control_Vectors_v.s._Prompt_Engineering)
 from Theia Vogel’s blog post on RepEng.
 
-In this first blog post, we want to share some quick examples of how these
-techniques can produce better results than prompt engineering, and that we can
-expose them in a way that’s really accessible even to non-technical users. We
-demonstrate this by steering some of the top companions from [chub](https://chub.ai).
-In later blog posts we’ll cover more in-depth topics, such as a more
-quantitative comparison between steering and prompting, a comparison with
-fine-tuning, and an analysis of what an LLM is thinking when it plays board
-games.
+In this first blog post, we want to share some quick examples of how one of
+these techniques, _steering vectors_, can produce better results than prompt
+engineering, and that we can expose them in a way that’s really accessible even
+to non-technical users. We demonstrate this by steering some of the top
+companions from [chub](https://chub.ai). In later blog posts we’ll cover more
+in-depth topics, such as a more quantitative comparison between steering and
+prompting, a comparison with fine-tuning, and an analysis of what an LLM is
+thinking when it plays strategic games.
 
 ## Background
+
+### AI Personalities
 
 One very popular use for LLMs are social and romantic chatbots. Companion AI
 sites let users generate characters and chat with them, forming emotional
@@ -31,6 +33,21 @@ processing life events, and entertainment. The most popular site for
 interacting with such characters is Character.ai, which recently boasted [20%
 the query volume of
 google](https://research.character.ai/optimizing-inference/?ref=blog.character.ai). 
+
+For our this post, we use the characters [Princess Amalia Arcanisse](https://chub.ai/characters/5943)
+and [Edric
+Sideris](https://chub.ai/characters/thebestsalmon/edric-sideris)
+from chub.ai. These two characters are 3rd and 4th most popular
+respectively.^[We tried the 1st and 2nd most popular characters as well, but
+their output is a lot less… blogpost appropriate]
+
+We ask the model to distill their personality traits as if they were popular
+characters. Edric is materialistic, cold, selfish, workaholic, non-committal,
+tyrannical and
+a [yandere](https://tvtropes.org/pmwiki/pmwiki.php/Main/Yandere). Amalia is
+sophisticated, intelligent, proud,
+charismatic, obsessive and also a yandere.
+
 
 To create a character, a user provides a name, tagline, and description, then
 iterates with test prompts until they’re happy with the character they’ve
@@ -42,24 +59,24 @@ open-source models like Llama 3.1, so unless something changes, we can perhaps
 expect this sort of homogenization to get worse, rather than better, in the
 coming future. So, let’s change something!
 
-In particular, we’re going to look at the following ways in which steering can
+### Steering
+
+_Steering vectors_ let you customize model outputs in a more subtle way than
+prompting or fine-tuning. In particular, we’re going to look at the following ways in which steering can
 improve your prompts:
 
 - Fine-grained control over personalities  
 - Creativity with companions  
 - Conformance with archetypes
 
-For our we use the characters [Princess Amalia Arcanisse](https://chub.ai/characters/5943)
-and [Edric
-Sideris](https://chub.ai/characters/thebestsalmon/edric-sideris)
-from chub.ai. These two characters are 3rd and 4th most popular
-respectively.^[We tried the 1st and 2nd most popular characters as well, but
-their output is a lot less… blogpost appropriate]
 
-We ask the model to distill their personality traits, as if they were popular
-characters. Edric is materialistic, cold, selfish, workaholic, non-committal,
-tyrannical and a [yandere](https://tvtropes.org/pmwiki/pmwiki.php/Main/Yandere). Amalia is sophisticated, intelligent, proud,
-charismatic, obsessive and also a yandere.
+But what are these steering vectors? They are
+directions in the residual stream that --- at inference time -- you can read from, increase, or decrease,
+in order to monkey with the model's internal representations. There are a lot of methods
+to find them [[Zou et al, 2023](https://arxiv.org/abs/2310.01405)], both supervised and unsupervised, but for our case studies below,
+we use the [repeng library](https://github.com/vgel/repeng), which trains them
+in a supervised manner using PCA. 
+ 
 
 ## Fine-grained control over traits
 
@@ -148,12 +165,20 @@ rather than resorting directly to violence.
 ## What’s the catch?
 
 Hopefully this post gives you some ideas for making use of the ability to write
-to the residual stream. Despite all this, steering isn’t without challenges: if
-you’re presenting all these options to the character creator, it presents an
+to the residual stream. Despite all this, steering isn’t without challenges:
+
+* It's worth noting that large positive or negative values applied naively
+to steering vectors can create strange, repetitive outputs as the activations
+get pushed out of distribution. If you'd like to see how to deal with that problem,
+keep your eyes peeled for an upcoming paper from our friends at [Eleluther](https://www.eleuther.ai/).
+
+* If you’re presenting all these options to the character creator, it presents an
 overwhelming amount of choice, which can create challenges making choices from
-all these options and even challenges in UX navigating all of them. On the
-other hand, tuning them more automatically gives us yet another
+all these options and even challenges in UX navigating all of them. On the other hand, tuning them more automatically gives us yet another
 high-dimensional optimization problem. But that’s a topic for a later blog
 post. Stay tuned for that, some case studies about *reading* from the residual
 stream, and for some more quantitative explorations of steering vs prompt
 engineering.
+
+If you found this interesting at all, or just want to chat about the topic, or
+how we can help you get better results with your models, drop us a line at [REMOVED](mailto:REMOVED)

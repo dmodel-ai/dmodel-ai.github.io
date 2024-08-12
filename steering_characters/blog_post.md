@@ -16,7 +16,7 @@ from Theia Vogel’s blog post on RepEng.
 In this first blog post, we want to share some quick examples of how these
 techniques can produce better results than prompt engineering, and that we can
 expose them in a way that’s really accessible even to non-technical users. We
-demonstrate this by steering some of the top companions from [chub](chub.ai).
+demonstrate this by steering some of the top companions from [chub](https://chub.ai).
 In later blog posts we’ll cover more in-depth topics, such as a more
 quantitative comparison between steering and prompting, a comparison with
 fine-tuning, and an analysis of what an LLM is thinking when it plays board
@@ -30,7 +30,7 @@ connections to these characters and using them for emotional support,
 processing life events, and entertainment. The most popular site for
 interacting with such characters is Character.ai, which recently boasted [20%
 the query volume of
-google]([https://research.character.ai/optimizing-inference/?ref=blog.character.ai](https://research.character.ai/optimizing-inference/?ref=blog.character.ai)). 
+google](https://research.character.ai/optimizing-inference/?ref=blog.character.ai). 
 
 To create a character, a user provides a name, tagline, and description, then
 iterates with test prompts until they’re happy with the character they’ve
@@ -49,24 +49,24 @@ improve your prompts:
 - Creativity with companions  
 - Conformance with archetypes
 
-For our we use the characters [Princess Amalia
-Arcanisse]([https://chub.ai/characters/5943](https://chub.ai/characters/5943))
+For our we use the characters [Princess Amalia Arcanisse](https://chub.ai/characters/5943)
 and [Edric
-Sideris]((https://chub.ai/characters/thebestsalmon/edric-sideris))
+Sideris](https://chub.ai/characters/thebestsalmon/edric-sideris)
 from chub.ai. These two characters are 3rd and 4th most popular
 respectively.^[We tried the 1st and 2nd most popular characters as well, but
 their output is a lot less… blogpost appropriate]
 
-We ask the model to distill their personality traits. Edric is materialistic,
-cold, selfish, workaholic, non-committal, tyrannical and a yandere. Amalia is
-sophisticated, intelligent, proud, charismatic, obsessive and also a yandere.
+We ask the model to distill their personality traits, as if they were popular
+characters. Edric is materialistic, cold, selfish, workaholic, non-committal,
+tyrannical and a [yandere](https://tvtropes.org/pmwiki/pmwiki.php/Main/Yandere). Amalia is sophisticated, intelligent, proud,
+charismatic, obsessive and also a yandere.
 
 ## Fine-grained control over traits
 
 It’s not always clear how to ask your character AI to be “more” obsessive.
 Users can append an instruction to a prompt that puts an emphasis on trait such
 as an emotion or personality, but it’s hard to be granular: you can use CAPS,
-use more superlatives, repeat repeatable words, or use ***symbols***, but
+use more superlatives, repeat repeatable words, or use \*\*\*symbols\*\*\*, but
 that’s about it. With control vectors, you can continuously scale the trait in
 a predictable manner rather than hoping the model picks up on the differences
 between “very very obsessive” and an all-caps “OBSESSIVE”.

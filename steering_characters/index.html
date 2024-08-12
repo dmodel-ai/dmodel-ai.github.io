@@ -194,8 +194,8 @@ paragraph</a> from Theia Vogel’s blog post on RepEng.</p>
 these techniques can produce better results than prompt engineering, and
 that we can expose them in a way that’s really accessible even to
 non-technical users. We demonstrate this by steering some of the top
-companions from <a href="chub.ai">chub</a>. In later blog posts we’ll
-cover more in-depth topics, such as a more quantitative comparison
+companions from <a href="https://chub.ai">chub</a>. In later blog posts
+we’ll cover more in-depth topics, such as a more quantitative comparison
 between steering and prompting, a comparison with fine-tuning, and an
 analysis of what an LLM is thinking when it plays board games.</p>
 <h2 id="background">Background</h2>
@@ -205,7 +205,7 @@ forming emotional connections to these characters and using them for
 emotional support, processing life events, and entertainment. The most
 popular site for interacting with such characters is Character.ai, which
 recently boasted <a
-href="%5Bhttps://research.character.ai/optimizing-inference/?ref=blog.character.ai%5D(https://research.character.ai/optimizing-inference/?ref=blog.character.ai)">20%
+href="https://research.character.ai/optimizing-inference/?ref=blog.character.ai">20%
 the query volume of google</a>.</p>
 <p>To create a character, a user provides a name, tagline, and
 description, then iterates with test prompts until they’re happy with
@@ -227,27 +227,27 @@ steering can improve your prompts:</p>
 <li>Conformance with archetypes</li>
 </ul>
 <p>For our we use the characters <a
-href="%5Bhttps://chub.ai/characters/5943%5D(https://chub.ai/characters/5943)">Princess
-Amalia Arcanisse</a> and <a
-href="(https://chub.ai/characters/thebestsalmon/edric-sideris)">Edric
+href="https://chub.ai/characters/5943">Princess Amalia Arcanisse</a> and
+<a href="https://chub.ai/characters/thebestsalmon/edric-sideris">Edric
 Sideris</a> from chub.ai. These two characters are 3rd and 4th most
 popular respectively.<a href="#fn1" class="footnote-ref" id="fnref1"
 role="doc-noteref"><sup>1</sup></a></p>
-<p>We ask the model to distill their personality traits. Edric is
-materialistic, cold, selfish, workaholic, non-committal, tyrannical and
-a yandere. Amalia is sophisticated, intelligent, proud, charismatic,
-obsessive and also a yandere.</p>
+<p>We ask the model to distill their personality traits, as if they were
+popular characters. Edric is materialistic, cold, selfish, workaholic,
+non-committal, tyrannical and a <a
+href="https://tvtropes.org/pmwiki/pmwiki.php/Main/Yandere">yandere</a>.
+Amalia is sophisticated, intelligent, proud, charismatic, obsessive and
+also a yandere.</p>
 <h2 id="fine-grained-control-over-traits">Fine-grained control over
 traits</h2>
 <p>It’s not always clear how to ask your character AI to be “more”
 obsessive. Users can append an instruction to a prompt that puts an
 emphasis on trait such as an emotion or personality, but it’s hard to be
 granular: you can use CAPS, use more superlatives, repeat repeatable
-words, or use <strong><em>symbols</em></strong>, but that’s about it.
-With control vectors, you can continuously scale the trait in a
-predictable manner rather than hoping the model picks up on the
-differences between “very very obsessive” and an all-caps
-“OBSESSIVE”.</p>
+words, or use ***symbols***, but that’s about it. With control vectors,
+you can continuously scale the trait in a predictable manner rather than
+hoping the model picks up on the differences between “very very
+obsessive” and an all-caps “OBSESSIVE”.</p>
 <p>Here is an example of steering Amalia to be more and less obsessive
 (than she currently is). A more obsessive Amalia is more physically
 intimate and extremely relentless in her love for the user compared to
@@ -270,8 +270,7 @@ instruction-follows a prompt, the less creative it is. This makes for a
 less interesting experience for the interlocutor, and puts more of the
 onus on the character designer to anticipate creative reactions to
 situations the character might find themselves in. A good illustration
-of this can be found in [<a
-href="%5Bhttps://arxiv.org/pdf/2407.02446v1%5D(https://arxiv.org/pdf/2407.02446v1)">Li
+of this can be found in [<a href="https://arxiv.org/pdf/2407.02446v1">Li
 et al, 2024</a>], which show that instruct models often stick to stock
 phrases.</p>
 <p><img src="images_blogpost_1/image3_rlhf_paper_fig.png" /></p>

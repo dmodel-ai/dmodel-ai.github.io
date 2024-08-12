@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Anish Tondwalkar and Daniel Moon" />
+  <title>Steering characters with Interpretability</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Steering characters with Interpretability</h1>
+<p class="author">Anish Tondwalkar and Daniel Moon</p>
+<p class="date"><span
+class="math inline"><em>d</em><sub><em>m</em><em>o</em><em>d</em><em>e</em><em>l</em></sub></span></p>
+</header>
+<p>tl;dr : We think you can make better characters with steering
+vectors. Try it out in <a
+href="https://gist.github.com/atondwal/06c4aa91960667517a5f2f079825eaec">this
+notebook</a></p>
+<p>Here at d_model, we’re focused on understanding and steering models
+using interpretability techniques. We’re hearing a lot of excitement in
+this space, but we’re also hearing a lot of folks wondering how they
+compare to traditional methods like prompting or fine tuning. This
+ground isn’t really well-covered: the best resource we found was <a
+href="https://vgel.me/posts/representation-engineering/#Control_Vectors_v.s._Prompt_Engineering">this
+paragraph</a> from Theia Vogel’s blog post on RepEng.</p>
+<p>In this first blog post, we want to share some quick examples of how
+these techniques can produce better results than prompt engineering, and
+that we can expose them in a way that’s really accessible even to
+non-technical users. We demonstrate this by steering some of the top
+companions from <a href="chub.ai">chub</a>. In later blog posts we’ll
+cover more in-depth topics, such as a more quantitative comparison
+between steering and prompting, a comparison with fine-tuning, and an
+analysis of what an LLM is thinking when it plays board games.</p>
+<h2 id="background">Background</h2>
+<p>One very popular use for LLMs are social and romantic chatbots.
+Companion AI sites let users generate characters and chat with them,
+forming emotional connections to these characters and using them for
+emotional support, processing life events, and entertainment. The most
+popular site for interacting with such characters is Character.ai, which
+recently boasted <a
+href="%5Bhttps://research.character.ai/optimizing-inference/?ref=blog.character.ai%5D(https://research.character.ai/optimizing-inference/?ref=blog.character.ai)">20%
+the query volume of google</a>.</p>
+<p>To create a character, a user provides a name, tagline, and
+description, then iterates with test prompts until they’re happy with
+the character they’ve created. This process has a creative ceiling for
+the end user, especially as popular <code>instruct</code> models often
+develop specific, somewhat fixed, personalities when post-trained for
+instruction following. Moreover, Character.ai recently announced that
+they were pivoting from their own foundation models to open-source
+models like Llama 3.1, so unless something changes, we can perhaps
+expect this sort of homogenization to get worse, rather than better, in
+the coming future. So, let’s change something!</p>
+<p>In particular, we’re going to look at the following ways in which
+steering can improve your prompts:</p>
+<ul>
+<li>Fine-grained control over personalities<br />
+</li>
+<li>Creativity with companions<br />
+</li>
+<li>Conformance with archetypes</li>
+</ul>
+<p>For our we use the characters <a
+href="%5Bhttps://chub.ai/characters/5943%5D(https://chub.ai/characters/5943)">Princess
+Amalia Arcanisse</a> and <a
+href="(https://chub.ai/characters/thebestsalmon/edric-sideris)">Edric
+Sideris</a> from chub.ai. These two characters are 3rd and 4th most
+popular respectively.<a href="#fn1" class="footnote-ref" id="fnref1"
+role="doc-noteref"><sup>1</sup></a></p>
+<p>We ask the model to distill their personality traits. Edric is
+materialistic, cold, selfish, workaholic, non-committal, tyrannical and
+a yandere. Amalia is sophisticated, intelligent, proud, charismatic,
+obsessive and also a yandere.</p>
+<h2 id="fine-grained-control-over-traits">Fine-grained control over
+traits</h2>
+<p>It’s not always clear how to ask your character AI to be “more”
+obsessive. Users can append an instruction to a prompt that puts an
+emphasis on trait such as an emotion or personality, but it’s hard to be
+granular: you can use CAPS, use more superlatives, repeat repeatable
+words, or use <strong><em>symbols</em></strong>, but that’s about it.
+With control vectors, you can continuously scale the trait in a
+predictable manner rather than hoping the model picks up on the
+differences between “very very obsessive” and an all-caps
+“OBSESSIVE”.</p>
+<p>Here is an example of steering Amalia to be more and less obsessive
+(than she currently is). A more obsessive Amalia is more physically
+intimate and extremely relentless in her love for the user compared to
+“prompt only Amalia”.</p>
+<p><img src="images_blogpost_1/image1_amalia_obsessive.png" /></p>
+<p>Interestingly, when you subtract the control vector, Amalia is more
+dispassionate and believes that our relationship with her is just a
+means to an end.</p>
+<p>What happens if we try to replicate this with a prompt? Perhaps the
+most obvious solution is to append “act obsessive” to the prompt. Below,
+you can see that it does work, it’s a dramatic change over the baseline:
+Amalia becomes so aggressive that she physically harms the user. This is
+an example where the prompt engineering techniques do work, but make it
+difficult to add more subtle increases to Amalia’s “obsessiveness”.</p>
+<p><strong><img
+src="images_blogpost_1/image2_amalia_prompt_only.png" /></strong></p>
+<h2 id="creativity-with-companions">Creativity with companions</h2>
+<p>Another problem with prompting is that the more the model
+instruction-follows a prompt, the less creative it is. This makes for a
+less interesting experience for the interlocutor, and puts more of the
+onus on the character designer to anticipate creative reactions to
+situations the character might find themselves in. A good illustration
+of this can be found in [<a
+href="%5Bhttps://arxiv.org/pdf/2407.02446v1%5D(https://arxiv.org/pdf/2407.02446v1)">Li
+et al, 2024</a>], which show that instruct models often stick to stock
+phrases.</p>
+<p><img src="images_blogpost_1/image3_rlhf_paper_fig.png" /></p>
+<p>In our experience, steering vectors allow us to mess with the model
+internals enough to disrupt this, letting the model again unleash its
+creativity.</p>
+<p><img src="images_blogpost_1/image4_edric_cold.png" /></p>
+<p>Edric’s prompt tells him to be cold. But he’s so cold that his
+responses are short, monotonous and same-y. Let’s refine our approach:
+let’s make him a bit less cold by subtracting out the “cold” vector. In
+this example Edric — whose character description includes that he plays
+the violin as a hobby — begrudgingly complies, and forces himself to
+play to be more agreeable, a nice detail that the user can further
+elaborate on!</p>
+<p>This also demonstrates another virtue of steering this way: the
+steering vector we trained with supervised learning captures a lot of
+the “incidental” implications of what it means for a character to be
+“cold”, so we can use the subtle differences in multiple vectors to
+order to create a more nuanced result, rather than just picking one, as
+we would have to do for prompt engineering. In this example, we make him
+a bit more stable and less noncommittal, allowing us to achieve similar
+result without having to subtract out as much coldness.</p>
+<p><img src="images_blogpost_1/image5_edric_nuanced.png" /></p>
+<h2 id="conformance-with-archetypes">Conformance with Archetypes</h2>
+<p>Control vectors can be extended to archetypes, beliefs, etc.
+Characters are often described using tropes derived from anime and
+manga. The Amalia character metadata indicates that she’s a yandere, but
+with just the prompt, in the below example, we see a much more muted
+response than the trope is known for. In fact, we believe it’s actually
+quite difficult to get even the “uncensored” version of Llama 3.1
+Instruct to behave like a yandere — as we noted in the previous section,
+the post-training stack concentrates probability stubbornly around the
+kinds of phrases and responses that perform well in instruction
+following, and Yandere simply isn’t a part of that.</p>
+<p>Instead, we gave the user an option to steer between cool (kuudere)
+and unstable (yandere) archetypes. When we make Amalia more yandere, she
+begins to inflict violence on the user, and threatens the lives of the
+user’s future lovers. This is quite intense. By contrast, a more kuudere
+Amalia is more cold, and her threats more nuanced. She appeals to duty,
+and to your rational mind, rather than resorting directly to
+violence.</p>
+<p><img src="images_blogpost_1//image6_amalia_yandere.png" /></p>
+<h2 id="whats-the-catch">What’s the catch?</h2>
+<p>Hopefully this post gives you some ideas for making use of the
+ability to write to the residual stream. Despite all this, steering
+isn’t without challenges: if you’re presenting all these options to the
+character creator, it presents an overwhelming amount of choice, which
+can create challenges making choices from all these options and even
+challenges in UX navigating all of them. On the other hand, tuning them
+more automatically gives us yet another high-dimensional optimization
+problem. But that’s a topic for a later blog post. Stay tuned for that,
+some case studies about <em>reading</em> from the residual stream, and
+for some more quantitative explorations of steering vs prompt
+engineering.</p>
+<aside id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>We tried the 1st and 2nd most popular characters as
+well, but their output is a lot less… blogpost appropriate<a
+href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</aside>
+</body>
+</html>

@@ -95,7 +95,7 @@ a prompt, the less creative it is. This makes for a less interesting experience
 for the interlocutor, and puts more of the onus on the character designer to
 anticipate creative reactions to situations the character might find themselves
 in. A good illustration of this can be found in [[Li et al,
-2024]([https://arxiv.org/pdf/2407.02446v1](https://arxiv.org/pdf/2407.02446v1))],
+2024](https://arxiv.org/pdf/2407.02446v1)],
 which show that instruct models often stick to stock phrases.  
 
 ![](images_blogpost_1/image3_rlhf_paper_fig.png)

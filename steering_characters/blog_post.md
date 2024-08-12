@@ -89,7 +89,7 @@ a predictable manner rather than hoping the model picks up on the differences
 between “very very obsessive” and an all-caps “OBSESSIVE”.
 
 Here is an example of steering Amalia to be more and less obsessive (than she
-currently is). A more obsessive Amalia is more physically intimate and
+currently is). A more obsessive Amalia ("prompt + control") is more physically intimate and
 extremely relentless in her love for the user compared to “prompt only Amalia”.
 
 ![](images_blogpost_1/image1_amalia_obsessive.png)  

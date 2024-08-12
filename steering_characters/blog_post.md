@@ -17,7 +17,7 @@ In this first blog post, we want to share some quick examples of how one of
 these techniques, _steering vectors_, can produce better results than prompt
 engineering, and that we can expose them in a way that’s really accessible even
 to non-technical users. We demonstrate this by steering some of the top
-companions from [chub](https://chub.ai). In later blog posts we’ll cover more
+companions from [chub](https://chub.ai). In later blog posts, we’ll cover more
 in-depth topics, such as a more quantitative comparison between steering and
 prompting, a comparison with fine-tuning, and an analysis of what an LLM is
 thinking when it plays strategic games.

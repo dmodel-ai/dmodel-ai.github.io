@@ -2,9 +2,12 @@
 % Anish Tondwalkar and Daniel Moon
 % $d_{model}$
 
-tl;dr : We think you can make better characters with steering vectors. Try it
+tl;dr: We think you can make better characters with steering vectors. Try it
 out in [this
-notebook](https://gist.github.com/atondwal/06c4aa91960667517a5f2f079825eaec)
+notebook](https://gist.github.com/atondwal/06c4aa91960667517a5f2f079825eaec), or
+check out some of the examples from the screenshots in the post below.
+
+ *  *  *  *
 
 Here at $d_{model}$, we’re focused on understanding and steering models using
 interpretability techniques. We're hearing a lot of excitement in this space,

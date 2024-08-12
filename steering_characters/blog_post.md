@@ -1,4 +1,4 @@
-% Steering characters with Interpretability
+% Steering Characters with Interpretability
 % Anish Tondwalkar and Daniel Moon
 % $d_{model}$
 

@@ -20,10 +20,10 @@ In this first blog post, we want to share some quick examples of how one of
 these techniques, _steering vectors_, can produce better results than prompt
 engineering, and that we can expose them in a way that’s really accessible even
 to non-technical users. We demonstrate this by steering some of the top
-companions from [chub](https://chub.ai). In later blog posts, we’ll cover more
+companions from [chub](https://chub.ai). <!-- In later blog posts, we’ll cover more
 in-depth topics, such as a more quantitative comparison between steering and
 prompting, a comparison with fine-tuning, and an analysis of what an LLM is
-thinking when it plays strategic games.
+thinking when it plays strategic games.//-->
 
 ## Background
 
@@ -33,7 +33,7 @@ connections to these characters and using them for emotional support,
 processing life events, and entertainment. The most popular site for
 interacting with such characters is Character.ai, which recently boasted [20%
 the query volume of
-google](https://research.character.ai/optimizing-inference/?ref=blog.character.ai). 
+Google](https://research.character.ai/optimizing-inference/?ref=blog.character.ai). 
 
 For our this post, we use the characters [Princess Amalia Arcanisse](https://chub.ai/characters/5943)
 and [Edric
@@ -42,12 +42,14 @@ from chub.ai. These two characters are 3rd and 4th most popular
 respectively.^[We tried the 1st and 2nd most popular characters as well, but
 their output is a lot less… blogpost appropriate]
 
+<!--
 We ask the model to distill their personality traits as if they were popular
 characters. Edric is materialistic, cold, selfish, workaholic, non-committal,
 tyrannical and
 a [yandere](https://tvtropes.org/pmwiki/pmwiki.php/Main/Yandere). Amalia is
 sophisticated, intelligent, proud,
 charismatic, obsessive and also a yandere.
+//-->
 
 In particular, we’re going to look at the following
 ways in which steering can improve your prompts:
@@ -58,7 +60,9 @@ ways in which steering can improve your prompts:
 
 To create a character, a user provides a name, tagline, and description, then
 iterates with test prompts until they’re happy with the character they’ve
-created. This process has a creative ceiling for the end user, especially as
+created.
+
+This process has a creative ceiling for the end user, especially as
 popular `instruct` models often develop specific, somewhat fixed, personalities
 when post-trained for instruction following. Moreover, Character.ai recently
 announced that they were pivoting from their own foundation models to
@@ -140,7 +144,7 @@ out as much coldness.
 
 Control vectors can be extended to archetypes, beliefs, etc. Characters are
 often described using tropes derived from anime and manga. The Amalia character
-metadata indicates that she’s a yandere, but with just the prompt, in the below
+metadata indicates that she’s a [yandere](https://tvtropes.org/pmwiki/pmwiki.php/Main/Yandere), but with just the prompt, in the below
 example, we see a much more muted response than the trope is known for. In
 fact, we believe it’s actually quite difficult to get even the “uncensored”
 version of Llama 3.1 Instruct to behave like a yandere — as we noted in the

@@ -173,7 +173,7 @@ to the residual stream. Despite all this, steering isn’t without challenges:
 * It's worth noting that large positive or negative values applied naively
 to steering vectors can create strange, repetitive outputs as the activations
 get pushed out of distribution. If you'd like to see how to deal with that problem,
-keep your eyes peeled for an upcoming paper from our friends at [Eleluther](https://www.eleuther.ai/).
+keep your eyes peeled for an upcoming paper from our friends at [Eleuther](https://www.eleuther.ai/).
 
 * If you’re presenting all these options to the character creator, it presents an
 overwhelming amount of choice, which can create challenges making choices from

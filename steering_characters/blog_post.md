@@ -27,8 +27,6 @@ thinking when it plays strategic games.
 
 ## Background
 
-### AI Personalities
-
 One very popular use for LLMs are social and romantic chatbots. Companion AI
 sites let users generate characters and chat with them, forming emotional
 connections to these characters and using them for emotional support,
@@ -51,6 +49,12 @@ a [yandere](https://tvtropes.org/pmwiki/pmwiki.php/Main/Yandere). Amalia is
 sophisticated, intelligent, proud,
 charismatic, obsessive and also a yandere.
 
+In particular, we’re going to look at the following
+ways in which steering can improve your prompts:
+
+- Fine-grained control over personalities  
+- Improved creativity
+- Conformance with archetypes
 
 To create a character, a user provides a name, tagline, and description, then
 iterates with test prompts until they’re happy with the character they’ve
@@ -62,24 +66,12 @@ open-source models like Llama 3.1, so unless something changes, we can perhaps
 expect this sort of homogenization to get worse, rather than better, in the
 coming future. So, let’s change something!
 
-### Steering
-
 _Steering vectors_ let you customize model outputs in a more subtle way than
-prompting or fine-tuning. In particular, we’re going to look at the following ways in which steering can
-improve your prompts:
-
-- Fine-grained control over personalities  
-- Improved creativity
-- Conformance with archetypes
-
-
-But what are these steering vectors? They are
-directions in the residual stream that --- at inference time -- you can read from, increase, or decrease,
-in order to monkey with the model's internal representations. There are a lot of methods
-to find them [[Zou et al, 2023](https://arxiv.org/abs/2310.01405)], both supervised and unsupervised, but for our case studies below,
-we use the [repeng library](https://github.com/vgel/repeng), which trains them
-in a supervised manner using PCA. 
- 
+prompting or fine-tuning.
+We're going to monkey with the model's internal representations [[Zou et al,
+2023](https://arxiv.org/abs/2310.01405)] at inference time, by adding,
+subtracting, or taking dot products between these internal representations and
+our steering vectors.
 
 ## Fine-grained control over traits
 
@@ -179,9 +171,11 @@ keep your eyes peeled for an upcoming paper from our friends at [Eleuther](https
 overwhelming amount of choice, which can create challenges making choices from
 all these options and even challenges in UX navigating all of them. On the other hand, tuning them more automatically gives us yet another
 high-dimensional optimization problem. But that’s a topic for a later blog
-post. Stay tuned for that, some case studies about *reading* from the residual
+post.
+
+Stay tuned for that, for some case studies about *reading* from the residual
 stream, and for some more quantitative explorations of steering vs prompt
 engineering.
 
-If you found this interesting at all, or just want to chat about the topic, or
+If you found this interesting at all, or just want to chat about the topic, or about
 how we can help you get better results with your models, drop us a line at [REMOVED](mailto:REMOVED)

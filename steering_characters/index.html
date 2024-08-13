@@ -199,10 +199,11 @@ one of these techniques, <em>steering vectors</em>, can produce better
 results than prompt engineering, and that we can expose them in a way
 that’s really accessible even to non-technical users. We demonstrate
 this by steering some of the top companions from <a
-href="https://chub.ai">chub</a>. In later blog posts, we’ll cover more
-in-depth topics, such as a more quantitative comparison between steering
-and prompting, a comparison with fine-tuning, and an analysis of what an
-LLM is thinking when it plays strategic games.</p>
+href="https://chub.ai">chub</a>.
+<!-- In later blog posts, we’ll cover more
+in-depth topics, such as a more quantitative comparison between steering and
+prompting, a comparison with fine-tuning, and an analysis of what an LLM is
+thinking when it plays strategic games.//--></p>
 <h2 id="background">Background</h2>
 <p>One very popular use for LLMs are social and romantic chatbots.
 Companion AI sites let users generate characters and chat with them,
@@ -211,19 +212,21 @@ emotional support, processing life events, and entertainment. The most
 popular site for interacting with such characters is Character.ai, which
 recently boasted <a
 href="https://research.character.ai/optimizing-inference/?ref=blog.character.ai">20%
-the query volume of google</a>.</p>
+the query volume of Google</a>.</p>
 <p>For our this post, we use the characters <a
 href="https://chub.ai/characters/5943">Princess Amalia Arcanisse</a> and
 <a href="https://chub.ai/characters/thebestsalmon/edric-sideris">Edric
 Sideris</a> from chub.ai. These two characters are 3rd and 4th most
 popular respectively.<a href="#fn1" class="footnote-ref" id="fnref1"
 role="doc-noteref"><sup>1</sup></a></p>
-<p>We ask the model to distill their personality traits as if they were
-popular characters. Edric is materialistic, cold, selfish, workaholic,
-non-committal, tyrannical and a <a
-href="https://tvtropes.org/pmwiki/pmwiki.php/Main/Yandere">yandere</a>.
-Amalia is sophisticated, intelligent, proud, charismatic, obsessive and
-also a yandere.</p>
+<!--
+We ask the model to distill their personality traits as if they were popular
+characters. Edric is materialistic, cold, selfish, workaholic, non-committal,
+tyrannical and
+a [yandere](https://tvtropes.org/pmwiki/pmwiki.php/Main/Yandere). Amalia is
+sophisticated, intelligent, proud,
+charismatic, obsessive and also a yandere.
+//-->
 <p>In particular, we’re going to look at the following ways in which
 steering can improve your prompts:</p>
 <ul>
@@ -234,14 +237,15 @@ steering can improve your prompts:</p>
 </ul>
 <p>To create a character, a user provides a name, tagline, and
 description, then iterates with test prompts until they’re happy with
-the character they’ve created. This process has a creative ceiling for
-the end user, especially as popular <code>instruct</code> models often
-develop specific, somewhat fixed, personalities when post-trained for
-instruction following. Moreover, Character.ai recently announced that
-they were pivoting from their own foundation models to open-source
-models like Llama 3.1, so unless something changes, we can perhaps
-expect this sort of homogenization to get worse, rather than better, in
-the coming future. So, let’s change something!</p>
+the character they’ve created.</p>
+<p>This process has a creative ceiling for the end user, especially as
+popular <code>instruct</code> models often develop specific, somewhat
+fixed, personalities when post-trained for instruction following.
+Moreover, Character.ai recently announced that they were pivoting from
+their own foundation models to open-source models like Llama 3.1, so
+unless something changes, we can perhaps expect this sort of
+homogenization to get worse, rather than better, in the coming future.
+So, let’s change something!</p>
 <p><em>Steering vectors</em> let you customize model outputs in a more
 subtle way than prompting or fine-tuning. We’re going to monkey with the
 model’s internal representations [<a
@@ -308,8 +312,9 @@ result without having to subtract out as much coldness.</p>
 <h2 id="conformance-with-archetypes">Conformance with archetypes</h2>
 <p>Control vectors can be extended to archetypes, beliefs, etc.
 Characters are often described using tropes derived from anime and
-manga. The Amalia character metadata indicates that she’s a yandere, but
-with just the prompt, in the below example, we see a much more muted
+manga. The Amalia character metadata indicates that she’s a <a
+href="https://tvtropes.org/pmwiki/pmwiki.php/Main/Yandere">yandere</a>,
+but with just the prompt, in the below example, we see a much more muted
 response than the trope is known for. In fact, we believe it’s actually
 quite difficult to get even the “uncensored” version of Llama 3.1
 Instruct to behave like a yandere — as we noted in the previous section,

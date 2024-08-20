@@ -1,5 +1,5 @@
 % Steering Characters with Interpretability
-% [Anish Tondwalkar](http://ani.sh) and [Daniel Moon](d-moon@d-model.ai)
+% [Anish Tondwalkar](http://ani.sh) and [Daniel Moon](https://www.linkedin.com/in/d-moon/)
 % $d_{model}$
 
 tl;dr: We think you can make better characters with steering vectors. Try it

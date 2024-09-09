@@ -35,7 +35,7 @@ interacting with such characters is Character.ai, which recently boasted [20%
 the query volume of
 Google](https://research.character.ai/optimizing-inference/?ref=blog.character.ai). 
 
-For our this post, we use the characters [Princess Amalia Arcanisse](https://chub.ai/characters/5943)
+For this post, we use the characters [Princess Amalia Arcanisse](https://chub.ai/characters/5943)
 and [Edric
 Sideris](https://chub.ai/characters/thebestsalmon/edric-sideris)
 from chub.ai. These two characters are 3rd and 4th most popular

@@ -292,7 +292,10 @@ these layers to improve their overall accuracy as a linear model:
 * Dividing by the average absolute amount that each layer activates on the positive samples
 * Dividing by the square root of the average of squares of layer activations
 
-And we found that: <!-- todo -->
+And we found that no normalization actually did the best of all three
+scaling methods. In domains like this one where we have a lot less
+training data points then dimensions, what techniques will generalize
+well to the test data can be hard to predict.
 
 
 # Appendix

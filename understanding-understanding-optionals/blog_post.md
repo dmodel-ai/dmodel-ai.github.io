@@ -276,8 +276,9 @@ vectors, we averaged the positive examples and the negative examples,
 and then took the difference of the averages as our base reading
 vector. This is called "mass mean probing" in the literature, and
 empirically has been shown to generalize better in high dimensional
-space than trying to learn a linear model through logistic regression.
-<!-- todo: link to appendix about this? -->
+space than trying to learn a linear model through logistic
+regression.^[see the appendix section "Mass Mean Probing vs Linear
+Regression" for more on this]
 
 In this reading vector, the impact of each layer based on the
 magnitude of difference in that layer, instead of separate a notion of
@@ -509,7 +510,6 @@ def main(x: int) -> None:
 
 def process_value(value):
 ```
-
 The names of functions are highly influential in the models
 understanding of their type semantics. When test 3 is changed so that
 `process_value` is instead called `count_chars`, Pythia 6.9b becomes
@@ -518,3 +518,14 @@ from its training data that functions called `count_chars` always take
 non-optional strings. Similarly, when test 4 is changed so that
 process_values becomes string_complexity, it goes from consistently
 passing to almost always failing.
+
+## Mass Mean Probing vs Linear Regression
+
+We were initially very surprised to find that mass means probing would
+perform better than linear regression. After all, linear regression is
+a much more powerful technique for fitting data. And mass means
+probing can be seen as giving the direction of best fit in each
+dimension independently, without considering other dimensions. The
+more dimensions you consider at one time, the better your model fit
+can be. But repeatedly in our data, we found that mass means probing
+outperformed linear regression on the test data.

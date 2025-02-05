@@ -249,7 +249,7 @@ To start, let's look at how previous works have extracted reading
 vectors from sample activations. In the Zhou representation
 engineering paper, the authors extract a reading vector from the
 contrastive pairs of activations using principal component
-analysis.
+analysis (PCA).
 
 First, they take each pair of honest and dishonest promptings for the
 same stimulus, and get the difference between them, creating a set of

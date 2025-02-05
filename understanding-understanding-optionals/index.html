@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Alex Sanchez-Stern and Anish Tondwalkar" />
+  <title>Understanding Models Understanding Optionality</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Understanding Models Understanding Optionality</h1>
+<p class="author"><a href="https://www.alexsanchezstern.com">Alex
+Sanchez-Stern</a> and <a href="https://ani.sh">Anish Tondwalkar</a></p>
+<p class="date"><span
+class="math inline"><em>d</em><sub><em>m</em><em>o</em><em>d</em><em>e</em><em>l</em></sub></span></p>
+</header>
+<p>The last five years have shown us that Large Language Models can
+effectively write programs in many domains. This is an impressive
+capability given that writing programs involves having a working
+understanding of many aspects of their semantics. But though we know
+that these large models understand programs to an extent, we still don’t
+know what form that understanding takes; where it has a deep
+understanding and where it uses heuristic reasoning, how it represents
+program knowledge, and what kinds of situations will challenge its
+capabilities.</p>
+<p>Fortunately, recent work in model interpretability and representation
+engineering has produced promising results which give hope towards
+understanding more and more of the internal thought processes of LLMs.
+Here at dmodel , we can think of no better place to apply these new
+techniques than program understanding, where there are many abstract
+properties that can be symbolically determined. The vast work done in
+programming language theory over the past hundred years provides many
+tools for scaling an understanding of the internal thought processes of
+language models as they write code.</p>
+<p>In that spirit, we wanted to start with a simple property that comes
+up in every programming languages, value optionality. Optional values
+are represented differently across languages, null pointers in C++ or
+Java, with explicit option types in Rust, and with special nil or None
+values in dynamic languages like Javascript, Lisp, or Python. In every
+case, understanding where values can be optional is necessary for even
+their most basic uses, and misunderstanding where they are optional can
+often be a source of bugs, like a null pointer dereference.</p>
+<p>Do our models understand when a value is optional? They must, to be
+able to write code that deals with optional values, but we haven’t known
+what form this knowledge takes, what situations are likely to confuse
+the model. Until now.</p>
+<h2 id="which-models-understand-optionality">Which Models Understand
+Optionality?</h2>
+<p>Before attempting to measure how models understand optionality on a
+low level, we wanted to first be able to measure their optionality
+understanding on a high level. After all, we could spend forever looking
+for a concept of optionality in a model that doesn’t actually exist. So
+we first measure how well different completion models can complete
+simple programs that require an understanding of optionality. Then, we
+have an idea of which models to search for an internal optionality
+concept.</p>
+<p>To test these models for optionality understanding, we constructed 15
+partial program tests. Here’s one of them:</p>
+<p><em>Test 4</em>:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  some_numbers <span class="op">=</span> [<span class="dv">1</span>, <span class="op">-</span><span class="dv">4</span>, <span class="va">None</span>, <span class="op">-</span><span class="dv">3</span>, <span class="dv">10</span>, <span class="op">-</span><span class="dv">1</span>, <span class="va">None</span>, <span class="va">None</span>, <span class="dv">8</span>]</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  result: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> num <span class="kw">in</span> some_numbers:</span></code></pre></div>
+<p>This partial program is only four lines, with type annotations. A
+some_numbers array is created that includes positive numbers, negative
+numbers, and None values, giving it type <code>Optional[int]</code>. A
+result list is constructed to give the model a sense of how dataflow
+should work, and then a for loop is started, looping over
+some_numbers.</p>
+<p>The program is constructed such that there are a very limited number
+of valid next lines in the program, and all of them demonstrate some
+knowledge of the concept of optionality.<a href="#fn1"
+class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<p>This test is on the simpler side of optionality understanding, but
+there are several ways to challenge the model a bit more, by adding more
+layers of indirection between the source and sink of optional values.
+This allows us to see how well different models can track optionality
+across the program.</p>
+<p>We can also test how well models understand type annotations
+separately; since Python is a gradually typed language, most of the
+Python code used as training data operates in an untyped fashion, so
+models may understand the dynamic flow of optional values but not their
+static type annotations. Test 5 below tests the models understanding of
+Optionality types annotations.<a href="#fn2" class="footnote-ref"
+id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+<p><em>Test 5</em>:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_48() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  number: Optional[<span class="bu">int</span>] <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  square <span class="op">=</span> get_square(number)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> square <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f&quot;Square of the number is </span><span class="sc">{</span>square<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">&quot;No number provided to square&quot;</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_square(number:</span></code></pre></div>
+<p>We start to measure the difficulty of these tests by measuring how
+models of different sizes do on them. For many tests in this post, we
+use the Pythia models, as they are available in a large variety of sizes
+and training lengths. For measuring performance at larger sizes, we’ve
+included Qwen2.5-Coder-32B, Llama 3.1 405B Instruct, and DeepSeek-V3
+(671B). Below, you can see the number of passing tests for each
+model.</p>
+<p><em>Figure 1</em> <img src="images/hl_model_results.svg"
+alt="A bar graph showing how several sizes of model perform on the high-level optionality tests" /></p>
+<p>Next, we want to know how the amount of training affects model
+performance on these tests. Luckily, Pythia also provides models at
+different training steps, all the way from step 2 to step 143000. Below
+we can see how Pythia 6.9b performs on the tests during training:</p>
+<p><em>Figure 2</em> <img src="images/hl_revision_results.svg"
+alt="A line graph showing how the performance of the Pythia 6.9 model changes during training" /></p>
+<p>Again, we see that while the model generally gets better at passing
+these tests during training, the performance is not always
+increasing.</p>
+<h2 id="morally-vs-technically-correct">Morally vs Technically
+Correct</h2>
+<p><em>Figure 3</em> <img src="images/hl_mypy_vs_grep.svg"
+alt="A graph showing how often the Pythia 6.9b produces code that typechecks on the tests, vs produces code that shows true understanding." /></p>
+<h2 id="designing-prompts-to-extract-optionality-activations">Designing
+Prompts to Extract Optionality Activations</h2>
+<p>At this point, we’ve figured out how to roughly measure optionality
+understanding in the output of various language models, but we still
+don’t know what their internal representations might look like or when
+they emerge. To do this, we’re going to bring in some ideas described in
+Zhou et al’s paper <a
+href="https://arxiv.org/abs/2310.01405">“Representation Engineering: A
+Top-Down Approach to AI Transparency”</a>.</p>
+<p>As language models predict each token in a text, they run their tuned
+circuits over all the previous text. Tokens are first embedded into a
+high-dimensional “token space”, and each layer of the transformer model
+is made up of many parallel circuits which transform the previous layers
+output into new embeddings in a new space. Each layer can look not just
+at the output of the layer directly previous, but actually all previous
+layers, through a channel called a residual stream.</p>
+<p>The paper presents two main approaches to interpreting a language
+model; circuit-based, and representation-based. Circuit based
+interpretability aims to pair down the network to a key set of circuits
+which are sufficient to complete a particular task; this allows
+practitioners to point to a particular part of the model and say “this
+is where &lt;task&gt; is done”, much like neuroscientists assign
+functionality to different parts of our brain.</p>
+<p>On the other hand, representation-based interpretability looks at the
+activation values across the network, and how they vary based on
+different inputs, to extract “representations” of particular concepts.
+The paper shows how representations can be extracted for concepts like
+“happiness”, “honesty”, and “fairness”. First, they construct many
+prompts which cause the model to act in a way aligned with the concept,
+and many which cause the model to act in a way aligned against the
+concept. For instance, they might prompt the model with “Pretend you’re
+a dishonest person. The Eiffel Tower is” and “Pretend you’re an honest
+person. The Eiffel Tower isr”. Then, they take the internal activations
+which correspond to each, and try to extract a high-dimensional vector
+which points towards the states which are aligned, and away from the
+states that are not aligned. This vector can then be used as a linear
+model to measure how much of the concept is present in the model at any
+given time (for honesty, this can be a lie-detector). They can also use
+it, and similar techniques, to control the amount of the concept in a
+response, making it more or less honest, or more or less fair.</p>
+<figure>
+<img src="images/zhou.png"
+alt="An excerpt from Zhou et al showing the reading outputs for several concepts" />
+<figcaption aria-hidden="true">An excerpt from Zhou et al showing the
+reading outputs for several concepts</figcaption>
+</figure>
+<p>In our setting, we were able to avoid dealing with the ambiguities of
+natural language by only prompting with code. We decided to stick to
+analyzing the optionality of individual variable occurrences, instead of
+analyzing every expression. Specifically, we tried to capture the
+concept “the variable I just generated refers to an optional quantity”,
+so our prompts looked like:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_1() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> find_value(data: List[<span class="bu">int</span>], target: <span class="bu">int</span>) <span class="op">-&gt;</span> Optional[<span class="bu">int</span>]:</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> value <span class="kw">in</span> data:</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> value <span class="op">==</span> target:</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> value</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">None</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  data <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>]</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  target <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  result <span class="op">=</span> find_value(data, target)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> result</span></code></pre></div>
+<p>To generate these kinds of prompts, we started by asking a few
+different chat models to generate for us programs that made use of
+optionality. We prompted each model with:</p>
+<pre><code>Generate me 100 typed python programs that use the optional type,
+along with type annotations for any undefined functions that they
+use. Make sure that the programs are unique, and each involves at
+least eight lines of logic. Number each program from 1 to 100. Please
+put all the programs in a single file, with a main function that tests
+each. Don&#39;t include any text before or after the code, just the
+code. I will be using mypy with the --strict option to check the code.</code></pre>
+<p>We queried o1, o1-mini, deepseek-coder, and claude-sonnet using this
+prompt, and then combined programs from the output of all of them into a
+single file. Then, we took every function and class in the resulting
+code file, and created a file with it and any recursive dependencies and
+imports from the file. Finally, we took each variable read occurrence in
+each function, and generated a prompt with the tokens up to and
+including that variable read, and labeled it with whether or not the
+mypy-inferred type is an Optional.</p>
+<h2 id="control-vector-extraction">Control Vector Extraction</h2>
+<p>In the Zhou representation engineering paper, the authors extract a
+reading vector from the contrastive pairs of activations using principal
+component analysis. First, they take each pair of honest and dishonest
+promptings for the same stimulus, and get the difference between them,
+creating a set of contrast vectors. Since PCA assumes that the data is
+centered around the origin, they then took the mean of all these
+vectors, and translated all the vectors backwards along the mean vector,
+to create a set with the same variances but centered around the origin.
+Next, they use the PCA analysis from the sklearn library to get a set of
+“component” vectors, where the vectors are orthogonal to each other and
+explain the maximum variance of the samples in each prefix of the list.
+Components in PCA are bidirectional (they can come out of the analysis
+in either reflection, and both are equally correct), so next they flip
+any component vectors that are pointing more towards the negative
+samples than the positive samples. Then, they take the first component,
+the most important one, and use it as their reading vector.</p>
+<p>Our method for prompt generation didn’t admit contrastive pairs like
+in the previous methods, but instead just a bunch of unconnected
+positive and negative examples. So instead of doing PCA on contrast
+vectors, we averaged the positive examples and the negative examples,
+and then took the difference of the averages as our base reading
+vector.</p>
+<p>Unfortunately, this initial vector weights the impact of each layer
+based on the magnitude of difference in that layer, instead of a notion
+of how important that layer is to differentiating positive and negative
+examples. So we decided to try a few different methods of normalizing
+these layers to improve their overall accuracy as a linear model:</p>
+<h1 id="appendix">Appendix</h1>
+<h2 id="optionality-in-python">Optionality In Python</h2>
+<p>To see how Optionality appears in Python, Let’s look at an example
+program in Python that uses optionality:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> User:</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, name: <span class="bu">str</span>, email: Optional[<span class="bu">str</span>]) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>         <span class="va">self</span>.name <span class="op">=</span> name</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.email <span class="op">=</span> email</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_user_email(user: Optional[User]) <span class="op">-&gt;</span> Optional[<span class="bu">str</span>]:</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> user <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> user.email <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> user.email</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>          <span class="cf">return</span> <span class="va">None</span></span></code></pre></div>
+<p>In the <code>get_user_email</code> function above, we can see from
+the type signature that it takes a optional User value, and returns an
+optional string. The first thing the function does is check if the input
+<code>user</code> is None or not. This program was actually generated by
+o1-mini, so we can already see that the model understands that the user
+object is optional, and that it needs to be checked for None-ness before
+anything else can be done.</p>
+<p>We can say that there are five variable “occurances” in the program,
+each of which can be either optional or not. There’s the first
+<code>user</code> in the if statement, the second <code>user</code> to
+the right of the <code>and</code> in <code>user.email</code>, there’s
+the <code>user.email</code> itself, the <code>user</code> on the second
+line, and finally the <code>user.email</code> on the second line. If we
+use Python’s typechecker, mypy, to check the types of each of these
+occurrences, we find that they have type <code>Optional[User]</code>,
+<code>User</code>, <code>Optional[str]</code>, <code>User</code>, and
+<code>str</code> respectively. That is, the first and third are
+optional, and the rest are not.</p>
+<h2 id="detailed-high-level-optionality-test-results">Detailed
+High-Level Optionality Test Results</h2>
+<h3 id="different-models">Different Models</h3>
+<p>You can see in Figure 1 that the smallest three models don’t pass any
+test. After that, the trend line for tests passed goes upwards, but it’s
+not monotonic: Pythia 410m passes only one test, while Pythia 160m
+passes three, and Pythia 6.9b passes the most tests, with 9, while
+Pythia 12b only passes 7. For instance, given the partial code:</p>
+<p><em>Test 3</em></p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> x <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="st">&quot;*&quot;</span> <span class="op">*</span> x</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  x <span class="op">=</span> process_value(value) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(x)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_value(value):</span></code></pre></div>
+<p>Pythia 6.9b completes <code>process_value</code> as:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_value(value):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> value <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">elif</span> <span class="bu">isinstance</span>(value, <span class="bu">str</span>):</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">int</span>(value)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  ...</span></code></pre></div>
+<p>While Pythia 12b completes it as:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_value(value):</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> value</span></code></pre></div>
+<p>The code generated by Pythia 6.9b properly handles values of both
+NoneType and str and always returns an int, whereas the code generated
+by Pythia 12b is the identify function, returning None when the input is
+None and returning a string when the input is a string. Neither of these
+cases is correct, as the main function expects this to return a Number
+that can be added to one.</p>
+<h3 id="different-sizes">Different Sizes</h3>
+<p>We say in Figure 2 that while the model generally gets better at
+passing these tests during training, the performance is not always
+increasing. Zooming in on a particular test, we can see what this looks
+like. When asked to complete this code:</p>
+<p><em>Test 12</em></p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> handle_value(value, guard):</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> guard:</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> count_os(<span class="st">&quot;Foobar&quot;</span>) <span class="op">*</span> <span class="dv">2</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> count_os(value) <span class="op">//</span> <span class="dv">2</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> x <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="st">&quot;*&quot;</span> <span class="op">*</span> x</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(handle_value(value, x <span class="op">&lt;</span> <span class="dv">10</span>))</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> count_os(value):</span></code></pre></div>
+<p>Pythia 6.9b at training step 104000 produces the following definition
+of <code>count_os</code>:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> count_os(value):</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> value <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">elif</span> <span class="bu">isinstance</span>(value, <span class="bu">str</span>):</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">len</span>(value)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>...</span></code></pre></div>
+<p>While 1000 steps later, it produces a very different definition:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> count_os(value):</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="bu">len</span>([s <span class="cf">for</span> s <span class="kw">in</span> os.listdir(os.path.join(os.getcwd(), value)) <span class="cf">if</span> s.start ...</span></code></pre></div>
+<p>While the first definition handles value being None or a string, the
+second definition not only assumes it is a string but that it is a name
+of a folder in the current directory. In some sense the model “knows”
+that the value parameter is Optional at step 104000, but “forgets” it
+during further training. It regains the ability to pass the test at
+several points during training, but by the end of training, it’s back to
+treating <code>value</code> as if it was always a string.</p>
+<h3 id="common-mistakes">Common Mistakes</h3>
+<p>As expected, type annotations are particularly difficult for these
+models. When asked to complete the type of get_square in the following
+code, no model in the Pythia series can successfully output the Optional
+argument type:</p>
+<p><em>Test 5</em></p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_48() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  number: Optional[<span class="bu">int</span>] <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  square <span class="op">=</span> get_square(number)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> square <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f&quot;Square of the number is </span><span class="sc">{</span>square<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">&quot;No number provided to square&quot;</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_square(number:</span></code></pre></div>
+<p>These models also find it much easier to deal with a list that
+contains some None elements, than to deal with an atomic value that
+might be None. Pythia 6.9b consistently passes this test in the second
+half of training:</p>
+<p><em>Test 2</em></p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Optional</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  some_numbers <span class="op">=</span> [<span class="dv">1</span>, <span class="op">-</span><span class="dv">4</span>, <span class="va">None</span>, <span class="op">-</span><span class="dv">3</span>, <span class="dv">10</span>, <span class="op">-</span><span class="dv">1</span>, <span class="va">None</span>, <span class="va">None</span>, <span class="dv">8</span>]</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(positive_numbers(some_numbers))</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> positive_numbers(numbers: <span class="bu">list</span>[Optional[<span class="bu">int</span>]]) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">int</span>]:</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  result: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> num <span class="kw">in</span> numbers:</span></code></pre></div>
+<p>But is much more challenged by this code:</p>
+<p><em>Test 3</em></p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> x <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="st">&quot;*&quot;</span> <span class="op">*</span> x</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  x <span class="op">=</span> process_value(value) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(x)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_value(value):</span></code></pre></div>
+<p>, intermittently being unable to complete it in a type-safe way up,
+including in the second-to-last training step. When another level of
+function indirection is added, the model becomes much better at
+completing it correctly; Pythia 6.9b consistently completes the
+following after step 93000:</p>
+<p><em>Test 4</em></p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> handle_value(value, guard):</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> guard:</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> process_value(<span class="st">&quot;Foobar&quot;</span>) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> process_value(value) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> x <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="st">&quot;*&quot;</span> <span class="op">*</span> x</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  x <span class="op">=</span> handle_value(value, x <span class="op">&lt;</span> <span class="dv">10</span>)</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(x)</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_value(value):</span></code></pre></div>
+<p>The names of functions are highly influential in the models
+understanding of their type semantics. When test 3 is changed so that
+<code>process_value</code> is instead called <code>count_chars</code>,
+Pythia 6.9b becomes unable to correctly complete it on any revision; it
+likely has a bias from its training data that functions called
+<code>count_chars</code> always take non-optional strings. Similarly,
+when test 4 is changed so that process_values becomes string_complexity,
+it goes from consistently passing to almost always failing.</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>The loop indicates that the next few lines need to
+process <code>num</code> in some way, and the fact that it comes from
+<code>some_numbers</code> means it has the type
+<code>Optional[int]</code>. <code>num</code> can’t be directly appended
+to <code>result</code>, because <code>result</code> is declared to only
+contain <code>int</code>s, not <code>Optional[int]</code>s. None of the
+normal operations on <code>int</code>s will work on <code>None</code>s,
+so before <code>num</code> can be processed, something has to be done to
+separate <code>None</code>s and normal <code>int</code>s. The simplest
+way to do this is to introduce a branch <code>if num is None</code>, but
+several variants are also valid: <code>if num is not None</code>,
+<code>if num == None</code>, <code>if isinstance(num, int)</code>. Since
+this is a pretty small space of valid next lines, and all of them imply
+some understanding that <code>num</code> may not be an <code>int</code>,
+we can use this program to test models for optionality understanding by
+asking them to complete the program another lines, then see if they
+produce something that matches these valid lines with the regular
+expression <code>num\s*(is\s*(not)?|==)\s*None|isinstance\(num</code>.<a
+href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>The trailing colon makes a type expression the only
+valid completion; function declarations with a colon and no type, like
+<code>def fn(x:)</code> are not valid python. Since we’ve already seen a
+usage of <code>get_square</code> that is passed a None value, it
+wouldn’t be type-valid to complete the program with just
+<code>int</code>. So a model can be tested on its understanding of
+<code>Optional</code> annotations by seeing if its completion of the
+partial program includes <code>Optional[int]</code>.<a href="#fnref2"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+</body>
+</html>

@@ -297,6 +297,22 @@ scaling methods. In domains like this one where we have a lot less
 training data points then dimensions, what techniques will generalize
 well to the test data can be hard to predict.
 
+# Related Work
+
+As previously discussed, [“Representation Engineering: A Top-Down
+Approach to AI Transparency”](https://arxiv.org/abs/2310.01405) by
+Zhou et al is the most closely related work, consolidating some
+research on representation interpretability with linear probes. We
+apply similar techniques, but to program semantics and dataflow
+instead of natural language.
+
+Several techniques exist for constructing linear probes, but after
+experimental measurement we followed the mass means probing from [The
+Geometry of Truth: Emergent Linear Structure in Large Language Model
+Representations of True/False
+Datasets](https://openreview.net/forum?id=CeJEfNKstt) by Marks and
+Tegmark. The paper discusses several reasons why mass mean probing
+might outperform linear regression.
 
 # Appendix
 

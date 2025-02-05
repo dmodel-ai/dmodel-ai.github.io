@@ -274,14 +274,24 @@ in the previous methods, but instead just a bunch of unconnected
 positive and negative examples. So instead of doing PCA on contrast
 vectors, we averaged the positive examples and the negative examples,
 and then took the difference of the averages as our base reading
-vector.
+vector. This is called "mass mean probing" in the literature, and
+empirically has been shown to generalize better in high dimensional
+space than trying to learn a linear model through logistic regression.
+<!-- todo: link to appendix about this? -->
 
-Unfortunately, this initial vector weights the impact of each layer
-based on the magnitude of difference in that layer, instead of a
-notion of how important that layer is to differentiating positive and
-negative examples. So we decided to try a few different methods of
-normalizing these layers to improve their overall accuracy as a linear
-model:
+In this reading vector, the impact of each layer based on the
+magnitude of difference in that layer, instead of separate a notion of
+how "important" that layer is to differentiating positive and negative
+examples. So we decided to try a few different methods of normalizing
+these layers to improve their overall accuracy as a linear model:
+
+* No normalization; just the projection across the average difference.
+* Normalizing each layers vector to a uniform length
+* Dividing by the average amount that each layer activates on the positives samples
+* Dividing by the average absolute amount that each layer activates on the positive samples
+* Dividing by the square root of the average of squares of layer activations
+
+And we found that: <!-- todo -->
 
 
 # Appendix

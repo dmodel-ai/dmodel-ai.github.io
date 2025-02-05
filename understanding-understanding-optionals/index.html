@@ -427,34 +427,54 @@ imports from the file. Finally, we took each variable read occurrence in
 each function, and generated a prompt with the tokens up to and
 including that variable read, and labeled it with whether or not the
 mypy-inferred type is an Optional.</p>
-<h2 id="control-vector-extraction">Control Vector Extraction</h2>
-<p>In the Zhou representation engineering paper, the authors extract a
-reading vector from the contrastive pairs of activations using principal
-component analysis. First, they take each pair of honest and dishonest
-promptings for the same stimulus, and get the difference between them,
-creating a set of contrast vectors. Since PCA assumes that the data is
-centered around the origin, they then took the mean of all these
-vectors, and translated all the vectors backwards along the mean vector,
-to create a set with the same variances but centered around the origin.
-Next, they use the PCA analysis from the sklearn library to get a set of
-“component” vectors, where the vectors are orthogonal to each other and
-explain the maximum variance of the samples in each prefix of the list.
-Components in PCA are bidirectional (they can come out of the analysis
-in either reflection, and both are equally correct), so next they flip
-any component vectors that are pointing more towards the negative
-samples than the positive samples. Then, they take the first component,
-the most important one, and use it as their reading vector.</p>
+<h2 id="reading-vector-extraction">Reading Vector Extraction</h2>
+<p>To start, let’s look at how previous works have extracted reading
+vectors from sample activations. In the Zhou representation engineering
+paper, the authors extract a reading vector from the contrastive pairs
+of activations using principal component analysis.</p>
+<p>First, they take each pair of honest and dishonest promptings for the
+same stimulus, and get the difference between them, creating a set of
+contrast vectors. They randomly flip some of these contrast vectors, so
+that overall the set will vary a lot along the direction of the
+contrast. Since PCA assumes that the data is centered around the origin,
+they then took the mean of all these vectors, and translated all the
+vectors backwards along the mean vector, to create a set with the same
+variances but centered around the origin.</p>
+<p>Next, they use the PCA analysis from the sklearn library to get a set
+of “component” vectors, where the vectors are orthogonal to each other
+and explain the maximum variance of the samples in each prefix of the
+list. Components in PCA are bidirectional (they can come out of the
+analysis in either reflection, and both are equally correct), so next
+they flip any component vectors that are pointing more towards the
+negative samples than the positive samples. Then, they take the first
+component, the most important one, and use it as their reading
+vector.</p>
 <p>Our method for prompt generation didn’t admit contrastive pairs like
 in the previous methods, but instead just a bunch of unconnected
 positive and negative examples. So instead of doing PCA on contrast
 vectors, we averaged the positive examples and the negative examples,
-and then took the difference of the averages as our base reading
-vector.</p>
-<p>Unfortunately, this initial vector weights the impact of each layer
-based on the magnitude of difference in that layer, instead of a notion
-of how important that layer is to differentiating positive and negative
+and then took the difference of the averages as our base reading vector.
+This is called “mass mean probing” in the literature, and empirically
+has been shown to generalize better in high dimensional space than
+trying to learn a linear model through logistic regression.
+<!-- todo: link to appendix about this? --></p>
+<p>In this reading vector, the impact of each layer based on the
+magnitude of difference in that layer, instead of separate a notion of
+how “important” that layer is to differentiating positive and negative
 examples. So we decided to try a few different methods of normalizing
 these layers to improve their overall accuracy as a linear model:</p>
+<ul>
+<li>No normalization; just the projection across the average
+difference.</li>
+<li>Normalizing each layers vector to a uniform length</li>
+<li>Dividing by the average amount that each layer activates on the
+positives samples</li>
+<li>Dividing by the average absolute amount that each layer activates on
+the positive samples</li>
+<li>Dividing by the square root of the average of squares of layer
+activations</li>
+</ul>
+<p>And we found that: <!-- todo --></p>
 <h1 id="appendix">Appendix</h1>
 <h2 id="optionality-in-python">Optionality In Python</h2>
 <p>To see how Optionality appears in Python, Let’s look at an example

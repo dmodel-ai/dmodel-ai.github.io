@@ -243,25 +243,31 @@ occurrence in each function, and generated a prompt with the tokens up
 to and including that variable read, and labeled it with whether or
 not the mypy-inferred type is an Optional.
 
-## Control Vector Extraction
+## Reading Vector Extraction
 
-In the Zhou representation engineering paper, the authors extract a
-reading vector from the contrastive pairs of activations using
-principal component analysis. First, they take each pair of honest and
-dishonest promptings for the same stimulus, and get the difference
-between them, creating a set of contrast vectors. Since PCA assumes
-that the data is centered around the origin, they then took the mean
-of all these vectors, and translated all the vectors backwards along
-the mean vector, to create a set with the same variances but centered
-around the origin. Next, they use the PCA analysis from the sklearn
-library to get a set of “component” vectors, where the vectors are
-orthogonal to each other and explain the maximum variance of the
-samples in each prefix of the list. Components in PCA are
-bidirectional (they can come out of the analysis in either reflection,
-and both are equally correct), so next they flip any component vectors
-that are pointing more towards the negative samples than the positive
-samples. Then, they take the first component, the most important one,
-and use it as their reading vector.
+To start, let's look at how previous works have extracted reading
+vectors from sample activations. In the Zhou representation
+engineering paper, the authors extract a reading vector from the
+contrastive pairs of activations using principal component
+analysis.
+
+First, they take each pair of honest and dishonest promptings for the
+same stimulus, and get the difference between them, creating a set of
+contrast vectors. They randomly flip some of these contrast vectors,
+so that overall the set will vary a lot along the direction of the
+contrast.  Since PCA assumes that the data is centered around the
+origin, they then took the mean of all these vectors, and translated
+all the vectors backwards along the mean vector, to create a set with
+the same variances but centered around the origin.
+
+Next, they use the PCA analysis from the sklearn library to get a set
+of “component” vectors, where the vectors are orthogonal to each other
+and explain the maximum variance of the samples in each prefix of the
+list. Components in PCA are bidirectional (they can come out of the
+analysis in either reflection, and both are equally correct), so next
+they flip any component vectors that are pointing more towards the
+negative samples than the positive samples. Then, they take the first
+component, the most important one, and use it as their reading vector.
 
 Our method for prompt generation didn’t admit contrastive pairs like
 in the previous methods, but instead just a bunch of unconnected

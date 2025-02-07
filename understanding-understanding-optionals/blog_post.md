@@ -41,22 +41,26 @@ able to write code that deals with optional values, but we haven’t
 known what form this knowledge takes, what situations are likely to
 confuse the model. Until now.\todo{big claim!}
 
+\todo{contributions:
+- microbenchmark: optional eval
+- we find that models understand optionality
+- we study optionality across time and scale
+- we investigate morally vs technically correct
+}
+
 # Overview
 \todo{write the lead into the overview}
 
 ## Which Models Understand Optionality?
 
-Before attempting to measure how models understand optionality on a
-low level, we wanted to first be able to measure their optionality
-understanding on a high level. After all, we could spend forever
-looking for a concept of optionality in a model that doesn’t actually
-exist. So we first measure how well different completion models can
+We begin with a "skyline" estimate of model understanding of optionality
+\todo{cite a la Tegmark?}, first measure how well different models can
+understand the concept. We have the model
 complete simple programs that require an understanding of
-optionality. Then, we have an idea of which models to search for an
-internal optionality concept.
+optionality. We refer to this suite of programs as `OptionalEval`.
 
 To test these models for optionality understanding, we constructed 15
-partial program tests. Here’s one of them:
+partial program tests. For example,
 
 *Test 4*:
 ```python
@@ -67,10 +71,10 @@ def main() -> None:
 ```
 
 This partial program is only four lines, with type annotations. A
-some_numbers array is created that includes positive numbers, negative
-numbers, and None values, giving it type `Optional[int]`. A result
-list is constructed to give the model a sense of how dataflow should
-work, and then a for loop is started, looping over some_numbers.
+`some_numbers` array is created that includes positive numbers, negative
+numbers, and None values, giving it type `Optional[int]`. A list `result`j
+is constructed to give the model a sense of dataflow,
+and then a loop loops over `some_numbers`.
 
 The program is constructed such that there are a very limited number
 of valid next lines in the program, and all of them demonstrate some
@@ -92,18 +96,18 @@ another lines, then see if they produce something that matches these
 valid lines with the regular expression
 `num\s*(is\s*(not)?|==)\s*None|isinstance\(num`.]
 
-This test is on the simpler side of optionality understanding, but
-there are several ways to challenge the model a bit more, by adding
-more layers of indirection between the source and sink of optional
-values. This allows us to see how well different models can track
-optionality across the program.
+This test is on the simpler side, but
+we can challenge the model more, adding
+layers of indirection between the source and sink of optional
+values, testing the model's _interprocedural_ understanding.
 
 We can also test how well models understand type annotations
+\todo{python is not graudally typed}
 separately; since Python is a gradually typed language, most of the
 Python code used as training data operates in an untyped fashion, so
 models may understand the dynamic flow of optional values but not
-their static type annotations. Test 5 below tests the models understanding of
-Optionality types annotations.^[The trailing colon makes a type expression
+their static type annotations. Test 5, below, tests the models understanding of
+`Optional` types annotations.^[The trailing colon makes a type expression
 the only valid completion; function declarations with a colon and no
 type, like `def fn(x:)` are not valid python. Since we’ve already seen
 a usage of `get_square` that is passed a None value, it wouldn’t be
@@ -124,7 +128,7 @@ def program_48() -> None:
 def get_square(number:
 ```
 
-We start to measure the difficulty of these tests by measuring how
+We measure the difficulty of these tests by measuring how
 models of different sizes do on them. For many tests in this post, we
 use the Pythia models, as they are available in a large variety of
 sizes and training lengths. For measuring performance at larger sizes,

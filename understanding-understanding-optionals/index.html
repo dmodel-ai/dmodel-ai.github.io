@@ -555,10 +555,19 @@ Emergent Linear Structure in Large Language Model Representations of
 True/False Datasets</a> by Marks and Tegmark. The paper discusses
 several reasons why mass mean probing might outperform linear
 regression.</p>
-<h1 data-number="4" id="appendix"><span
-class="header-section-number">4</span> Appendix</h1>
-<h2 data-number="4.1" id="optionality-in-python"><span
-class="header-section-number">4.1</span> Optionality In Python</h2>
+<h1 class="unnumbered" id="references">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent"
+data-entry-spacing="0" role="list">
+<div id="ref-fengBinding2024" class="csl-entry" role="listitem">
+Feng, Jiahai, and Jacob Steinhardt. 2024. <span>“How Do <span>Language
+Models Bind Entities</span> in <span>Context</span>?”</span> arXiv. <a
+href="https://doi.org/10.48550/arXiv.2310.17191">https://doi.org/10.48550/arXiv.2310.17191</a>.
+</div>
+</div>
+<h1 data-number="5" id="appendix"><span
+class="header-section-number">5</span> Appendix</h1>
+<h2 data-number="5.1" id="optionality-in-python"><span
+class="header-section-number">5.1</span> Optionality In Python</h2>
 <p>To see how Optionality appears in Python, Let’s look at an example
 program in Python that uses optionality:</p>
 <div class="sourceCode" id="cb5"><pre
@@ -590,12 +599,12 @@ occurrences, we find that they have type <code>Optional[User]</code>,
 <code>User</code>, <code>Optional[str]</code>, <code>User</code>, and
 <code>str</code> respectively. That is, the first and third are
 optional, and the rest are not.</p>
-<h2 data-number="4.2"
+<h2 data-number="5.2"
 id="detailed-high-level-optionality-test-results"><span
-class="header-section-number">4.2</span> Detailed High-Level Optionality
+class="header-section-number">5.2</span> Detailed High-Level Optionality
 Test Results</h2>
-<h3 data-number="4.2.1" id="across-scale"><span
-class="header-section-number">4.2.1</span> Across Scale</h3>
+<h3 data-number="5.2.1" id="across-scale"><span
+class="header-section-number">5.2.1</span> Across Scale</h3>
 <p>You can see in fig. <a href="#fig:hl_scale">1</a> that the smallest
 three models don’t pass any test. After that, the trend line for tests
 passed goes upwards, but it’s not monotonic: Pythia 410m passes only one
@@ -632,8 +641,8 @@ by Pythia 12b is the identify function, returning None when the input is
 None and returning a string when the input is a string. Neither of these
 cases is correct, as the main function expects this to return a Number
 that can be added to one.</p>
-<h3 data-number="4.2.2" id="across-time"><span
-class="header-section-number">4.2.2</span> Across Time</h3>
+<h3 data-number="5.2.2" id="across-time"><span
+class="header-section-number">5.2.2</span> Across Time</h3>
 <p>We say in fig. <a href="#fig:hl_time">2</a> that while the model
 generally gets better at passing these tests during training, the
 performance is not always increasing. Zooming in on a particular test,
@@ -675,8 +684,8 @@ that the value parameter is Optional at step 104000, but “forgets” it
 during further training. It regains the ability to pass the test at
 several points during training, but by the end of training, it’s back to
 treating <code>value</code> as if it was always a string.</p>
-<h3 data-number="4.2.3" id="common-mistakes"><span
-class="header-section-number">4.2.3</span> Common Mistakes</h3>
+<h3 data-number="5.2.3" id="common-mistakes"><span
+class="header-section-number">5.2.3</span> Common Mistakes</h3>
 <p>As expected, type annotations are particularly difficult for these
 models. When asked to complete the type of get_square in the following
 code, no model in the Pythia series can successfully output the Optional
@@ -750,8 +759,8 @@ likely has a bias from its training data that functions called
 <code>count_chars</code> always take non-optional strings. Similarly,
 when test 4 is changed so that process_values becomes string_complexity,
 it goes from consistently passing to almost always failing.</p>
-<h2 data-number="4.3" id="mass-mean-probing-vs-linear-regression"><span
-class="header-section-number">4.3</span> Mass Mean Probing vs Linear
+<h2 data-number="5.3" id="mass-mean-probing-vs-linear-regression"><span
+class="header-section-number">5.3</span> Mass Mean Probing vs Linear
 Regression</h2>
 <p>We were initially very surprised to find that mass means probing
 would perform better than linear regression. After all, linear
@@ -761,15 +770,6 @@ dimension independently, without considering other dimensions. The more
 dimensions you consider at one time, the better your model fit can be.
 But repeatedly in our data, we found that mass means probing
 outperformed linear regression on the test data.</p>
-<h1 class="unnumbered" id="references">References</h1>
-<div id="refs" class="references csl-bib-body hanging-indent"
-data-entry-spacing="0" role="list">
-<div id="ref-fengBinding2024" class="csl-entry" role="listitem">
-Feng, Jiahai, and Jacob Steinhardt. 2024. <span>“How Do <span>Language
-Models Bind Entities</span> in <span>Context</span>?”</span> arXiv. <a
-href="https://doi.org/10.48550/arXiv.2310.17191">https://doi.org/10.48550/arXiv.2310.17191</a>.
-</div>
-</div>
 <section id="footnotes" class="footnotes footnotes-end-of-document"
 role="doc-endnotes">
 <hr />

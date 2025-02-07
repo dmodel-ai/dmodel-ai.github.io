@@ -1,0 +1,7 @@
+input-file: blog_post.md
+number-sections: true
+standalone: true
+output-file: index.html
+filters:
+  - pandoc-crossref
+  - citeproc

@@ -351,7 +351,7 @@ might outperform linear regression.
 :::
 
 \appendix
-# Appendix
+# Appendix {.appendix}
 
 ## Optionality In Python
 

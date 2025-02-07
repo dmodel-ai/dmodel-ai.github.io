@@ -136,6 +136,7 @@ sizes and training lengths. For measuring performance at larger sizes,
 we've included Qwen2.5-Coder-32B, Llama 3.1 405B Instruct, and
 DeepSeek-V3 (671B). Below, you can see the number of passing tests for
 each model.
+\todo{more through exploration of why?}
 
 *Figure 1*
 ![A bar graph showing how several sizes of model perform on the
@@ -153,9 +154,18 @@ training:
 
 Again, we see that while the model generally gets better at passing
 these tests during training, the performance is not always increasing.
+Also note that this plot is quite noisy, so in the sequel, we will show smoothed charts.
+\todo{describe smoothing in footnote?}
 
 
 ## Morally vs Technically Correct
+
+One explanation of why the model gets worse before it gets better is that the
+model first learns the concepts need to solve the task, then learns the
+language of python --- its syntax, static (under mypy), and dynamic semantics,
+and then both.
+\todo{cite something here. grokking, double descent, interp?}
+Let's make this more concrete.
 
 We say a model produces an answer that is "morally" (vs technically) correct if
 the code attempts to solve the problem asked of it. Each test case is paird with a

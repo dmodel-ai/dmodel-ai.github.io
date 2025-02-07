@@ -1,8 +1,9 @@
-% Understanding Models Understanding Optionality
-% [Alex Sanchez-Stern](https://www.alexsanchezstern.com) and [Anish Tondwalkar](https://ani.sh)
-% $d_{model}$
-
-\todo{abstract}
+---
+title: Understanding Models Understanding Optionality
+author: '[Alex Sanchez-Stern](https://www.alexsanchezstern.com) and [Anish Tondwalkar](https://ani.sh)'
+date: '$d_{model}$'
+abstract: 'The Abstract\todo{abstract}'
+---
 
 # Introduction
 The last five years have shown us that Large Language Models can

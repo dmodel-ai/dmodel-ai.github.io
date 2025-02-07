@@ -179,8 +179,9 @@
     }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
     /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
     pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
     pre > code.sourceCode > span:empty { height: 1.2em; }
     .sourceCode { overflow: visible; }
     code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -191,7 +192,7 @@
     }
     @media print {
     pre > code.sourceCode { white-space: pre-wrap; }
-    pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
     }
     pre.numberSource code
       { counter-reset: source-line 0; }
@@ -242,7 +243,27 @@
     code span.va { color: #19177c; } /* Variable */
     code span.vs { color: #4070a0; } /* VerbatimString */
     code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-  </style>
+    /* CSS for citations */
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+      margin-bottom: 0em;
+    }
+    .hanging-indent div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
+    }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
+    }
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
+    }  </style>
 </head>
 <body>
 <header id="title-block-header">
@@ -294,9 +315,11 @@ class="header-section-number">2</span> Overview</h1>
 class="header-section-number">2.1</span> Which Models Understand
 Optionality?</h2>
 <p>We begin with a “skyline” estimate of model understanding of
-optionality , first measure how well different models can understand the
-concept. We have the model complete simple programs that require an
-understanding of optionality. We refer to this suite of programs as
+optionality (a la <span class="citation"
+data-cites="fengBinding2024">Feng and Steinhardt (2024)</span>), first
+measure how well different models can understand the concept. We have
+the model complete simple programs that require an understanding of
+optionality. We refer to this suite of programs as
 <code>OptionalEval</code>.</p>
 <p>To test these models for optionality understanding, we constructed 15
 partial program tests. For example,</p>
@@ -343,28 +366,41 @@ different sizes do on them. For many tests in this post, we use the
 Pythia models, as they are available in a large variety of sizes and
 training lengths. For measuring performance at larger sizes, we’ve
 included Qwen2.5-Coder-32B, Llama 3.1 405B Instruct, and DeepSeek-V3
-(671B). Below, you can see the number of passing tests for each
-model.</p>
-<p><em>Figure 1</em> <img src="images/hl_model_results.svg"
-alt="A bar graph showing how several sizes of model perform on the high-level optionality tests" /></p>
+(671B). Below, you can see the number of passing tests for each model.
+</p>
+<figure id="fig:hl_scale">
+<img src="images/hl_model_results.svg"
+alt="Figure 1: A bar graph showing how several sizes of model perform on the high-level optionality tests" />
+<figcaption aria-hidden="true">Figure 1: A bar graph showing how several
+sizes of model perform on the high-level optionality tests</figcaption>
+</figure>
 <p>Next, we want to know how the amount of training affects model
 performance on these tests. Luckily, Pythia also provides models at
 different training steps, all the way from step 2 to step 143000. Below
 we can see how Pythia 6.9b performs on the tests during training:</p>
-<p><em>Figure 2</em> <img src="images/hl_revision_results.svg"
-alt="A line graph showing how the performance of the Pythia 6.9 model changes during training" /></p>
+<figure id="fig:hl_time">
+<img src="images/hl_revision_results.svg"
+alt="Figure 2: A line graph showing how the performance of the Pythia 6.9 model changes during training" />
+<figcaption aria-hidden="true">Figure 2: A line graph showing how the
+performance of the Pythia 6.9 model changes during training</figcaption>
+</figure>
 <p>Again, we see that while the model generally gets better at passing
-these tests during training, the performance is not always
-increasing.</p>
+these tests during training, the performance is not always increasing.
+Also note that this plot is quite noisy, so in the sequel, we will show
+smoothed charts. </p>
 <h2 data-number="2.2" id="morally-vs-technically-correct"><span
 class="header-section-number">2.2</span> Morally vs Technically
 Correct</h2>
+<p>One explanation of why the model gets worse before it gets better is
+that the model first learns the concepts need to solve the task, then
+learns the language of python — its syntax, static (under mypy), and
+dynamic semantics, and then both. Let’s make this more concrete.</p>
 <p>We say a model produces an answer that is “morally” (vs technically)
 correct if the code attempts to solve the problem asked of it. Each test
 case is paird with a regex that tests if the model output produces code
 that touches all of the relevant concepts. Here, we say the solution is
 “technically” correct if it passes <code>mypy</code>.</p>
-<p><em>Figure 3</em> <img src="images/hl_mypy_vs_grep.svg"
+<p><img src="images/hl_mypy_vs_grep.svg" id="fig:hl_moral"
 alt="A graph showing how often the Pythia 6.9b produces code that typechecks on the tests, vs produces code that shows true understanding." />
 </p>
 <h2 data-number="2.3"
@@ -558,13 +594,14 @@ optional, and the rest are not.</p>
 id="detailed-high-level-optionality-test-results"><span
 class="header-section-number">4.2</span> Detailed High-Level Optionality
 Test Results</h2>
-<h3 data-number="4.2.1" id="different-models"><span
-class="header-section-number">4.2.1</span> Different Models</h3>
-<p>You can see in Figure 1 that the smallest three models don’t pass any
-test. After that, the trend line for tests passed goes upwards, but it’s
-not monotonic: Pythia 410m passes only one test, while Pythia 160m
-passes three, and Pythia 6.9b passes the most tests, with 9, while
-Pythia 12b only passes 7. For instance, given the partial code:</p>
+<h3 data-number="4.2.1" id="across-scale"><span
+class="header-section-number">4.2.1</span> Across Scale</h3>
+<p>You can see in fig. <a href="#fig:hl_scale">1</a> that the smallest
+three models don’t pass any test. After that, the trend line for tests
+passed goes upwards, but it’s not monotonic: Pythia 410m passes only one
+test, while Pythia 160m passes three, and Pythia 6.9b passes the most
+tests, with 9, while Pythia 12b only passes 7. For instance, given the
+partial code:</p>
 <p><em>Test 3</em></p>
 <div class="sourceCode" id="cb6"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
@@ -595,12 +632,12 @@ by Pythia 12b is the identify function, returning None when the input is
 None and returning a string when the input is a string. Neither of these
 cases is correct, as the main function expects this to return a Number
 that can be added to one.</p>
-<h3 data-number="4.2.2" id="different-sizes"><span
-class="header-section-number">4.2.2</span> Different Sizes</h3>
-<p>We say in Figure 2 that while the model generally gets better at
-passing these tests during training, the performance is not always
-increasing. Zooming in on a particular test, we can see what this looks
-like. When asked to complete this code:</p>
+<h3 data-number="4.2.2" id="across-time"><span
+class="header-section-number">4.2.2</span> Across Time</h3>
+<p>We say in fig. <a href="#fig:hl_time">2</a> that while the model
+generally gets better at passing these tests during training, the
+performance is not always increasing. Zooming in on a particular test,
+we can see what this looks like. When asked to complete this code:</p>
 <p><em>Test 12</em></p>
 <div class="sourceCode" id="cb9"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> handle_value(value, guard):</span>
@@ -724,6 +761,15 @@ dimension independently, without considering other dimensions. The more
 dimensions you consider at one time, the better your model fit can be.
 But repeatedly in our data, we found that mass means probing
 outperformed linear regression on the test data.</p>
+<h1 class="unnumbered" id="references">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent"
+data-entry-spacing="0" role="list">
+<div id="ref-fengBinding2024" class="csl-entry" role="listitem">
+Feng, Jiahai, and Jacob Steinhardt. 2024. <span>“How Do <span>Language
+Models Bind Entities</span> in <span>Context</span>?”</span> arXiv. <a
+href="https://doi.org/10.48550/arXiv.2310.17191">https://doi.org/10.48550/arXiv.2310.17191</a>.
+</div>
+</div>
 <section id="footnotes" class="footnotes footnotes-end-of-document"
 role="doc-endnotes">
 <hr />

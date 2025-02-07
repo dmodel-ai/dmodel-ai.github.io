@@ -2,6 +2,8 @@
 title: Understanding Models Understanding Optionality
 author: '[Alex Sanchez-Stern](https://www.alexsanchezstern.com) and [Anish Tondwalkar](https://ani.sh)'
 date: '$d_{model}$'
+bibliography: all.bib
+linkReferences: true
 abstract: 'The Abstract\todo{abstract}'
 ---
 
@@ -55,7 +57,7 @@ confuse the model. Until now.\todo{big claim!}
 ## Which Models Understand Optionality?
 
 We begin with a "skyline" estimate of model understanding of optionality
-\todo{cite a la Tegmark?}, first measure how well different models can
+(a la @fengBinding2024), first measure how well different models can
 understand the concept. We have the model
 complete simple programs that require an understanding of
 optionality. We refer to this suite of programs as `OptionalEval`.
@@ -138,9 +140,8 @@ DeepSeek-V3 (671B). Below, you can see the number of passing tests for
 each model.
 \todo{more through exploration of why?}
 
-*Figure 1*
 ![A bar graph showing how several sizes of model perform on the
- high-level optionality tests](images/hl_model_results.svg)
+ high-level optionality tests](images/hl_model_results.svg){#fig:hl_scale}
 
 Next, we want to know how the amount of training affects model
 performance on these tests. Luckily, Pythia also provides models at
@@ -148,9 +149,8 @@ different training steps, all the way from step 2 to step
 143000. Below we can see how Pythia 6.9b performs on the tests during
 training:
 
-*Figure 2*
 ![A line graph showing how the performance of the Pythia
-6.9 model changes during training](images/hl_revision_results.svg)
+6.9 model changes during training](images/hl_revision_results.svg){#fig:hl_time}
 
 Again, we see that while the model generally gets better at passing
 these tests during training, the performance is not always increasing.
@@ -175,10 +175,9 @@ concepts.
 Here, we say the solution is
 "technically" correct if it passes `mypy`.
 
-*Figure 3*
 ![A graph showing how often the Pythia 6.9b produces code that
 typechecks on the tests, vs produces code that shows true
-understanding.](images/hl_mypy_vs_grep.svg)
+understanding.](images/hl_mypy_vs_grep.svg){#fig:hl_moral}
 \todo{write this section}
 
 ## Designing Prompts to Extract Optionality Activations
@@ -387,9 +386,9 @@ and third are optional, and the rest are not.
 
 ## Detailed High-Level Optionality Test Results
 
-### Different Models
+### Across Scale
 
-You can see in Figure 1 that the smallest three models don’t pass any
+You can see in @fig:hl_scale that the smallest three models don’t pass any
 test. After that, the trend line for tests passed goes upwards, but
 it’s not monotonic: Pythia 410m passes only one test, while Pythia
 160m passes three, and Pythia 6.9b passes the most tests, with 9,
@@ -430,9 +429,9 @@ is None and returning a string when the input is a string. Neither of
 these cases is correct, as the main function expects this to return a
 Number that can be added to one.
 
-### Different Sizes
+### Across Time
 
-We say in Figure 2 that while the model generally gets better at
+We say in @fig:hl_time that while the model generally gets better at
 passing these tests during training, the performance is not always
 increasing.  Zooming in on a particular test, we can see what this
 looks like. When asked to complete this code:
@@ -580,3 +579,5 @@ dimension independently, without considering other dimensions. The
 more dimensions you consider at one time, the better your model fit
 can be. But repeatedly in our data, we found that mass means probing
 outperformed linear regression on the test data.
+
+# References

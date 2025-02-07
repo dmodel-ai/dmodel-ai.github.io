@@ -6,7 +6,7 @@
 
 # Introduction
 The last five years have shown us that Large Language Models can
-effectively write programs in many domains. This is an impressive
+effectively write programs in many domains.\todo{cite} This is an impressive
 capability given that writing programs involves having a working
 understanding of many aspects of their semantics. But though we know
 that these large models understand programs to an extent, we still
@@ -16,7 +16,7 @@ program knowledge, and what kinds of situations will challenge its
 capabilities.
 
 Fortunately, recent work in model interpretability and
-representation engineering has produced promising results
+representation engineering\todo{which work?} has produced promising results
 which give hope towards understanding more and more of the
 internal thought processes of LLMs. Here at dmodel , we can
 think of no better place to apply these new techniques than
@@ -25,7 +25,7 @@ properties that can be symbolically determined. The vast work
 done in programming language theory over the past hundred
 years provides many tools for scaling an understanding of the
 internal thought processes of language models as they write
-code.
+code.\todo{for examples, see cite, cite}
 
 In that spirit, we wanted to start with a simple property that comes
 up in every programming languages, value optionality.\todo{we need a better word for "optionality"} Optional values
@@ -156,10 +156,19 @@ these tests during training, the performance is not always increasing.
 
 ## Morally vs Technically Correct
 
+We say a model produces an answer that is "morally" (vs technically) correct if
+the code attempts to solve the problem asked of it. Each test case is paird with a
+regex that tests if the model output produces code that touches all of the relevant
+concepts.
+\todo{put an example here?}
+Here, we say the solution is
+"technically" correct if it passes `mypy`.
+
 *Figure 3*
 ![A graph showing how often the Pythia 6.9b produces code that
 typechecks on the tests, vs produces code that shows true
 understanding.](images/hl_mypy_vs_grep.svg)
+\todo{write this section}
 
 ## Designing Prompts to Extract Optionality Activations
 \todo{we can probably just make this a brief part of the related work}

@@ -2,6 +2,9 @@
 % [Alex Sanchez-Stern](https://www.alexsanchezstern.com) and [Anish Tondwalkar](https://ani.sh)
 % $d_{model}$
 
+\todo{abstract}
+
+# Introduction
 The last five years have shown us that Large Language Models can
 effectively write programs in many domains. This is an impressive
 capability given that writing programs involves having a working
@@ -25,7 +28,7 @@ internal thought processes of language models as they write
 code.
 
 In that spirit, we wanted to start with a simple property that comes
-up in every programming languages, value optionality. Optional values
+up in every programming languages, value optionality.\todo{we need a better word for "optionality"} Optional values
 are represented differently across languages, null pointers in C++ or
 Java, with explicit option types in Rust, and with special nil or None
 values in dynamic languages like Javascript, Lisp, or Python. In every
@@ -36,7 +39,10 @@ can often be a source of bugs, like a null pointer dereference.
 Do our models understand when a value is optional? They must, to be
 able to write code that deals with optional values, but we haven’t
 known what form this knowledge takes, what situations are likely to
-confuse the model. Until now.
+confuse the model. Until now.\todo{big claim!}
+
+# Overview
+\todo{write the lead into the overview}
 
 ## Which Models Understand Optionality?
 
@@ -152,7 +158,7 @@ typechecks on the tests, vs produces code that shows true
 understanding.](images/hl_mypy_vs_grep.svg)
 
 ## Designing Prompts to Extract Optionality Activations
-
+\todo{we can probably just make this a brief part of the related work}
 At this point, we’ve figured out how to roughly measure optionality
 understanding in the output of various language models, but we still
 don’t know what their internal representations might look like or when
@@ -298,6 +304,8 @@ training data points then dimensions, what techniques will generalize
 well to the test data can be hard to predict.
 
 # Related Work
+
+\todo{mention the tigges paper on circuits across scale, the feng and steinhardt papers, etc}
 
 As previously discussed, [“Representation Engineering: A Top-Down
 Approach to AI Transparency”](https://arxiv.org/abs/2310.01405) by

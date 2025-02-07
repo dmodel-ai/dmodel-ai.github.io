@@ -168,9 +168,8 @@
     }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
     /* CSS for syntax highlighting */
-    html { -webkit-text-size-adjust: 100%; }
     pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span { line-height: 1.25; }
     pre > code.sourceCode > span:empty { height: 1.2em; }
     .sourceCode { overflow: visible; }
     code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -181,7 +180,7 @@
     }
     @media print {
     pre > code.sourceCode { white-space: pre-wrap; }
-    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
     }
     pre.numberSource code
       { counter-reset: source-line 0; }
@@ -242,6 +241,8 @@ Sanchez-Stern</a> and <a href="https://ani.sh">Anish Tondwalkar</a></p>
 <p class="date"><span
 class="math inline"><em>d</em><sub><em>m</em><em>o</em><em>d</em><em>e</em><em>l</em></sub></span></p>
 </header>
+<h1 data-number="1" id="introduction"><span
+class="header-section-number">1</span> Introduction</h1>
 <p>The last five years have shown us that Large Language Models can
 effectively write programs in many domains. This is an impressive
 capability given that writing programs involves having a working
@@ -272,7 +273,8 @@ often be a source of bugs, like a null pointer dereference.</p>
 able to write code that deals with optional values, but we haven’t known
 what form this knowledge takes, what situations are likely to confuse
 the model. Until now.</p>
-<h2 id="which-models-understand-optionality">Which Models Understand
+<h2 data-number="1.1" id="which-models-understand-optionality"><span
+class="header-section-number">1.1</span> Which Models Understand
 Optionality?</h2>
 <p>Before attempting to measure how models understand optionality on a
 low level, we wanted to first be able to measure their optionality
@@ -341,12 +343,15 @@ alt="A line graph showing how the performance of the Pythia 6.9 model changes du
 <p>Again, we see that while the model generally gets better at passing
 these tests during training, the performance is not always
 increasing.</p>
-<h2 id="morally-vs-technically-correct">Morally vs Technically
+<h2 data-number="1.2" id="morally-vs-technically-correct"><span
+class="header-section-number">1.2</span> Morally vs Technically
 Correct</h2>
 <p><em>Figure 3</em> <img src="images/hl_mypy_vs_grep.svg"
 alt="A graph showing how often the Pythia 6.9b produces code that typechecks on the tests, vs produces code that shows true understanding." /></p>
-<h2 id="designing-prompts-to-extract-optionality-activations">Designing
-Prompts to Extract Optionality Activations</h2>
+<h2 data-number="1.3"
+id="designing-prompts-to-extract-optionality-activations"><span
+class="header-section-number">1.3</span> Designing Prompts to Extract
+Optionality Activations</h2>
 <p>At this point, we’ve figured out how to roughly measure optionality
 understanding in the output of various language models, but we still
 don’t know what their internal representations might look like or when
@@ -427,11 +432,12 @@ imports from the file. Finally, we took each variable read occurrence in
 each function, and generated a prompt with the tokens up to and
 including that variable read, and labeled it with whether or not the
 mypy-inferred type is an Optional.</p>
-<h2 id="reading-vector-extraction">Reading Vector Extraction</h2>
+<h2 data-number="1.4" id="reading-vector-extraction"><span
+class="header-section-number">1.4</span> Reading Vector Extraction</h2>
 <p>To start, let’s look at how previous works have extracted reading
 vectors from sample activations. In the Zhou representation engineering
 paper, the authors extract a reading vector from the contrastive pairs
-of activations using principal component analysis.</p>
+of activations using principal component analysis (PCA).</p>
 <p>First, they take each pair of honest and dishonest promptings for the
 same stimulus, and get the difference between them, creating a set of
 contrast vectors. They randomly flip some of these contrast vectors, so
@@ -479,8 +485,25 @@ activations</li>
 scaling methods. In domains like this one where we have a lot less
 training data points then dimensions, what techniques will generalize
 well to the test data can be hard to predict.</p>
-<h1 id="appendix">Appendix</h1>
-<h2 id="optionality-in-python">Optionality In Python</h2>
+<h1 data-number="2" id="related-work"><span
+class="header-section-number">2</span> Related Work</h1>
+<p>As previously discussed, <a
+href="https://arxiv.org/abs/2310.01405">“Representation Engineering: A
+Top-Down Approach to AI Transparency”</a> by Zhou et al is the most
+closely related work, consolidating some research on representation
+interpretability with linear probes. We apply similar techniques, but to
+program semantics and dataflow instead of natural language.</p>
+<p>Several techniques exist for constructing linear probes, but after
+experimental measurement we followed the mass means probing from <a
+href="https://openreview.net/forum?id=CeJEfNKstt">The Geometry of Truth:
+Emergent Linear Structure in Large Language Model Representations of
+True/False Datasets</a> by Marks and Tegmark. The paper discusses
+several reasons why mass mean probing might outperform linear
+regression.</p>
+<h1 data-number="3" id="appendix"><span
+class="header-section-number">3</span> Appendix</h1>
+<h2 data-number="3.1" id="optionality-in-python"><span
+class="header-section-number">3.1</span> Optionality In Python</h2>
 <p>To see how Optionality appears in Python, Let’s look at an example
 program in Python that uses optionality:</p>
 <div class="sourceCode" id="cb5"><pre
@@ -512,9 +535,12 @@ occurrences, we find that they have type <code>Optional[User]</code>,
 <code>User</code>, <code>Optional[str]</code>, <code>User</code>, and
 <code>str</code> respectively. That is, the first and third are
 optional, and the rest are not.</p>
-<h2 id="detailed-high-level-optionality-test-results">Detailed
-High-Level Optionality Test Results</h2>
-<h3 id="different-models">Different Models</h3>
+<h2 data-number="3.2"
+id="detailed-high-level-optionality-test-results"><span
+class="header-section-number">3.2</span> Detailed High-Level Optionality
+Test Results</h2>
+<h3 data-number="3.2.1" id="different-models"><span
+class="header-section-number">3.2.1</span> Different Models</h3>
 <p>You can see in Figure 1 that the smallest three models don’t pass any
 test. After that, the trend line for tests passed goes upwards, but it’s
 not monotonic: Pythia 410m passes only one test, while Pythia 160m
@@ -550,7 +576,8 @@ by Pythia 12b is the identify function, returning None when the input is
 None and returning a string when the input is a string. Neither of these
 cases is correct, as the main function expects this to return a Number
 that can be added to one.</p>
-<h3 id="different-sizes">Different Sizes</h3>
+<h3 data-number="3.2.2" id="different-sizes"><span
+class="header-section-number">3.2.2</span> Different Sizes</h3>
 <p>We say in Figure 2 that while the model generally gets better at
 passing these tests during training, the performance is not always
 increasing. Zooming in on a particular test, we can see what this looks
@@ -592,7 +619,8 @@ that the value parameter is Optional at step 104000, but “forgets” it
 during further training. It regains the ability to pass the test at
 several points during training, but by the end of training, it’s back to
 treating <code>value</code> as if it was always a string.</p>
-<h3 id="common-mistakes">Common Mistakes</h3>
+<h3 data-number="3.2.3" id="common-mistakes"><span
+class="header-section-number">3.2.3</span> Common Mistakes</h3>
 <p>As expected, type annotations are particularly difficult for these
 models. When asked to complete the type of get_square in the following
 code, no model in the Pythia series can successfully output the Optional
@@ -666,8 +694,9 @@ likely has a bias from its training data that functions called
 <code>count_chars</code> always take non-optional strings. Similarly,
 when test 4 is changed so that process_values becomes string_complexity,
 it goes from consistently passing to almost always failing.</p>
-<h2 id="mass-mean-probing-vs-linear-regression">Mass Mean Probing vs
-Linear Regression</h2>
+<h2 data-number="3.3" id="mass-mean-probing-vs-linear-regression"><span
+class="header-section-number">3.3</span> Mass Mean Probing vs Linear
+Regression</h2>
 <p>We were initially very surprised to find that mass means probing
 would perform better than linear regression. After all, linear
 regression is a much more powerful technique for fitting data. And mass

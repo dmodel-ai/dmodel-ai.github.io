@@ -345,6 +345,12 @@ Datasets](https://openreview.net/forum?id=CeJEfNKstt) by Marks and
 Tegmark. The paper discusses several reasons why mass mean probing
 might outperform linear regression.
 
+
+# References {.unnumbered}
+::: {#refs}
+:::
+
+\appendix
 # Appendix
 
 ## Optionality In Python
@@ -580,4 +586,3 @@ more dimensions you consider at one time, the better your model fit
 can be. But repeatedly in our data, we found that mass means probing
 outperformed linear regression on the test data.
 
-# References

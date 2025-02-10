@@ -111,9 +111,8 @@ another lines, then see if they produce something that matches these
 valid lines with the regular expression
 `num\s*(is\s*(not)?|==)\s*None|isinstance\(num`.]
 
-This test is on the simpler side, but
-we can challenge the model more, adding
-layers of indirection between the source and sink of optional
+This test is on the simpler side, but we can challenge the model more,
+adding layers of indirection between the source and sink of optional
 values, testing the model's _interprocedural_ understanding.
 
 We can also test how well models understand type annotations
@@ -655,4 +654,3 @@ dimension independently, without considering other dimensions. The
 more dimensions you consider at one time, the better your model fit
 can be. But repeatedly in our data, we found that mass means probing
 outperformed linear regression on the test data.
-

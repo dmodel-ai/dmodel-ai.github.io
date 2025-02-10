@@ -58,7 +58,13 @@ With this work, we contribute three things:
   across the program.
 
 # Overview
-\todo{write the lead into the overview}
+
+Understanding the flow of optionality across programs is an essential
+part of writing most code, and misunderstandings are often a source of
+bugs. For models to write code, they must learn to track optionality
+in some form. In this work, we'll explore ways to measure optionality
+understanding in language models, and use that to show how the
+understanding of optionality changes over various model parameters.
 
 ## Which Models Understand Optionality?
 

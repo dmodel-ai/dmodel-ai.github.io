@@ -142,6 +142,9 @@ def program_48() -> None:
 def get_square(number:
 ```
 
+All of the tests in this benchmark suite are composed of three
+functions or less, where the largest function is seven lines long.
+
 We measure the difficulty of these tests by measuring how
 models of different sizes do on them. For many tests in this post, we
 use the Pythia models, as they are available in a large variety of

@@ -44,12 +44,18 @@ able to write code that deals with optional values, but we haven’t
 known what form this knowledge takes, what situations are likely to
 confuse the model. Until now.\todo{big claim!}
 
-\todo{contributions:
-- microbenchmark: optional eval
-- we find that models understand optionality
-- we study optionality across time and scale
-- we investigate morally vs technically correct
-}
+With this work, we contribute three things:
+
+* A microbenchmark of 15 programs that test basic model understanding
+  of the flow of optionality through a program.
+
+* Experiments that show that models begin to develop a concept of
+  optionality as they get bigger and are trained for longer.
+
+* Experiments that show that models begin to understand optionality in
+  a local scope, satisfying many requirements of the python
+  typechecker, before they start to understand how optionality flows
+  across the program.
 
 # Overview
 \todo{write the lead into the overview}

@@ -21,7 +21,7 @@ capabilities.
 Fortunately, recent work in model interpretability and
 representation engineering\todo{which work?} has produced promising results
 which give hope towards understanding more and more of the
-internal thought processes of LLMs. Here at dmodel , we can
+internal thought processes of LLMs. Here at $d_{model}$ , we can
 think of no better place to apply these new techniques than
 program understanding, where there are many abstract
 properties that can be symbolically determined. The vast work

@@ -345,6 +345,64 @@ Datasets](https://openreview.net/forum?id=CeJEfNKstt) by Marks and
 Tegmark. The paper discusses several reasons why mass mean probing
 might outperform linear regression.
 
+# Experimental Results
+
+We first measure the accuracy of Pythia models of various sizes and
+number of pre-training steps. We use a mass-means probe on all layers,
+with a linear regression determining the weights of each layer, since
+that is the probing method that we found works best overall. While we
+measured accuracy for every available Pythia model size, we exclude
+the smallest (14 million parameters) from this graph since it would
+exist entirely above the top of the graph.
+
+![The performance, measured in binary cross-entropy, of each Pythia
+ model size during pretraining. Since this graph is of loss, lower is
+ better](images/accuracy_during_pretraining.svg){#fig:models-and-steps}
+
+In [@Fig:models-and-steps], we can see how loss behaves as model size
+increases, and the number of pre-training steps increases. Generally,
+we see the loss decreases as models get bigger and are trained for
+longer. However, models with fewer than 1 billion parameters reach
+their lowest loss before the end of training, and loss increases
+after. This indicates that these models may be "overtrained", at least
+judging by this particular task. This is to be expected as Pythia
+trains all model sizes for the same number of steps, so some will be
+overtrained while others will be undertrained.
+
+Prior work focused their probing on a single layer, often handpicked
+based on prior papers. In our experiments, we decided to probe *all*
+layers using a mass means probe, and learn which ones were most
+important from the data. We tested two methods for doing so - either
+allowing the magnitude of the difference of means vector to determine
+the importance of the layer in the final probe, or to learn
+coefficients for each layer using linear regression. We found that
+which method is more accurate on test data varies over both model size
+and number of training steps.
+
+![The performance of pure mass means probing vs mass means probing
+ with linear regression for different Pythia model
+ sizes](images/mm-vs-mmlr.svg){#fig:mm-vs-mmlr-sizes}
+
+In [@Fig:mm-vs-mmlr-sizes], we can see that pure mass means probing
+gives lower loss for smaller models (those with less than 410 million
+parameters), but that for larger models weighting layers using linear
+regression gives lower loss consistently.
+
+![The performance of the two probing methods on the Pythia 160m model
+ for different numbers of pretraining steps. There are regions where
+ pure mass means scaling is better, and regions where linear
+ regression on layer weights is better.](images/mm-vs-mmlr-160m.svg){#fig:mm-vs-mmlr-160m}
+
+In [@Fig:mm-vs-mmlr-160m;@Fig:mm-vs-mmlr-410], we look at how these
+scaling methods perform for different amounts of pretraining, for the
+model sizes nearest the boundary. We see that relative merit of each
+scaling method can vary significantly over pretraining steps.
+
+![The performance of the two probing methods on the Pythia 410m model
+for different numbers of pretraining steps. Pure mass means probing
+starts better, but is quickly overtaken by mass means probing with
+linear regression on layer weights.](images/mm-vs-mmlr-410m.svg){#fig:mm-vs-mmlr-410}
+
 
 # References {.unnumbered}
 ::: {#refs}

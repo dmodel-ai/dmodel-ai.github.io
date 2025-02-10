@@ -157,6 +157,16 @@ each model.
 ![A bar graph showing how several sizes of model perform on the
  high-level optionality tests](images/hl_model_results.svg){#fig:hl_scale}
 
+In [@Fig:hl_scale], we can see the number of passing tests for each
+model. We can see that generally models get better at larger
+sizes^[Pythia 12b performs worse than its 6.9b variant, though this
+might be due to under-training at that size. Qwen 32B also performs
+about as well as Pythia 6.9b, it's not clear if this is due to model
+architecture or something else.]. Model performance on these tests is
+approximately logarithmic in model size: models of 2.8 billion
+parameters can pass about half the tests, but it takes more than 405
+billion parameters to pass all of the tests
+
 Next, we want to know how the amount of training affects model
 performance on these tests. Luckily, Pythia also provides models at
 different training steps, all the way from step 2 to step

@@ -168,8 +168,10 @@ training:
 
 Again, we see that while the model generally gets better at passing
 these tests during training, the performance is not always increasing.
-Also note that this plot is quite noisy, so in the sequel, we will show smoothed charts.
-\todo{describe smoothing in footnote?}
+Also note that this plot is quite noisy, so in the sequel, we will
+show smoothed charts^[In our case, "smoothed" means that we average
+each training step point with the two points before it and the two
+after].
 
 
 ## Morally vs Technically Correct

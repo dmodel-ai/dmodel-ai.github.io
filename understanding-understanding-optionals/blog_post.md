@@ -419,7 +419,7 @@ Datasets](https://openreview.net/forum?id=CeJEfNKstt) by Marks and
 Tegmark. The paper discusses several reasons why mass mean probing
 might outperform linear regression.
 
-# Experimental Results
+# Nullability Prediction Accuracy Across Training and Scale
 
 We first measure the accuracy of Pythia models of various sizes and
 number of pre-training steps. We use a mass-means probe on all layers,

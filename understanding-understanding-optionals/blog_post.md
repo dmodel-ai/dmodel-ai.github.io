@@ -1,5 +1,5 @@
 ---
-title: Understanding Models Understanding Optionality
+title: Understanding Models Understanding Nullability
 author: '[Alex Sanchez-Stern](https://www.alexsanchezstern.com) and [Anish Tondwalkar](https://ani.sh)'
 date: '$d_{model}$'
 bibliography: all.bib
@@ -31,50 +31,50 @@ internal thought processes of language models as they write
 code.\todo{for examples, see cite, cite}
 
 In that spirit, we wanted to start with a simple property that comes
-up in every programming languages, value optionality.\todo{we need a better word for "optionality"} Optional values
+up in every programming languages, nullability. Nullable values
 are represented differently across languages, null pointers in C++ or
-Java, with explicit option types in Rust, and with special nil or None
+Java, with explicit Option types in Rust, and with special nil or None
 values in dynamic languages like Javascript, Lisp, or Python. In every
-case, understanding where values can be optional is necessary for even
-their most basic uses, and misunderstanding where they are optional
+case, understanding where values can be nullable is necessary for even
+their most basic uses, and misunderstanding where they are nullable
 can often be a source of bugs, like a null pointer dereference.
 
-Do our models understand when a value is optional? They must, to be
-able to write code that deals with optional values, but we haven’t
+Do our models understand when a value is nullable? They must, to be
+able to write code that deals with nullable values, but we haven’t
 known what form this knowledge takes, what situations are likely to
 confuse the model. Until now.\todo{big claim!}
 
 With this work, we contribute three things:
 
 * A microbenchmark of 15 programs that test basic model understanding
-  of the flow of optionality through a program.
+  of the flow of nullability through a program.
 
-* Experiments that show that models begin to develop a concept of
-  optionality as they get bigger and are trained for longer.
+* Experiments that show that models develop a concept of nullability
+  as they get bigger and are trained for longer.
 
-* Experiments that show that models begin to understand optionality in
+* Experiments that show that models begin to understand nullability in
   a local scope, satisfying many requirements of the python
-  typechecker, before they start to understand how optionality flows
+  typechecker, before they start to understand how nullability flows
   across the program.
 
 # Overview
 
-Understanding the flow of optionality across programs is an essential
+Understanding the flow of nullability across programs is an essential
 part of writing most code, and misunderstandings are often a source of
-bugs. For models to write code, they must learn to track optionality
-in some form. In this work, we'll explore ways to measure optionality
+bugs. For models to write code, they must learn to track nullability
+in some form. In this work, we'll explore ways to measure nullability
 understanding in language models, and use that to show how the
-understanding of optionality changes over various model parameters.
+understanding of nullability changes over various model parameters.
 
-## Which Models Understand Optionality?
+## Which Models Understand Nullability?
 
-We begin with a "skyline" estimate of model understanding of optionality
+We begin with a "skyline" estimate of model understanding of nullability
 (a la @fengBinding2024), first measure how well different models can
 understand the concept. We have the model
 complete simple programs that require an understanding of
-optionality. We refer to this suite of programs as `OptionalEval`.
+nullability. We refer to this suite of programs as `NullabilityEval`.
 
-To test these models for optionality understanding, we constructed 15
+To test these models for nullability understanding, we constructed 15
 partial program tests. For example,
 
 *Test 4*:
@@ -93,7 +93,7 @@ and then a loop loops over `some_numbers`.
 
 The program is constructed such that there are a very limited number
 of valid next lines in the program, and all of them demonstrate some
-knowledge of the concept of optionality.^[The loop indicates that the
+knowledge of the concept of nullability.^[The loop indicates that the
 next few lines need to process `num` in some way, and the fact that it
 comes from `some_numbers` means it has the type `Optional[int]`. `num`
 can’t be directly appended to `result`, because `result` is declared
@@ -106,13 +106,13 @@ but several variants are also valid: `if num is not None`, `if num ==
 None`, `if isinstance(num, int)`. Since this is a pretty small space
 of valid next lines, and all of them imply some understanding that
 `num` may not be an `int`, we can use this program to test models for
-optionality understanding by asking them to complete the program
+nullability understanding by asking them to complete the program
 another lines, then see if they produce something that matches these
 valid lines with the regular expression
 `num\s*(is\s*(not)?|==)\s*None|isinstance\(num`.]
 
 This test is on the simpler side, but we can challenge the model more,
-adding layers of indirection between the source and sink of optional
+adding layers of indirection between the source and sink of nullable
 values, testing the model's _interprocedural_ understanding.
 
 We can also test how well models understand type annotations
@@ -121,7 +121,7 @@ required^[Technically this is known as "Optional typing", but that's
 confusing in the context of this post. Not to be confused with Gradual
 Typing, as introduced by Siek et al.], most of the Python code used as
 training data operates in an untyped fashion, so models may understand
-the dynamic flow of optional values but not their static type
+the dynamic flow of nullable values but not their static type
 annotations. Test 5, below, tests the models understanding of
 `Optional` types annotations.^[The trailing colon makes a type
 expression the only valid completion; function declarations with a
@@ -158,7 +158,7 @@ each model.
 \todo{more through exploration of why?}
 
 ![A bar graph showing how several sizes of model perform on the
- high-level optionality tests](images/hl_model_results.svg){#fig:hl_scale}
+ high-level nullability tests](images/hl_model_results.svg){#fig:hl_scale}
 
 In [@Fig:hl_scale], we can see the number of passing tests for each
 model. We can see that generally models get better at larger
@@ -209,9 +209,9 @@ typechecks on the tests, vs produces code that shows true
 understanding.](images/hl_mypy_vs_grep.svg){#fig:hl_moral}
 \todo{write this section}
 
-## Designing Prompts to Extract Optionality Activations
+## Designing Prompts to Extract Nullability Activations
 \todo{we can probably just make this a brief part of the related work}
-At this point, we’ve figured out how to roughly measure optionality
+At this point, we’ve figured out how to roughly measure nullability
 understanding in the output of various language models, but we still
 don’t know what their internal representations might look like or when
 they emerge. To do this, we’re going to bring in some ideas described
@@ -259,9 +259,9 @@ less honest, or more or less fair.
 
 In our setting, we were able to avoid dealing with the ambiguities of
 natural language by only prompting with code. We decided to stick to
-analyzing the optionality of individual variable occurrences, instead
+analyzing the nullability of individual variable occurrences, instead
 of analyzing every expression. Specifically, we tried to capture the
-concept “the variable I just generated refers to an optional
+concept “the variable I just generated refers to an nullable
 quantity”, so our prompts looked like:
 
 ```python
@@ -280,7 +280,7 @@ def program_1() -> None:
 
 To generate these kinds of prompts, we started by asking a few
 different chat models to generate for us programs that made use of
-optionality. We prompted each model with:
+nullability . We prompted each model with:
 
 ```
 Generate me 100 typed python programs that use the optional type,
@@ -440,10 +440,10 @@ linear regression on layer weights.](images/mm-vs-mmlr-410m.svg){#fig:mm-vs-mmlr
 \appendix
 # Appendix {.appendix}
 
-## Optionality In Python
+## Nullability In Python
 
-To see how Optionality appears in Python, Let’s look at an example
-program in Python that uses optionality:
+To see how nullability appears in Python, Let’s look at an example
+program in Python that uses nullability:
 
 ```python
 class User:
@@ -459,25 +459,25 @@ def get_user_email(user: Optional[User]) -> Optional[str]:
 ```
 
 In the `get_user_email` function above, we can see from the type
-signature that it takes a optional User value, and returns an optional
+signature that it takes a nullable User value, and returns an nullable
 string. The first thing the function does is check if the input `user`
 is None or not. This program was actually generated by o1-mini, so we
 can already see that the model understands that the user object is
-optional, and that it needs to be checked for None-ness before
+nullable, and that it needs to be checked for None-ness before
 anything else can be done.
 
 We can say that there are five variable “occurances” in the program,
-each of which can be either optional or not. There’s the first `user`
+each of which can be either nullable or not. There’s the first `user`
 in the if statement, the second `user` to the right of the `and` in
 `user.email`, there’s the `user.email` itself, the `user` on the
 second line, and finally the `user.email` on the second line. If we
 use Python’s typechecker, mypy, to check the types of each of these
 occurrences, we find that they have type `Optional[User]`, `User`,
 `Optional[str]`, `User`, and `str` respectively. That is, the first
-and third are optional, and the rest are not.
+and third are nullable, and the rest are not.
 
 
-## Detailed High-Level Optionality Test Results
+## Detailed High-Level Nullability Test Results
 
 ### Across Scale
 
@@ -570,7 +570,7 @@ def count_os(value):
 While the first definition handles value being None or a string, the
 second definition not only assumes it is a string but that it is a
 name of a folder in the current directory. In some sense the model
-“knows” that the value parameter is Optional at step 104000, but
+“knows” that the value parameter is nullable at step 104000, but
 “forgets” it during further training. It regains the ability to pass
 the test at several points during training, but by the end of
 training, it’s back to treating `value` as if it was always a string.
@@ -658,7 +658,7 @@ understanding of their type semantics. When test 3 is changed so that
 `process_value` is instead called `count_chars`, Pythia 6.9b becomes
 unable to correctly complete it on any revision; it likely has a bias
 from its training data that functions called `count_chars` always take
-non-optional strings. Similarly, when test 4 is changed so that
+non-nullable strings. Similarly, when test 4 is changed so that
 process_values becomes string_complexity, it goes from consistently
 passing to almost always failing.
 

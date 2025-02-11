@@ -4,7 +4,19 @@ author: '[Alex Sanchez-Stern](https://www.alexsanchezstern.com) and [Anish Tondw
 date: '$d_{model}$'
 bibliography: all.bib
 linkReferences: true
-abstract: 'The Abstract\todo{abstract}'
+abstract:
+
+  Large language models have demonstrated impressive emergent
+  capabilities, including the ability to write code, but this ability
+  requires a model of program semantics that is little
+  understood. Recent interpretability work has shown the ability to
+  extract internal representations of natural language concepts,
+  raising the possibility that similar techniques could be used to
+  extract program semantics concepts. In this work we study how large
+  language models represent nullability of program values. We measure
+  how well models of various sizes complete programs that use nullable
+  values, and then extract an internal representation of nullability.
+
 ---
 
 # Introduction

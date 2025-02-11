@@ -282,15 +282,13 @@ To generate these kinds of prompts, we started by asking a few
 different chat models to generate for us programs that made use of
 nullability . We prompted each model with:
 
-```
-Generate me 100 typed python programs that use the optional type,
-along with type annotations for any undefined functions that they
-use. Make sure that the programs are unique, and each involves at
-least eight lines of logic. Number each program from 1 to 100. Please
-put all the programs in a single file, with a main function that tests
-each. Don't include any text before or after the code, just the
-code. I will be using mypy with the --strict option to check the code.
-```
+> Generate me 100 typed python programs that use the Optional type,
+> along with type annotations for any undefined functions that they
+> use. Make sure that the programs are unique, and each involves at
+> least eight lines of logic. Number each program from 1 to 100. Please
+> put all the programs in a single file, with a main function that tests
+> each. Don't include any text before or after the code, just the
+> code. I will be using mypy with the --strict option to check the code.
 
 We queried o1, o1-mini, deepseek-coder, and claude-sonnet using this
 prompt, and then combined programs from the output of all of them into

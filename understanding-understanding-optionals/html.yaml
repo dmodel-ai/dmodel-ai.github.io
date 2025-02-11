@@ -2,6 +2,10 @@ input-file: blog_post.md
 number-sections: true
 standalone: true
 output-file: index.html
+css:
+  - pandoc.css
+  - sidenote.css
 filters:
   - pandoc-crossref
   - citeproc
+  - pandoc-sidenote

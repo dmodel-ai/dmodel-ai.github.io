@@ -365,6 +365,41 @@ scaling methods. In domains like this one where we have a lot less
 training data points then dimensions, what techniques will generalize
 well to the test data can be hard to predict.
 
+Prior work focused their probing on a single layer, often handpicked
+based on prior papers. In our experiments, we decided to probe *all*
+layers using a mass means probe, and learn which ones were most
+important from the data. We tested two methods for doing so - either
+allowing the magnitude of the difference of means vector to determine
+the importance of the layer in the final probe, or to learn
+coefficients for each layer using linear regression. We found that
+which method is more accurate on test data varies over both model size
+and number of training steps.
+
+![The performance of pure mass means probing vs mass means probing
+ with linear regression for different Pythia model
+ sizes](images/mm-vs-mmlr.svg){#fig:mm-vs-mmlr-sizes}
+
+In [@Fig:mm-vs-mmlr-sizes], we can see that pure mass means probing
+gives lower loss for smaller models (those with less than 410 million
+parameters), but that for larger models weighting layers using linear
+regression gives lower loss consistently.
+
+![The performance of the two probing methods on the Pythia 160m model
+ for different numbers of pretraining steps. There are regions where
+ pure mass means scaling is better, and regions where linear
+ regression on layer weights is better.](images/mm-vs-mmlr-160m.svg){#fig:mm-vs-mmlr-160m}
+
+In [@Fig:mm-vs-mmlr-160m;@Fig:mm-vs-mmlr-410], we look at how these
+scaling methods perform for different amounts of pretraining, for the
+model sizes nearest the boundary. We see that relative merit of each
+scaling method can vary significantly over pretraining steps.
+
+![The performance of the two probing methods on the Pythia 410m model
+for different numbers of pretraining steps. Pure mass means probing
+starts better, but is quickly overtaken by mass means probing with
+linear regression on layer weights.](images/mm-vs-mmlr-410m.svg){#fig:mm-vs-mmlr-410}
+
+
 # Related Work
 
 \todo{mention the tigges paper on circuits across scale, the feng and steinhardt papers, etc}
@@ -407,41 +442,6 @@ after. This indicates that these models may be "overtrained", at least
 judging by this particular task. This is to be expected as Pythia
 trains all model sizes for the same number of steps, so some will be
 overtrained while others will be undertrained.
-
-Prior work focused their probing on a single layer, often handpicked
-based on prior papers. In our experiments, we decided to probe *all*
-layers using a mass means probe, and learn which ones were most
-important from the data. We tested two methods for doing so - either
-allowing the magnitude of the difference of means vector to determine
-the importance of the layer in the final probe, or to learn
-coefficients for each layer using linear regression. We found that
-which method is more accurate on test data varies over both model size
-and number of training steps.
-
-![The performance of pure mass means probing vs mass means probing
- with linear regression for different Pythia model
- sizes](images/mm-vs-mmlr.svg){#fig:mm-vs-mmlr-sizes}
-
-In [@Fig:mm-vs-mmlr-sizes], we can see that pure mass means probing
-gives lower loss for smaller models (those with less than 410 million
-parameters), but that for larger models weighting layers using linear
-regression gives lower loss consistently.
-
-![The performance of the two probing methods on the Pythia 160m model
- for different numbers of pretraining steps. There are regions where
- pure mass means scaling is better, and regions where linear
- regression on layer weights is better.](images/mm-vs-mmlr-160m.svg){#fig:mm-vs-mmlr-160m}
-
-In [@Fig:mm-vs-mmlr-160m;@Fig:mm-vs-mmlr-410], we look at how these
-scaling methods perform for different amounts of pretraining, for the
-model sizes nearest the boundary. We see that relative merit of each
-scaling method can vary significantly over pretraining steps.
-
-![The performance of the two probing methods on the Pythia 410m model
-for different numbers of pretraining steps. Pure mass means probing
-starts better, but is quickly overtaken by mass means probing with
-linear regression on layer weights.](images/mm-vs-mmlr-410m.svg){#fig:mm-vs-mmlr-410}
-
 
 # References {.unnumbered}
 ::: {#refs}

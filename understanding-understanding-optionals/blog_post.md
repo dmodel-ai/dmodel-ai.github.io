@@ -116,18 +116,21 @@ adding layers of indirection between the source and sink of optional
 values, testing the model's _interprocedural_ understanding.
 
 We can also test how well models understand type annotations
-\todo{python is not graudally typed}
-separately; since Python is a gradually typed language, most of the
-Python code used as training data operates in an untyped fashion, so
-models may understand the dynamic flow of optional values but not
-their static type annotations. Test 5, below, tests the models understanding of
-`Optional` types annotations.^[The trailing colon makes a type expression
-the only valid completion; function declarations with a colon and no
-type, like `def fn(x:)` are not valid python. Since we’ve already seen
-a usage of `get_square` that is passed a None value, it wouldn’t be
-type-valid to complete the program with just `int`. So a model can be
-tested on its understanding of `Optional` annotations by seeing if its
-completion of the partial program includes `Optional[int]`.]
+separately; since the inclusion of type annotations in Python is not
+required^[Technically this is known as "Optional typing", but that's
+confusing in the context of this post. Not to be confused with Gradual
+Typing, as introduced by Siek et al.], most of the Python code used as
+training data operates in an untyped fashion, so models may understand
+the dynamic flow of optional values but not their static type
+annotations. Test 5, below, tests the models understanding of
+`Optional` types annotations.^[The trailing colon makes a type
+expression the only valid completion; function declarations with a
+colon and no type, like `def fn(x:)` are not valid python. Since we’ve
+already seen a usage of `get_square` that is passed a None value, it
+wouldn’t be type-valid to complete the program with just `int`. So a
+model can be tested on its understanding of `Optional` annotations by
+seeing if its completion of the partial program includes
+`Optional[int]`.]
 
 *Test 5*:
 ```python

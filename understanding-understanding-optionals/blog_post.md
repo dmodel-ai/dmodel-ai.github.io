@@ -199,7 +199,7 @@ each training step point with the two points before it and the two
 after].
 
 
-## Morally vs Technically Correct
+## Local vs Non-Local Type Correctness
 
 One explanation of why the model gets worse before it gets better is that the
 model first learns the concepts need to solve the task, then learns the

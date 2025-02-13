@@ -524,8 +524,9 @@ which method is more accurate on test data varies over both model size
 and number of training steps.
 
 ![The performance of pure mass means probing vs mass means probing
- with linear regression for different Pythia model
- sizes](images/mm-vs-mmlr.svg){#fig:mm-vs-mmlr-sizes}
+ with linear regression for different Pythia model sizes. Binary-cross
+ entropy is plotted, so lower is
+ better.](images/mm-vs-mmlr.svg){#fig:mm-vs-mmlr-sizes}
 
 In [@Fig:mm-vs-mmlr-sizes], we can see that pure mass means probing
 gives lower loss for smaller models (those with less than 410 million

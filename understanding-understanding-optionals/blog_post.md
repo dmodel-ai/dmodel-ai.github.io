@@ -202,8 +202,7 @@ more and more parameters to learn them at all.
 
 We can measure whether LLMs understand these rules by just asking for
 completions, what we call an "external" measurement of the models
-understanding. And that's what we'll do in detail in Section
-[SECTION]. But there are many places where variables appear where a
+understanding. But there are many places where variables appear where a
 completion won't tell you what type the model thinks the variable
 has. We would still like to know whether the model thinks these
 variables are nullable at those locations, so we can instead look for

@@ -224,7 +224,7 @@ understanding in more detail, and in Section <SECTION> we'll describe
 measuring the models internal states in detail. Finally, we'll go over
 some related work, and present final experiments.
 
-## Which Models Understand Nullability?
+# Measuring Nullability Understanding Externally
 
 We begin with a "skyline" estimate of model understanding of nullability
 (a la @fengBinding2024), first measure how well different models can
@@ -367,7 +367,9 @@ typechecks on the tests, vs produces code that shows true
 understanding.](images/hl_mypy_vs_grep.svg){#fig:hl_moral}
 \todo{write this section}
 
+# Measuring Nullability Understanding Internally
 ## Designing Prompts to Extract Nullability Activations
+
 \todo{we can probably just make this a brief part of the related work}
 At this point, we’ve figured out how to roughly measure nullability
 understanding in the output of various language models, but we still

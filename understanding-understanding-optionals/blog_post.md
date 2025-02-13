@@ -203,7 +203,7 @@ more and more parameters to learn them at all.
 We can measure whether LLMs understand these rules by just asking for
 completions, what we call an "external" measurement of the models
 understanding. And that's what we'll do in detail in Section
-<SECTION>. But there are many places where variables appear where a
+[SECTION]. But there are many places where variables appear where a
 completion won't tell you what type the model thinks the variable
 has. We would still like to know whether the model thinks these
 variables are nullable at those locations, so we can instead look for
@@ -219,8 +219,8 @@ variable.
 
 \todo{READING DIAGRAMS HERE}
 
-In Section <SECTION> we'll describe our external tests of nullability
-understanding in more detail, and in Section <SECTION> we'll describe
+In Section [SECTION] we'll describe our external tests of nullability
+understanding in more detail, and in Section [SECTION] we'll describe
 measuring the models internal states in detail. Finally, we'll go over
 some related work, and present final experiments.
 

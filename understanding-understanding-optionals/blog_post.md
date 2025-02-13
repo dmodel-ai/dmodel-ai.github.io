@@ -78,6 +78,152 @@ in some form. In this work, we'll explore ways to measure nullability
 understanding in language models, and use that to show how the
 understanding of nullability changes over various model parameters.
 
+Lets say you're writing a Python program with your LLM assistant. You've
+reached some point where you need to do something with a variable
+called `num`. Maybe you're building a list of numbers called
+`positive_nums`. How do you proceed?
+
+The answer often depends on the context in which you're working. If
+`num` and `positive_nums` are the things in scope, then you might
+guess that you should write the lines:
+
+```python
+if num > 0:
+  positive_nums.append(num)
+```
+
+And if `num` is always a concrete number, as its name would suggest,
+then this is probably the correct code. But variable names don't alway
+convey everything important about them, and it might be the case that
+`num` could be None. If so, you'll instead want to write:
+
+```python
+if num is not None and num > 0:
+  positive_nums.append(num)
+```
+
+In this case, the way you want to use `num` depends on whether it
+could be None or not. That is, whether `num` is "nullable". In Python
+that means having an Optional type (`Optional[int]` rather than
+`int`).
+
+Determining whether `num` is nullable in this context amounts to *type
+inference*, and it can be quite complicated in the worst
+case. Fortunately, in many cases it's quite simple, involving applying
+just a few rules. For instance, if `num` is the parameter to a
+function you're inside, and the function declares the type of `num` in
+its parameter list, then you can determine nullability from that
+type. So, if your context is:
+
+```python
+def foo(num: int):
+    positive_nums: list[int] = []
+    if num...
+```
+
+then you know you don't need to check for None, whereas if it's:
+
+```python
+def foo(num: Optional[int]):
+    positive_nums: list[int] = []
+    if num...
+```
+
+then you know you *do* need a None check.
+
+You could instead just ask your LLM assistant to complete the
+line. But how does your assistant know if `num` is nullable? Our
+experiments show that LLMs learn to approximate the same typing rules,
+by analyzing millions of programs.
+
+If we ask an LLM early in it's pre-training process to complete the
+program above, it produces:
+
+```python
+def foo(num: Optional[int]):
+    positive_nums: list[int] = []
+    if num.is_a():
+        ...
+```
+
+This is correct Python syntax, but it only works if `num` is an object
+with a `is_a()` method, instead of an optional integer.
+
+Train the LLM for a little longer, and it'll produce:
+
+```python
+def foo(num: Optional[int]):
+    positive_nums: list[int] = []
+    if num > 0:
+        ...
+```
+
+This is closer, in that its figured out that `num` is a number instead
+of an object, but it still isn't reading the function type signature
+and realizing that `num` could be None. Keep training it though, and
+eventually it will learn to insert the None test depending on the type
+signature of the function.
+
+This rule is pretty simple alone, so relatively small models can learn
+it, relatively early in their pre-training process. Other, more
+complicated rules can take a little longer to learn. For instance, if
+your program is:
+
+```python
+if condition():
+   num = 7
+else:
+   num = 9
+...
+if num...
+```
+
+then `num` is a non-nullable number, and you can complete the
+condition with ` < 0`.
+
+But if instead you're dealing with
+
+```python
+if condition():
+   num = 7
+else:
+   num = None
+...
+if num...
+```
+
+Then you'll want a None check first.
+
+This rule takes models a little longer to learn, but your
+highly-trained LLM assistant should make quick work of it. Our
+experiments show that as these rules get more and more complex, it
+takes LLMs longer and longer to learn them, and it also takes LLMs of
+more and more parameters to learn them at all.
+
+We can measure whether LLMs understand these rules by just asking for
+completions, what we call an "external" measurement of the models
+understanding. And that's what we'll do in detail in Section
+<SECTION>. But there are many places where variables appear where a
+completion won't tell you what type the model thinks the variable
+has. We would still like to know whether the model thinks these
+variables are nullable at those locations, so we can instead look for
+an "internal" measurement of the models understanding.
+
+We do so by looking at the activations of the model, meaning the
+values of each perceptron in the hidden layers. Together, these values
+give the entire internal state of the model at each token, and they
+can tell us what the model is "thinking" when processing that
+token. With the right tests, we can tell if the model is "thinking"
+that the current token is an optional variable, or a non-optional
+variable.
+
+\todo{READING DIAGRAMS HERE}
+
+In Section <SECTION> we'll describe our external tests of nullability
+understanding in more detail, and in Section <SECTION> we'll describe
+measuring the models internal states in detail. Finally, we'll go over
+some related work, and present final experiments.
+
 ## Which Models Understand Nullability?
 
 We begin with a "skyline" estimate of model understanding of nullability

@@ -93,6 +93,8 @@ $if(linestretch)$
 \usepackage{setspace}
 $endif$
 \usepackage{todonotes}
+\newcommand{\AT}[1]{\todo[color=green!40]{AT: #1}}
+\newcommand{\AS}[1]{\todo[color=red!40]{AS: #1}}
 \usepackage{iftex}
 \ifPDFTeX
   \usepackage[$if(fontenc)$$fontenc$$else$T1$endif$]{fontenc}

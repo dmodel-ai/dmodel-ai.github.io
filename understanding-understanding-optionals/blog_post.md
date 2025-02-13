@@ -21,7 +21,7 @@ abstract:
 
 # Introduction
 The last five years have shown us that Large Language Models can
-effectively write programs in many domains.\todo{cite} This is an impressive
+effectively write programs in many domains.\AT{cite} This is an impressive
 capability given that writing programs involves having a working
 understanding of many aspects of their semantics. But though we know
 that these large models understand programs to an extent, we still
@@ -31,7 +31,7 @@ program knowledge, and what kinds of situations will challenge its
 capabilities.
 
 Fortunately, recent work in model interpretability and
-representation engineering\todo{which work?} has produced promising results
+representation engineering\AT{which work?} has produced promising results
 which give hope towards understanding more and more of the
 internal thought processes of LLMs. Here at $d_{model}$ , we can
 think of no better place to apply these new techniques than
@@ -40,7 +40,7 @@ properties that can be symbolically determined. The vast work
 done in programming language theory over the past hundred
 years provides many tools for scaling an understanding of the
 internal thought processes of language models as they write
-code.\todo{for examples, see cite, cite}
+code.\AT{for examples, see cite, cite}
 
 In that spirit, we wanted to start with a simple property that comes
 up in every programming languages, nullability. Nullable values
@@ -350,14 +350,14 @@ One explanation of why the model gets worse before it gets better is that the
 model first learns the concepts need to solve the task, then learns the
 language of python --- its syntax, static (under mypy), and dynamic semantics,
 and then both.
-\todo{cite something here. grokking, double descent, interp?}
+\AT{cite something here. grokking, double descent, interp?}
 Let's make this more concrete.
 
 We say a model produces an answer that is "morally" (vs technically) correct if
 the code attempts to solve the problem asked of it. Each test case is paird with a
 regex that tests if the model output produces code that touches all of the relevant
 concepts.
-\todo{put an example here?}
+\AS{put an example here?}
 Here, we say the solution is
 "technically" correct if it passes `mypy`.
 
@@ -550,7 +550,7 @@ linear regression on layer weights.](images/mm-vs-mmlr-410m.svg){#fig:mm-vs-mmlr
 
 # Related Work
 
-\todo{mention the tigges paper on circuits across scale, the feng and steinhardt papers, etc}
+\AT{mention the tigges paper on circuits across scale, the feng and steinhardt papers, etc}
 
 As previously discussed, [“Representation Engineering: A Top-Down
 Approach to AI Transparency”](https://arxiv.org/abs/2310.01405) by

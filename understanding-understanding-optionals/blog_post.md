@@ -346,6 +346,25 @@ after].
 
 ## Local vs Non-Local Type Correctness
 
+For most of our tests, writing correct code simply requires following
+the rules of Python's mypy type system. This type system requires that
+types be internally consistent within functions, and match function
+type signatures if they exist. But six of our tests are different,
+because they involve functions that are *not* annotated with type
+signatures. Under mypy, these functions are allowed to do almost
+anything with their types. But at runtime, using values of the wrong
+type with these functions will result in a type error.
+
+You could strengthen mypy's type rules to require that these untyped
+functions have some valid type they could be assigned which would
+cause the function to typecheck. This would prevent programs that pass
+the typechecker from having runtime type errors. We can call this
+strengthened type system mypy+.
+
+Since mypy+ has strictly more typing rules than mypy, we would expect
+the model to take longer to learn how to satisfy it. And indeed this
+is the case: We find that models learn to satisfy the mypy typechecker
+
 One explanation of why the model gets worse before it gets better is that the
 model first learns the concepts need to solve the task, then learns the
 language of python --- its syntax, static (under mypy), and dynamic semantics,

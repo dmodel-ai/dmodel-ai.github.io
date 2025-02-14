@@ -6,6 +6,7 @@ css:
   - pandoc.css
   - sidenote.css
 filters:
+  - todo_filter.py
   - pandoc-crossref
   - citeproc
   - pandoc-sidenote

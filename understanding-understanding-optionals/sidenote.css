@@ -25,18 +25,19 @@ figcaption{
 }
 
 
-aside {
+.aside {
     position: absolute;
     left: 0;
     padding-left: 8rem;
     width: calc(50vw - 26rem);
     font-size: 1.2rem;
     background: orange;
+    display: block;
 }
-aside.AT{
+.aside.AT{
     background: lightgreen;
 }
-aside.AS{
+.aside.AS{
     background: pink;
 }
 

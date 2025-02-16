@@ -2,6 +2,10 @@ input-file: blog_post.md
 number-sections: true
 standalone: true
 output-file: index.html
+include-in-header:
+  - script_open.html
+  - sidenotes.js
+  - script_close.html
 css:
   - pandoc.css
   - sidenote.css
@@ -9,4 +13,3 @@ filters:
   - todo_filter.py
   - pandoc-crossref
   - citeproc
-  - pandoc-sidenote

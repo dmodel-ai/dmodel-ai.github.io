@@ -24,6 +24,23 @@ figcaption{
   width: 24em;
 }
 
+
+aside {
+    position: absolute;
+    left: 0;
+    padding-left: 8rem;
+    width: calc(50vw - 26rem);
+    font-size: 1.2rem;
+    background: orange;
+}
+aside.AT{
+    background: lightgreen;
+}
+aside.AS{
+    background: pink;
+}
+
+
 .highlighted-footnote-ref {
   background-color: red;
 }
@@ -42,7 +59,8 @@ figcaption{
 
 @media (max-width: 760px) {
     .sidenote,
-    .marginnote {
+    .marginnote,
+    aside {
         display: none;
     }
 }

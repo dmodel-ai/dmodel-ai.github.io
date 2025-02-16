@@ -137,7 +137,7 @@ internal representation of nullability.
 class="header-section-number">1</span> Introduction</h1>
 <p>The last five years have shown us that Large Language Models can
 effectively write programs in many
-domains.<aside class=AT>AT: cite</aside> This is an impressive
+domains.<span class="aside AT">AT: cite</span> This is an impressive
 capability given that writing programs involves having a working
 understanding of many aspects of their semantics. But though we know
 that these large models understand programs to an extent, we still don’t
@@ -146,7 +146,7 @@ understanding and where it uses heuristic reasoning, how it represents
 program knowledge, and what kinds of situations will challenge its
 capabilities.</p>
 <p>Fortunately, recent work in model interpretability and representation
-engineering<aside class=AT>AT: which work?</aside> has produced
+engineering<span class="aside AT">AT: which work?</span> has produced
 promising results which give hope towards understanding more and more of
 the internal thought processes of LLMs. Here at <span
 class="math inline"><em>d</em><sub><em>m</em><em>o</em><em>d</em><em>e</em><em>l</em></sub></span>
@@ -156,7 +156,7 @@ be symbolically determined. The vast work done in programming language
 theory over the past hundred years provides many tools for scaling an
 understanding of the internal thought processes of language models as
 they write
-code.<aside class=AT>AT: for examples, see cite, cite</aside></p>
+code.<span class="aside AT">AT: for examples, see cite, cite</span></p>
 <p>In that spirit, we wanted to start with a simple property that comes
 up in every programming languages, nullability. Nullable values are
 represented differently across languages, null pointers in C++ or Java,
@@ -168,7 +168,7 @@ be a source of bugs, like a null pointer dereference.</p>
 <p>Do our models understand when a value is nullable? They must, to be
 able to write code that deals with nullable values, but we haven’t known
 what form this knowledge takes, what situations are likely to confuse
-the model. Until now.<aside>big claim!</aside></p>
+the model. Until now.<span class=aside>big claim!</span></p>
 <p>With this work, we contribute three things:</p>
 <ul>
 <li><p>A microbenchmark of 15 programs that test basic model
@@ -357,7 +357,7 @@ Pythia models, as they are available in a large variety of sizes and
 training lengths. For measuring performance at larger sizes, we’ve
 included Qwen2.5-Coder-32B, Llama 3.1 405B Instruct, and DeepSeek-V3
 (671B). Below, you can see the number of passing tests for each model.
-<aside>more through exploration of why?</aside></p>
+<span class=aside>more through exploration of why?</span></p>
 <figure id="fig:hl_scale">
 <img src="images/hl_model_results.svg"
 alt="Figure 1: A bar graph showing how several sizes of model perform on the high-level nullability tests" />
@@ -409,17 +409,17 @@ the case: We find that models learn to satisfy the mypy typechecker</p>
 that the model first learns the concepts need to solve the task, then
 learns the language of python — its syntax, static (under mypy), and
 dynamic semantics, and then both.
-<aside class=AT>AT: cite something here. grokking, double descent, interp?</aside>
+<span class="aside AT">AT: cite something here. grokking, double descent, interp?</span>
 Let’s make this more concrete.</p>
 <p>We say a model produces an answer that is “morally” (vs technically)
 correct if the code attempts to solve the problem asked of it. Each test
 case is paird with a regex that tests if the model output produces code
 that touches all of the relevant concepts.
-<aside class=AS>AS: put an example here?</aside> Here, we say the
+<span class="aside AS">AS: put an example here?</span> Here, we say the
 solution is “technically” correct if it passes <code>mypy</code>.</p>
 <p><img src="images/hl_mypy_vs_grep.svg" id="fig:hl_moral"
 alt="A graph showing how often the Pythia 6.9b produces code that typechecks on the tests, vs produces code that shows true understanding." />
-<aside>write this section</aside></p>
+<span class=aside>write this section</span></p>
 <h1 data-number="4"
 id="measuring-nullability-understanding-internally"><span
 class="header-section-number">4</span> Measuring Nullability

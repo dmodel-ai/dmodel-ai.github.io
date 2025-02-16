@@ -52,14 +52,28 @@
       sidenote.innerHTML = footnoteLi.innerHTML; // clone the inner HTML.
 
       // Optional: add a small heading or link back:
-      // sidenote.insertAdjacentHTML(
-      //   'afterbegin',
-      //   `<div class="sidenote-index">[${index + 1}]</div>`
-      // );
+      sidenote.insertAdjacentHTML(
+        'afterbegin',
+        `<div class="sidenote-index"><a href="#fnref${index+1}">${index + 1}</a></div>`
+      );
 
       // Append to container.
       sidenoteContainer.appendChild(sidenote);
       sidenoteElements.push(sidenote);
+    });
+
+    // Add hover listeners to highlight the corresponding ref & sidenote.
+    footnoteRefs.forEach((ref, idx) => {
+      const note = sidenoteElements[idx];
+      if (!note) return;
+
+      // When hovering over the reference, highlight.
+      ref.addEventListener("mouseenter", () => highlightPair(idx, true));
+      ref.addEventListener("mouseleave", () => highlightPair(idx, false));
+
+      // When hovering over the sidenote, highlight.
+      note.addEventListener("mouseenter", () => highlightPair(idx, true));
+      note.addEventListener("mouseleave", () => highlightPair(idx, false));
     });
 
     // Position them initially.
@@ -110,6 +124,21 @@
       const noteHeight = note.offsetHeight;
       currentBottom = finalTop + noteHeight;
     });
+  }
+
+  // Highlight or unhighlight the reference and note pair.
+  function highlightPair(index, highlightOn) {
+    const ref = footnoteRefs[index];
+    const note = sidenoteElements[index];
+    if (!ref || !note) return;
+
+    if (highlightOn) {
+      ref.classList.add("highlighted-footnote");
+      note.classList.add("highlighted-footnote");
+    } else {
+      ref.classList.remove("highlighted-footnote");
+      note.classList.remove("highlighted-footnote");
+    }
   }
 
   // Run on DOMContentLoaded.

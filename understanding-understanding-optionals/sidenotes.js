@@ -32,7 +32,7 @@
     // You can adjust the width/top/right for your layout.
     sidenoteContainer.style.position = "absolute";
     sidenoteContainer.style.top = "0";
-    sidenoteContainer.style.width = "18em";
+    sidenoteContainer.style.width = "24em";
     // We'll place it once we know where main content ends.
 
     // Insert into DOM.

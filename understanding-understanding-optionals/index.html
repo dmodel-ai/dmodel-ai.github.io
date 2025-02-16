@@ -110,6 +110,125 @@
     }  </style>
   <link rel="stylesheet" href="pandoc.css" />
   <link rel="stylesheet" href="sidenote.css" />
+  <script>
+  // A simplified, modern approach that places all footnotes in a right-side column,
+  // preserving order and preventing overlap. This script expects Pandoc footnotes with:
+  //   (1) each footnote reference <a class="footnote-ref" href="#fnN"> in the text,
+  //   (2) a corresponding footnote <li id="fnN"> at the bottom.
+
+  (function () {
+    // Debounce utility to avoid thrashing on resize.
+    function debounce(fn, delay) {
+      let timer = null;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+      };
+    }
+
+    let sidenoteContainer = null;
+    let sidenoteElements = [];
+    let footnoteRefs = [];
+
+    // Main initialization
+    function initSidenotes() {
+      // Get references to each footnote.
+      footnoteRefs = Array.from(document.querySelectorAll("a.footnote-ref"));
+      if (footnoteRefs.length === 0) {
+        return; // No footnotes found.
+      }
+
+      // Create a container for all sidenotes.
+      sidenoteContainer = document.createElement("div");
+      sidenoteContainer.id = "sidenote-container";
+      // Absolutely positioned to the right of main content.
+      // You can adjust the width/top/right for your layout.
+      sidenoteContainer.style.position = "absolute";
+      sidenoteContainer.style.top = "0";
+      sidenoteContainer.style.width = "18em";
+      // We'll place it once we know where main content ends.
+
+      // Insert into DOM.
+      document.body.appendChild(sidenoteContainer);
+
+      // Build each sidenote and store references.
+      footnoteRefs.forEach((ref, index) => {
+        // The footnote ID is in the href, e.g. #fn1.
+        const footnoteID = ref.getAttribute("href").slice(1); // remove '#'.
+        const footnoteLi = document.getElementById(footnoteID);
+        if (!footnoteLi) return;
+
+        // Create a copy of footnote content.
+        const sidenote = document.createElement("div");
+        sidenote.classList.add("sidenote");
+        sidenote.style.position = "absolute";
+        sidenote.innerHTML = footnoteLi.innerHTML; // clone the inner HTML.
+
+        // Optional: add a small heading or link back:
+        // sidenote.insertAdjacentHTML(
+        //   'afterbegin',
+        //   `<div class="sidenote-index">[${index + 1}]</div>`
+        // );
+
+        // Append to container.
+        sidenoteContainer.appendChild(sidenote);
+        sidenoteElements.push(sidenote);
+      });
+
+      // Position them initially.
+      positionSidenotes();
+
+      // Reposition on window resize.
+      window.addEventListener("resize", debounce(positionSidenotes, 200));
+    }
+
+    // Recompute positions of the sidenotes in the right column.
+    function positionSidenotes() {
+      if (!sidenoteContainer || footnoteRefs.length === 0) return;
+
+      // Decide where to place the container horizontally.
+      // For example, to the right of #markdownBody or #content.
+      // If you don't have a main container, just fix it or place it on the right.
+      const main = document.getElementById("markdownBody") || document.body;
+      const mainRect = main.getBoundingClientRect();
+
+      // We place the sidenote container at the right side of main.
+      // You can tweak this offset.
+      sidenoteContainer.style.left = (window.scrollX + mainRect.right + 40) + "px";
+
+      // For vertical offset, we top-align with the top of main content.
+      // You can tweak this offset or fix it at 0.
+      const containerTop = window.scrollY + mainRect.top;
+      sidenoteContainer.style.top = containerTop + "px";
+
+      let currentBottom = 0; // track the bottom of the last placed sidenote.
+
+      sidenoteElements.forEach((note, idx) => {
+        // Each corresponding reference.
+        const ref = footnoteRefs[idx];
+        const refRect = ref.getBoundingClientRect();
+        const desiredTop = window.scrollY + refRect.top; // absolute top of the reference.
+
+        // Convert desiredTop into local coords of container.
+        const localTop = desiredTop - containerTop;
+
+        // If it would collide with the previous note, shift it down a bit.
+        const minTop = currentBottom + 10; // 10px gap.
+        const finalTop = Math.max(localTop, minTop);
+
+        note.style.top = finalTop + "px";
+        note.style.left = "0"; // keep everything in one column.
+
+        // Force layout so we can measure note height.
+        const noteHeight = note.offsetHeight;
+        currentBottom = finalTop + noteHeight;
+      });
+    }
+
+    // Run on DOMContentLoaded.
+    document.addEventListener("DOMContentLoaded", initSidenotes);
+  })();
+  </script>
 </head>
 <body>
 <header id="title-block-header">
@@ -322,57 +441,21 @@ to give the model a sense of dataflow, and then a loop loops over
 <code>some_numbers</code>.</p>
 <p>The program is constructed such that there are a very limited number
 of valid next lines in the program, and all of them demonstrate some
-knowledge of the concept of nullability.<span
-class="sidenote-wrapper"><label for="sn-0" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-0" class="margin-toggle"/><span
-class="sidenote">The loop indicates that the next few lines need to
-process <code>num</code> in some way, and the fact that it comes from
-<code>some_numbers</code> means it has the type
-<code>Optional[int]</code>. <code>num</code> can’t be directly appended
-to <code>result</code>, because <code>result</code> is declared to only
-contain <code>int</code>s, not <code>Optional[int]</code>s. None of the
-normal operations on <code>int</code>s will work on <code>None</code>s,
-so before <code>num</code> can be processed, something has to be done to
-separate <code>None</code>s and normal <code>int</code>s. The simplest
-way to do this is to introduce a branch <code>if num is None</code>, but
-several variants are also valid: <code>if num is not None</code>,
-<code>if num == None</code>, <code>if isinstance(num, int)</code>. Since
-this is a pretty small space of valid next lines, and all of them imply
-some understanding that <code>num</code> may not be an <code>int</code>,
-we can use this program to test models for nullability understanding by
-asking them to complete the program another lines, then see if they
-produce something that matches these valid lines with the regular
-expression
-<code>num\s*(is\s*(not)?|==)\s*None|isinstance\(num</code>.<br />
-<br />
-</span></span></p>
+knowledge of the concept of nullability.<a href="#fn1"
+class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
 <p>This test is on the simpler side, but we can challenge the model
 more, adding layers of indirection between the source and sink of
 nullable values, testing the model’s <em>interprocedural</em>
 understanding.</p>
 <p>We can also test how well models understand type annotations
 separately; since the inclusion of type annotations in Python is not
-required<span
-class="sidenote-wrapper"><label for="sn-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-1" class="margin-toggle"/><span
-class="sidenote">Technically this is known as “Optional typing”, but
-that’s confusing in the context of this post. Not to be confused with
-Gradual Typing, as introduced by Siek et al.<br />
-<br />
-</span></span>, most of the Python code used as training data operates
-in an untyped fashion, so models may understand the dynamic flow of
-nullable values but not their static type annotations. Test 5, below,
-tests the models understanding of <code>Optional</code> types
-annotations.<span
-class="sidenote-wrapper"><label for="sn-2" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-2" class="margin-toggle"/><span
-class="sidenote">The trailing colon makes a type expression the only
-valid completion; function declarations with a colon and no type, like
-<code>def fn(x:)</code> are not valid python. Since we’ve already seen a
-usage of <code>get_square</code> that is passed a None value, it
-wouldn’t be type-valid to complete the program with just
-<code>int</code>. So a model can be tested on its understanding of
-<code>Optional</code> annotations by seeing if its completion of the
-partial program includes <code>Optional[int]</code>.<br />
-<br />
-</span></span></p>
+required<a href="#fn2" class="footnote-ref" id="fnref2"
+role="doc-noteref"><sup>2</sup></a>, most of the Python code used as
+training data operates in an untyped fashion, so models may understand
+the dynamic flow of nullable values but not their static type
+annotations. Test 5, below, tests the models understanding of
+<code>Optional</code> types annotations.<a href="#fn3"
+class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
 <p><em>Test 5</em>:</p>
 <div class="sourceCode" id="cb10"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_48() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
@@ -401,17 +484,11 @@ sizes of model perform on the high-level nullability tests</figcaption>
 </figure>
 <p>In Fig. <a href="#fig:hl_scale">1</a>, we can see the number of
 passing tests for each model. We can see that generally models get
-better at larger sizes<span
-class="sidenote-wrapper"><label for="sn-3" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-3" class="margin-toggle"/><span
-class="sidenote">Pythia 12b performs worse than its 6.9b variant, though
-this might be due to under-training at that size. Qwen 32B also performs
-about as well as Pythia 6.9b, it’s not clear if this is due to model
-architecture or something else.<br />
-<br />
-</span></span>. Model performance on these tests is approximately
-logarithmic in model size: models of 2.8 billion parameters can pass
-about half the tests, but it takes more than 405 billion parameters to
-pass all of the tests</p>
+better at larger sizes<a href="#fn4" class="footnote-ref" id="fnref4"
+role="doc-noteref"><sup>4</sup></a>. Model performance on these tests is
+approximately logarithmic in model size: models of 2.8 billion
+parameters can pass about half the tests, but it takes more than 405
+billion parameters to pass all of the tests</p>
 <p>Next, we want to know how the amount of training affects model
 performance on these tests. Luckily, Pythia also provides models at
 different training steps, all the way from step 2 to step 143000. Below
@@ -425,16 +502,27 @@ performance of the Pythia 6.9 model changes during training</figcaption>
 <p>Again, we see that while the model generally gets better at passing
 these tests during training, the performance is not always increasing.
 Also note that this plot is quite noisy, so in the sequel, we will show
-smoothed charts<span
-class="sidenote-wrapper"><label for="sn-4" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-4" class="margin-toggle"/><span
-class="sidenote">In our case, “smoothed” means that we average each
-training step point with the two points before it and the two
-after<br />
-<br />
-</span></span>.</p>
+smoothed charts<a href="#fn5" class="footnote-ref" id="fnref5"
+role="doc-noteref"><sup>5</sup></a>.</p>
 <h2 data-number="3.1" id="local-vs-non-local-type-correctness"><span
 class="header-section-number">3.1</span> Local vs Non-Local Type
 Correctness</h2>
+<p>For most of our tests, writing correct code simply requires following
+the rules of Python’s mypy type system. This type system requires that
+types be internally consistent within functions, and match function type
+signatures if they exist. But six of our tests are different, because
+they involve functions that are <em>not</em> annotated with type
+signatures. Under mypy, these functions are allowed to do almost
+anything with their types. But at runtime, using values of the wrong
+type with these functions will result in a type error.</p>
+<p>You could strengthen mypy’s type rules to require that these untyped
+functions have some valid type they could be assigned which would cause
+the function to typecheck. This would prevent programs that pass the
+typechecker from having runtime type errors. We can call this
+strengthened type system mypy+.</p>
+<p>Since mypy+ has strictly more typing rules than mypy, we would expect
+the model to take longer to learn how to satisfy it. And indeed this is
+the case: We find that models learn to satisfy the mypy typechecker</p>
 <p>One explanation of why the model gets worse before it gets better is
 that the model first learns the concepts need to solve the task, then
 learns the language of python — its syntax, static (under mypy), and
@@ -570,12 +658,9 @@ vectors, we averaged the positive examples and the negative examples,
 and then took the difference of the averages as our base reading vector.
 This is called “mass mean probing” in the literature, and empirically
 has been shown to generalize better in high dimensional space than
-trying to learn a linear model through logistic regression.<span
-class="sidenote-wrapper"><label for="sn-5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-5" class="margin-toggle"/><span
-class="sidenote">see the appendix section “Mass Mean Probing vs Linear
-Regression” for more on this<br />
-<br />
-</span></span></p>
+trying to learn a linear model through logistic regression.<a
+href="#fn6" class="footnote-ref" id="fnref6"
+role="doc-noteref"><sup>6</sup></a></p>
 <p>In this reading vector, the impact of each layer based on the
 magnitude of difference in that layer, instead of separate a notion of
 how “important” that layer is to differentiating positive and negative
@@ -897,5 +982,54 @@ dimension independently, without considering other dimensions. The more
 dimensions you consider at one time, the better your model fit can be.
 But repeatedly in our data, we found that mass means probing
 outperformed linear regression on the test data.</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>The loop indicates that the next few lines need to
+process <code>num</code> in some way, and the fact that it comes from
+<code>some_numbers</code> means it has the type
+<code>Optional[int]</code>. <code>num</code> can’t be directly appended
+to <code>result</code>, because <code>result</code> is declared to only
+contain <code>int</code>s, not <code>Optional[int]</code>s. None of the
+normal operations on <code>int</code>s will work on <code>None</code>s,
+so before <code>num</code> can be processed, something has to be done to
+separate <code>None</code>s and normal <code>int</code>s. The simplest
+way to do this is to introduce a branch <code>if num is None</code>, but
+several variants are also valid: <code>if num is not None</code>,
+<code>if num == None</code>, <code>if isinstance(num, int)</code>. Since
+this is a pretty small space of valid next lines, and all of them imply
+some understanding that <code>num</code> may not be an <code>int</code>,
+we can use this program to test models for nullability understanding by
+asking them to complete the program another lines, then see if they
+produce something that matches these valid lines with the regular
+expression <code>num\s*(is\s*(not)?|==)\s*None|isinstance\(num</code>.<a
+href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Technically this is known as “Optional typing”, but
+that’s confusing in the context of this post. Not to be confused with
+Gradual Typing, as introduced by Siek et al.<a href="#fnref2"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>The trailing colon makes a type expression the only
+valid completion; function declarations with a colon and no type, like
+<code>def fn(x:)</code> are not valid python. Since we’ve already seen a
+usage of <code>get_square</code> that is passed a None value, it
+wouldn’t be type-valid to complete the program with just
+<code>int</code>. So a model can be tested on its understanding of
+<code>Optional</code> annotations by seeing if its completion of the
+partial program includes <code>Optional[int]</code>.<a href="#fnref3"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Pythia 12b performs worse than its 6.9b variant, though
+this might be due to under-training at that size. Qwen 32B also performs
+about as well as Pythia 6.9b, it’s not clear if this is due to model
+architecture or something else.<a href="#fnref4" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>In our case, “smoothed” means that we average each
+training step point with the two points before it and the two after<a
+href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>see the appendix section “Mass Mean Probing vs Linear
+Regression” for more on this<a href="#fnref6" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
 </body>
 </html>

@@ -255,16 +255,3 @@ div.csl-right-inline {
 div.csl-indent {
   margin-left: 2em;
 }
-
-aside {
-    position: absolute;
-    left: 10%;
-    width: 10%;
-    background: orange;
-}
-aside.AT{
-    background: lightgreen;
-}
-aside.AS{
-    background: pink;
-}

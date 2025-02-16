@@ -2,6 +2,7 @@
 title: Understanding Models Understanding Nullability
 author: '[Alex Sanchez-Stern](https://www.alexsanchezstern.com) and [Anish Tondwalkar](https://ani.sh)'
 date: '$d_{model}$'
+header-includes: "<script src=\"sidenotes.js\"></script>"
 bibliography: all.bib
 linkReferences: true
 abstract:

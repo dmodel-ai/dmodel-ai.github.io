@@ -244,7 +244,7 @@ def main() -> None:
 
 This partial program is only four lines, with type annotations. A
 `some_numbers` array is created that includes positive numbers, negative
-numbers, and None values, giving it type `Optional[int]`. A list `result`j
+numbers, and None values, giving it type `Optional[int]`. A list `result`
 is constructed to give the model a sense of dataflow,
 and then a loop loops over `some_numbers`.
 

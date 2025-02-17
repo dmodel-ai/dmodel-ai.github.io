@@ -180,7 +180,8 @@ href="#sec:probing">4</a>)</p></li>
 <li><p>We find that models begin to understand nullability in a local
 scope, satisfying many requirements of the python typechecker, before
 they start to understand how nullability flows across the program.
-(sec. <a href="#sec:grok">3.1, sec. <span>5</span></a>)</p></li>
+(sec. <a href="#sec:grok">3.1</a>, sec. <a
+href="#sec:results">5</a>)</p></li>
 </ul>
 <h1 data-number="2" id="overview"><span
 class="header-section-number">2</span> Overview</h1>
@@ -614,13 +615,22 @@ weights.</figcaption>
 <h1 data-number="5" id="sec:results"><span
 class="header-section-number">5</span> Nullability Prediction Accuracy
 Across Training and Scale</h1>
-<p>We first measure the accuracy of Pythia models of various sizes and
-number of pre-training steps. We use a mass-means probe on all layers,
-with a linear regression determining the weights of each layer, since
-that is the probing method that we found works best overall. While we
-measured accuracy for every available Pythia model size, we exclude the
-smallest (14 million parameters) from this graph since it would exist
-entirely above the top of the graph.</p>
+<p>In this section, we study the performance of our nullability probes
+across time and scale <span class="citation"
+data-cites="tigges24">(Tigges et al. 2024)</span>. We use a mass-means
+probe <span class="citation" data-cites="li24">(Li et al. 2024)</span>
+on all layers, with a linear regression determining the weights of each
+layer. <span class="citation" data-cites="li24">Li et al. (2024)</span>
+and <span class="citation" data-cites="zhou23">Zhou et al. (2023)</span>
+suggest that mass means probes are best for reading, while the direction
+perpendicular to the separating hyperplane is best for intervention.
+However, previous work leaves open the question of cross-layer weights.
+We use LR on the cross-layer weights because that is the probing method
+that we found works best overall.
+<span class="aside AT">AT: see section/appendix for further discussion</span>
+While we measured accuracy for every available Pythia model size, we
+exclude the smallest (14m) from this plot since it would exist entirely
+above the top of the plot.</p>
 <figure id="fig:models-and-steps">
 <img src="images/accuracy_during_pretraining.svg"
 alt="Figure 7: The performance, measured in binary cross-entropy, of each Pythia model size during pretraining. Since this graph is of loss, lower is better" />
@@ -628,17 +638,14 @@ alt="Figure 7: The performance, measured in binary cross-entropy, of each Pythia
 binary cross-entropy, of each Pythia model size during pretraining.
 Since this graph is of loss, lower is better</figcaption>
 </figure>
-<p>In Fig. <a href="#fig:models-and-steps">7</a>, we can see how loss
-behaves as model size increases, and the number of pre-training steps
-increases. Generally, we see the loss decreases as models get bigger and
-are trained for longer. However, models with fewer than 1 billion
-parameters reach their lowest loss before the end of training, and loss
-increases
-after.<span class=aside>this is not what overtrained means</span> This
-indicates that these models may be “overtrained”, at least judging by
-this particular task. This is to be expected as Pythia trains all model
-sizes for the same number of steps, so some will be overtrained while
-others will be undertrained.</p>
+<p>In Fig. <a href="#fig:models-and-steps">7</a>, we plot loss against
+scale and time. As expected, we see that loss tends to decreases as
+models get bigger and are trained for longer. However, models with fewer
+than 1 billion parameters reach their minimum loss well before the end
+of training. This may be because the features beyond this point become
+more complex — less linear, or the represented features themselves
+represent more subtle concepts.
+<span class="aside AT">AT: speculation</span></p>
 <h1 data-number="6" id="related-work"><span
 class="header-section-number">6</span> Related Work</h1>
 <p>As previously discussed, <a
@@ -669,6 +676,26 @@ href="https://doi.org/10.48550/arXiv.2304.01373">https://doi.org/10.48550/arXiv.
 Feng, Jiahai, and Jacob Steinhardt. 2024. <span>“How Do <span>Language
 Models Bind Entities</span> in <span>Context</span>?”</span> arXiv. <a
 href="https://doi.org/10.48550/arXiv.2310.17191">https://doi.org/10.48550/arXiv.2310.17191</a>.
+</div>
+<div id="ref-li24" class="csl-entry" role="listitem">
+Li, Kenneth, Oam Patel, Fernanda Viégas, Hanspeter Pfister, and Martin
+Wattenberg. 2024. <span>“Inference-<span>Time Intervention</span>:
+<span>Eliciting Truthful Answers</span> from a <span>Language
+Model</span>.”</span> arXiv. <a
+href="https://doi.org/10.48550/arXiv.2306.03341">https://doi.org/10.48550/arXiv.2306.03341</a>.
+</div>
+<div id="ref-tigges24" class="csl-entry" role="listitem">
+Tigges, Curt, Michael Hanna, Qinan Yu, and Stella Biderman. 2024.
+<span>“<span>LLM Circuit Analyses Are Consistent Across Training</span>
+and <span>Scale</span>.”</span> arXiv. <a
+href="https://doi.org/10.48550/arXiv.2407.10827">https://doi.org/10.48550/arXiv.2407.10827</a>.
+</div>
+<div id="ref-zhou23" class="csl-entry" role="listitem">
+Zhou, Jeffrey, Tianjian Lu, Swaroop Mishra, Siddhartha Brahma, Sujoy
+Basu, Yi Luan, Denny Zhou, and Le Hou. 2023.
+<span>“Instruction-<span>Following Evaluation</span> for <span>Large
+Language Models</span>.”</span> arXiv. <a
+href="https://doi.org/10.48550/arXiv.2311.07911">https://doi.org/10.48550/arXiv.2311.07911</a>.
 </div>
 </div>
 <h1 class="unnumbered" id="appendix">A Appendix</h1>

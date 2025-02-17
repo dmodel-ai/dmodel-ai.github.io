@@ -169,16 +169,18 @@ be a source of bugs, like a null pointer dereference.</p>
 able to write code that deals with nullable values, but we haven’t known
 what form this knowledge takes, what situations are likely to confuse
 the model. Until now.<span class=aside>big claim!</span></p>
-<p>With this work, we contribute three things:</p>
+<p>In this work, we contribute:</p>
 <ul>
 <li><p>A microbenchmark of 15 programs that test basic model
-understanding of the flow of nullability through a program.</p></li>
-<li><p>Experiments that show that models develop a concept of
-nullability as they get bigger and are trained for longer.</p></li>
-<li><p>Experiments that show that models begin to understand nullability
-in a local scope, satisfying many requirements of the python
-typechecker, before they start to understand how nullability flows
-across the program.</p></li>
+understanding of the flow of nullability through a program (sec. <a
+href="#sec:bench">3</a>).</p></li>
+<li><p>We find show that models develop an internal concept of
+nullability as they scale up and are trained for longer. (sec. <a
+href="#sec:probing">4</a>)</p></li>
+<li><p>We find that models begin to understand nullability in a local
+scope, satisfying many requirements of the python typechecker, before
+they start to understand how nullability flows across the program.
+(sec. <a href="#sec:grok">3.1, sec. <span>5</span></a>)</p></li>
 </ul>
 <h1 data-number="2" id="overview"><span
 class="header-section-number">2</span> Overview</h1>
@@ -296,48 +298,42 @@ token is an optional variable, or a non-optional variable.</p>
 understanding in more detail, and in Section [SECTION] we’ll describe
 measuring the models internal states in detail. Finally, we’ll go over
 some related work, and present final experiments.</p>
-<h1 data-number="3"
-id="measuring-nullability-understanding-externally"><span
+<h1 data-number="3" id="sec:bench"><span
 class="header-section-number">3</span> Measuring Nullability
-Understanding Externally</h1>
+Understanding
+Externally<span class="aside AT">AT: Externally = token-level?</span></h1>
 <p>We begin with a “skyline” estimate of model understanding of
-nullability (a la <span class="citation"
-data-cites="fengBinding2024">Feng and Steinhardt (2024)</span>), first
-measure how well different models can understand the concept. We have
-the model complete simple programs that require an understanding of
-nullability. We refer to this suite of programs as
-<code>NullabilityEval</code>.</p>
-<p>To test these models for nullability understanding, we constructed 15
-partial program tests. For example,</p>
+nullability (a la <span class="citation" data-cites="feng24binding">Feng
+and Steinhardt (2024)</span>). We measure how well different models can
+understand the concept. To do this, we have the model complete simple
+partial programs that require an understanding of nullability. We refer
+to this suite of programs as <code>NullabilityEval</code>. For
+example,</p>
 <p><em>Test 4</em>:</p>
 <div class="sourceCode" id="cb9"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  some_numbers <span class="op">=</span> [<span class="dv">1</span>, <span class="op">-</span><span class="dv">4</span>, <span class="va">None</span>, <span class="op">-</span><span class="dv">3</span>, <span class="dv">10</span>, <span class="op">-</span><span class="dv">1</span>, <span class="va">None</span>, <span class="va">None</span>, <span class="dv">8</span>]</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  result: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> num <span class="kw">in</span> some_numbers:</span></code></pre></div>
-<p>This partial program is only four lines, with type annotations. A
-<code>some_numbers</code> array is created that includes positive
-numbers, negative numbers, and None values, giving it type
-<code>Optional[int]</code>. A list <code>result</code> is constructed to
-give the model a sense of dataflow, and then a loop loops over
-<code>some_numbers</code>.</p>
-<p>The program is constructed such that there are a very limited number
-of valid next lines in the program, and all of them demonstrate some
-knowledge of the concept of nullability.<a href="#fn1"
-class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<p>The program<a href="#fn1" class="footnote-ref" id="fnref1"
+role="doc-noteref"><sup>1</sup></a> is constructed such that there are a
+very limited number of valid next lines in the program, and all of them
+demonstrate some knowledge of the concept of nullability.<a href="#fn2"
+class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
 <p>This test is on the simpler side, but we can challenge the model
 more, adding layers of indirection between the source and sink of
 nullable values, testing the model’s <em>interprocedural</em>
 understanding.</p>
 <p>We can also test how well models understand type annotations
 separately; since the inclusion of type annotations in Python is not
-required<a href="#fn2" class="footnote-ref" id="fnref2"
-role="doc-noteref"><sup>2</sup></a>, most of the Python code used as
+required<a href="#fn3" class="footnote-ref" id="fnref3"
+role="doc-noteref"><sup>3</sup></a>, most of the Python code used as
 training data operates in an untyped fashion, so models may understand
 the dynamic flow of nullable values but not their static type
-annotations. Test 5, below, tests the models understanding of
-<code>Optional</code> types annotations.<a href="#fn3"
-class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
+annotations. Test 5, below, tests the model’s understanding of
+<code>Optional</code> types annotations. The trailing colon makes a type
+expression the only valid completion<a href="#fn4" class="footnote-ref"
+id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
 <p><em>Test 5</em>:</p>
 <div class="sourceCode" id="cb10"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_48() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
@@ -352,11 +348,14 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a h
 <p>All of the tests in this benchmark suite are composed of three
 functions or less, where the largest function is seven lines long.</p>
 <p>We measure the difficulty of these tests by measuring how models of
-different sizes do on them. For many tests in this post, we use the
-Pythia models, as they are available in a large variety of sizes and
-training lengths. For measuring performance at larger sizes, we’ve
-included Qwen2.5-Coder-32B, Llama 3.1 405B Instruct, and DeepSeek-V3
-(671B). Below, you can see the number of passing tests for each model.
+different sizes perform. We pay particular focus to the Pythia model
+suite<span class="citation" data-cites="biderman23">(Biderman et al.
+2023)</span>, as they have checkpoints available across training runs
+and various scales. For measuring performance at larger sizes, we’ve
+included Qwen2.5-Coder-32B<span class="aside AT">AT: cite</span>, Llama
+3.1 405B Instruct<span class="aside AT">AT: cite</span>, and DeepSeek-V3
+(671B)<span class="aside AT">AT: cite</span>. Below, you can see the
+number of passing tests for each model.
 <span class=aside>more through exploration of why?</span></p>
 <figure id="fig:hl_scale">
 <img src="images/hl_model_results.svg"
@@ -366,27 +365,29 @@ sizes of model perform on the high-level nullability tests</figcaption>
 </figure>
 <p>In Fig. <a href="#fig:hl_scale">1</a>, we can see the number of
 passing tests for each model. We can see that generally models get
-better at larger sizes<a href="#fn4" class="footnote-ref" id="fnref4"
-role="doc-noteref"><sup>4</sup></a>. Model performance on these tests is
+better with scale.
+<span class=aside>I don't think this footnote is clear enough to add anything</span>
+<a href="#fn5" class="footnote-ref" id="fnref5"
+role="doc-noteref"><sup>5</sup></a> Model performance on these tests is
 approximately logarithmic in model size: models of 2.8 billion
 parameters can pass about half the tests, but it takes more than 405
-billion parameters to pass all of the tests</p>
-<p>Next, we want to know how the amount of training affects model
-performance on these tests. Luckily, Pythia also provides models at
-different training steps, all the way from step 2 to step 143000. Below
-we can see how Pythia 6.9b performs on the tests during training:</p>
+billion parameters to pass all of the tests.
+<span class=aside>interesting observation; seems to me that this is actually the case for all post-training evals. hmm, acutally it's also the case for pretraining loss --- see classic scaling laws papers: Kaplan et al, Chincilla, etc</span></p>
+<p>Next, we want to understand the training dynamics at play here.
+143000. Below we can see how Pythia 6.9b performs on the tests during
+training from step 2 to
+143000:<span class=aside>let's use the same axes scaling at the tigges paper</span></p>
 <figure id="fig:hl_time">
 <img src="images/hl_revision_results.svg"
 alt="Figure 2: A line graph showing how the performance of the Pythia 6.9 model changes during training" />
 <figcaption aria-hidden="true">Figure 2: A line graph showing how the
 performance of the Pythia 6.9 model changes during training</figcaption>
 </figure>
-<p>Again, we see that while the model generally gets better at passing
-these tests during training, the performance is not always increasing.
-Also note that this plot is quite noisy, so in the sequel, we will show
-smoothed charts<a href="#fn5" class="footnote-ref" id="fnref5"
-role="doc-noteref"><sup>5</sup></a>.</p>
-<h2 data-number="3.1" id="local-vs-non-local-type-correctness"><span
+<p>Again, performance does not increase monotonically. This plot is
+quite noisy, so in the sequel, we will show smoothed<a href="#fn6"
+class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>
+charts.</p>
+<h2 data-number="3.1" id="sec:grok"><span
 class="header-section-number">3.1</span> Local vs Non-Local Type
 Correctness</h2>
 <p>For most of our tests, writing correct code simply requires following
@@ -413,15 +414,18 @@ dynamic semantics, and then both.
 Let’s make this more concrete.</p>
 <p>We say a model produces an answer that is “morally” (vs technically)
 correct if the code attempts to solve the problem asked of it. Each test
-case is paird with a regex that tests if the model output produces code
+case is paired with a regex that tests if the model output produces code
 that touches all of the relevant concepts.
 <span class="aside AS">AS: put an example here?</span> Here, we say the
 solution is “technically” correct if it passes <code>mypy</code>.</p>
-<p><img src="images/hl_mypy_vs_grep.svg" id="fig:hl_moral"
-alt="A graph showing how often the Pythia 6.9b produces code that typechecks on the tests, vs produces code that shows true understanding." />
-<span class=aside>write this section</span></p>
-<h1 data-number="4"
-id="measuring-nullability-understanding-internally"><span
+<figure id="fig:hl_moral">
+<img src="images/hl_mypy_vs_grep.svg"
+alt="Figure 3: A graph showing how often the Pythia 6.9b produces code that typechecks on the tests, vs produces code that shows true understanding." />
+<figcaption aria-hidden="true">Figure 3: A graph showing how often the
+Pythia 6.9b produces code that typechecks on the tests, vs produces code
+that shows true understanding.</figcaption>
+</figure>
+<h1 data-number="4" id="sec:probing"><span
 class="header-section-number">4</span> Measuring Nullability
 Understanding Internally</h1>
 <h2 data-number="4.1"
@@ -541,8 +545,8 @@ and then took the difference of the averages as our base reading vector.
 This is called “mass mean probing” in the literature, and empirically
 has been shown to generalize better in high dimensional space than
 trying to learn a linear model through logistic regression.<a
-href="#fn6" class="footnote-ref" id="fnref6"
-role="doc-noteref"><sup>6</sup></a></p>
+href="#fn7" class="footnote-ref" id="fnref7"
+role="doc-noteref"><sup>7</sup></a></p>
 <p>In this reading vector, the impact of each layer based on the
 magnitude of difference in that layer, instead of separate a notion of
 how “important” that layer is to differentiating positive and negative
@@ -574,41 +578,69 @@ method is more accurate on test data varies over both model size and
 number of training steps.</p>
 <figure id="fig:mm-vs-mmlr-sizes">
 <img src="images/mm-vs-mmlr.svg"
-alt="Figure 3: The performance of pure mass means probing vs mass means probing with linear regression for different Pythia model sizes. Binary-cross entropy is plotted, so lower is better." />
-<figcaption aria-hidden="true">Figure 3: The performance of pure mass
+alt="Figure 4: The performance of pure mass means probing vs mass means probing with linear regression for different Pythia model sizes. Binary-cross entropy is plotted, so lower is better." />
+<figcaption aria-hidden="true">Figure 4: The performance of pure mass
 means probing vs mass means probing with linear regression for different
 Pythia model sizes. Binary-cross entropy is plotted, so lower is
 better.</figcaption>
 </figure>
-<p>In Fig. <a href="#fig:mm-vs-mmlr-sizes">3</a>, we can see that pure
+<p>In Fig. <a href="#fig:mm-vs-mmlr-sizes">4</a>, we can see that pure
 mass means probing gives lower loss for smaller models (those with less
 than 410 million parameters), but that for larger models weighting
 layers using linear regression gives lower loss consistently.</p>
 <figure id="fig:mm-vs-mmlr-160m">
 <img src="images/mm-vs-mmlr-160m.svg"
-alt="Figure 4: The performance of the two probing methods on the Pythia 160m model for different numbers of pretraining steps. There are regions where pure mass means scaling is better, and regions where linear regression on layer weights is better." />
-<figcaption aria-hidden="true">Figure 4: The performance of the two
+alt="Figure 5: The performance of the two probing methods on the Pythia 160m model for different numbers of pretraining steps. There are regions where pure mass means scaling is better, and regions where linear regression on layer weights is better." />
+<figcaption aria-hidden="true">Figure 5: The performance of the two
 probing methods on the Pythia 160m model for different numbers of
 pretraining steps. There are regions where pure mass means scaling is
 better, and regions where linear regression on layer weights is
 better.</figcaption>
 </figure>
-<p>In Figs. <a href="#fig:mm-vs-mmlr-160m">4</a>, <a
-href="#fig:mm-vs-mmlr-410">5</a>, we look at how these scaling methods
+<p>In Figs. <a href="#fig:mm-vs-mmlr-160m">5</a>, <a
+href="#fig:mm-vs-mmlr-410">6</a>, we look at how these scaling methods
 perform for different amounts of pretraining, for the model sizes
 nearest the boundary. We see that relative merit of each scaling method
 can vary significantly over pretraining steps.</p>
 <figure id="fig:mm-vs-mmlr-410">
 <img src="images/mm-vs-mmlr-410m.svg"
-alt="Figure 5: The performance of the two probing methods on the Pythia 410m model for different numbers of pretraining steps. Pure mass means probing starts better, but is quickly overtaken by mass means probing with linear regression on layer weights." />
-<figcaption aria-hidden="true">Figure 5: The performance of the two
+alt="Figure 6: The performance of the two probing methods on the Pythia 410m model for different numbers of pretraining steps. Pure mass means probing starts better, but is quickly overtaken by mass means probing with linear regression on layer weights." />
+<figcaption aria-hidden="true">Figure 6: The performance of the two
 probing methods on the Pythia 410m model for different numbers of
 pretraining steps. Pure mass means probing starts better, but is quickly
 overtaken by mass means probing with linear regression on layer
 weights.</figcaption>
 </figure>
-<h1 data-number="5" id="related-work"><span
-class="header-section-number">5</span> Related Work</h1>
+<h1 data-number="5" id="sec:results"><span
+class="header-section-number">5</span> Nullability Prediction Accuracy
+Across Training and Scale</h1>
+<p>We first measure the accuracy of Pythia models of various sizes and
+number of pre-training steps. We use a mass-means probe on all layers,
+with a linear regression determining the weights of each layer, since
+that is the probing method that we found works best overall. While we
+measured accuracy for every available Pythia model size, we exclude the
+smallest (14 million parameters) from this graph since it would exist
+entirely above the top of the graph.</p>
+<figure id="fig:models-and-steps">
+<img src="images/accuracy_during_pretraining.svg"
+alt="Figure 7: The performance, measured in binary cross-entropy, of each Pythia model size during pretraining. Since this graph is of loss, lower is better" />
+<figcaption aria-hidden="true">Figure 7: The performance, measured in
+binary cross-entropy, of each Pythia model size during pretraining.
+Since this graph is of loss, lower is better</figcaption>
+</figure>
+<p>In Fig. <a href="#fig:models-and-steps">7</a>, we can see how loss
+behaves as model size increases, and the number of pre-training steps
+increases. Generally, we see the loss decreases as models get bigger and
+are trained for longer. However, models with fewer than 1 billion
+parameters reach their lowest loss before the end of training, and loss
+increases
+after.<span class=aside>this is not what overtrained means</span> This
+indicates that these models may be “overtrained”, at least judging by
+this particular task. This is to be expected as Pythia trains all model
+sizes for the same number of steps, so some will be overtrained while
+others will be undertrained.</p>
+<h1 data-number="6" id="related-work"><span
+class="header-section-number">6</span> Related Work</h1>
 <p>As previously discussed, <a
 href="https://arxiv.org/abs/2310.01405">“Representation Engineering: A
 Top-Down Approach to AI Transparency”</a> by Zhou et al is the most
@@ -622,37 +654,18 @@ Emergent Linear Structure in Large Language Model Representations of
 True/False Datasets</a> by Marks and Tegmark. The paper discusses
 several reasons why mass mean probing might outperform linear
 regression.</p>
-<h1 data-number="6"
-id="nullability-prediction-accuracy-across-training-and-scale"><span
-class="header-section-number">6</span> Nullability Prediction Accuracy
-Across Training and Scale</h1>
-<p>We first measure the accuracy of Pythia models of various sizes and
-number of pre-training steps. We use a mass-means probe on all layers,
-with a linear regression determining the weights of each layer, since
-that is the probing method that we found works best overall. While we
-measured accuracy for every available Pythia model size, we exclude the
-smallest (14 million parameters) from this graph since it would exist
-entirely above the top of the graph.</p>
-<figure id="fig:models-and-steps">
-<img src="images/accuracy_during_pretraining.svg"
-alt="Figure 6: The performance, measured in binary cross-entropy, of each Pythia model size during pretraining. Since this graph is of loss, lower is better" />
-<figcaption aria-hidden="true">Figure 6: The performance, measured in
-binary cross-entropy, of each Pythia model size during pretraining.
-Since this graph is of loss, lower is better</figcaption>
-</figure>
-<p>In Fig. <a href="#fig:models-and-steps">6</a>, we can see how loss
-behaves as model size increases, and the number of pre-training steps
-increases. Generally, we see the loss decreases as models get bigger and
-are trained for longer. However, models with fewer than 1 billion
-parameters reach their lowest loss before the end of training, and loss
-increases after. This indicates that these models may be “overtrained”,
-at least judging by this particular task. This is to be expected as
-Pythia trains all model sizes for the same number of steps, so some will
-be overtrained while others will be undertrained.</p>
 <h1 class="unnumbered" id="references">References</h1>
 <div id="refs" class="references csl-bib-body hanging-indent"
 data-entry-spacing="0" role="list">
-<div id="ref-fengBinding2024" class="csl-entry" role="listitem">
+<div id="ref-biderman23" class="csl-entry" role="listitem">
+Biderman, Stella, Hailey Schoelkopf, Quentin Anthony, Herbie Bradley,
+Kyle O’Brien, Eric Hallahan, Mohammad Aflah Khan, et al. 2023.
+<span>“Pythia: <span>A Suite</span> for <span>Analyzing Large Language
+Models Across Training</span> and <span>Scaling</span>.”</span> arXiv.
+<a
+href="https://doi.org/10.48550/arXiv.2304.01373">https://doi.org/10.48550/arXiv.2304.01373</a>.
+</div>
+<div id="ref-feng24binding" class="csl-entry" role="listitem">
 Feng, Jiahai, and Jacob Steinhardt. 2024. <span>“How Do <span>Language
 Models Bind Entities</span> in <span>Context</span>?”</span> arXiv. <a
 href="https://doi.org/10.48550/arXiv.2310.17191">https://doi.org/10.48550/arXiv.2310.17191</a>.
@@ -868,7 +881,14 @@ outperformed linear regression on the test data.</p>
 role="doc-endnotes">
 <hr />
 <ol>
-<li id="fn1"><p>The loop indicates that the next few lines need to
+<li id="fn1"><p> This partial program is only four lines, with type
+annotations. A <code>some_numbers</code> array is created that includes
+positive numbers, negative numbers, and None values, giving it type
+<code>Optional[int]</code>. A list <code>result</code> is constructed to
+give the model a sense of dataflow, and then a loop loops over
+<code>some_numbers</code>.<a href="#fnref1" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>The loop indicates that the next few lines need to
 process <code>num</code> in some way, and the fact that it comes from
 <code>some_numbers</code> means it has the type
 <code>Optional[int]</code>. <code>num</code> can’t be directly appended
@@ -886,30 +906,28 @@ we can use this program to test models for nullability understanding by
 asking them to complete the program another lines, then see if they
 produce something that matches these valid lines with the regular
 expression <code>num\s*(is\s*(not)?|==)\s*None|isinstance\(num</code>.<a
-href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>Technically this is known as “Optional typing”, but
+href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Technically this is known as “Optional typing”, but
 that’s confusing in the context of this post. Not to be confused with
-Gradual Typing, as introduced by Siek et al.<a href="#fnref2"
+Gradual Typing, as introduced by Siek et al.<a href="#fnref3"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>The trailing colon makes a type expression the only
-valid completion; function declarations with a colon and no type, like
-<code>def fn(x:)</code> are not valid python. Since we’ve already seen a
-usage of <code>get_square</code> that is passed a None value, it
-wouldn’t be type-valid to complete the program with just
+<li id="fn4"><p>This is because function declarations with a colon and
+no type, like <code>def fn(x:)</code> are not valid python. Since we’ve
+already seen a usage of <code>get_square</code> that is passed a None
+value, it wouldn’t be type-valid to complete the program with just
 <code>int</code>. So a model can be tested on its understanding of
 <code>Optional</code> annotations by seeing if its completion of the
-partial program includes <code>Optional[int]</code>.<a href="#fnref3"
+partial program includes <code>Optional[int]</code>.<a href="#fnref4"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn4"><p>Pythia 12b performs worse than its 6.9b variant, though
+<li id="fn5"><p>Pythia 12b performs worse than its 6.9b variant, though
 this might be due to under-training at that size. Qwen 32B also performs
 about as well as Pythia 6.9b, it’s not clear if this is due to model
-architecture or something else.<a href="#fnref4" class="footnote-back"
+architecture or something else.<a href="#fnref5" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn5"><p>In our case, “smoothed” means that we average each
-training step point with the two points before it and the two after<a
-href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn6"><p>see the appendix section “Mass Mean Probing vs Linear
-Regression” for more on this<a href="#fnref6" class="footnote-back"
+<li id="fn6"><p>rolling average with a window size of 5<a href="#fnref6"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>see the appendix section “Mass Mean Probing vs Linear
+Regression” for more on this<a href="#fnref7" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>

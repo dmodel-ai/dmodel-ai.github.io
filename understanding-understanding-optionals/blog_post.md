@@ -57,18 +57,18 @@ able to write code that deals with nullable values, but we haven’t
 known what form this knowledge takes, what situations are likely to
 confuse the model. Until now.\todo{big claim!}
 
-With this work, we contribute three things:
+In this work, we contribute:
 
 * A microbenchmark of 15 programs that test basic model understanding
-  of the flow of nullability through a program.
+  of the flow of nullability through a program ([@sec:bench]).
 
-* Experiments that show that models develop a concept of nullability
-  as they get bigger and are trained for longer.
+* We find show that models develop an internal concept of
+  nullability as they scale up and are trained for longer. ([@sec:probing])
 
-* Experiments that show that models begin to understand nullability in
+* We find that models begin to understand nullability in
   a local scope, satisfying many requirements of the python
   typechecker, before they start to understand how nullability flows
-  across the program.
+  across the program. ([@sec:grok, @sec:results])
 
 # Overview
 
@@ -224,16 +224,14 @@ understanding in more detail, and in Section [SECTION] we'll describe
 measuring the models internal states in detail. Finally, we'll go over
 some related work, and present final experiments.
 
-# Measuring Nullability Understanding Externally
+# Measuring Nullability Understanding Externally\AT{Externally = token-level?} {#sec:bench}
 
 We begin with a "skyline" estimate of model understanding of nullability
-(a la @fengBinding2024), first measure how well different models can
-understand the concept. We have the model
-complete simple programs that require an understanding of
+(a la @feng24binding). We measure how well different models can
+understand the concept. To do this, we have the model
+complete simple partial programs that require an understanding of
 nullability. We refer to this suite of programs as `NullabilityEval`.
-
-To test these models for nullability understanding, we constructed 15
-partial program tests. For example,
+For example,
 
 *Test 4*:
 ```python
@@ -243,13 +241,14 @@ def main() -> None:
   for num in some_numbers:
 ```
 
+
+The program^[
 This partial program is only four lines, with type annotations. A
 `some_numbers` array is created that includes positive numbers, negative
 numbers, and None values, giving it type `Optional[int]`. A list `result`
 is constructed to give the model a sense of dataflow,
-and then a loop loops over `some_numbers`.
-
-The program is constructed such that there are a very limited number
+and then a loop loops over `some_numbers`.]
+is constructed such that there are a very limited number
 of valid next lines in the program, and all of them demonstrate some
 knowledge of the concept of nullability.^[The loop indicates that the
 next few lines need to process `num` in some way, and the fact that it
@@ -280,9 +279,9 @@ confusing in the context of this post. Not to be confused with Gradual
 Typing, as introduced by Siek et al.], most of the Python code used as
 training data operates in an untyped fashion, so models may understand
 the dynamic flow of nullable values but not their static type
-annotations. Test 5, below, tests the models understanding of
-`Optional` types annotations.^[The trailing colon makes a type
-expression the only valid completion; function declarations with a
+annotations. Test 5, below, tests the model's understanding of
+`Optional` types annotations. The trailing colon makes a type
+expression the only valid completion^[This is because function declarations with a
 colon and no type, like `def fn(x:)` are not valid python. Since we’ve
 already seen a usage of `get_square` that is passed a None value, it
 wouldn’t be type-valid to complete the program with just `int`. So a
@@ -307,11 +306,11 @@ All of the tests in this benchmark suite are composed of three
 functions or less, where the largest function is seven lines long.
 
 We measure the difficulty of these tests by measuring how
-models of different sizes do on them. For many tests in this post, we
-use the Pythia models, as they are available in a large variety of
-sizes and training lengths. For measuring performance at larger sizes,
-we've included Qwen2.5-Coder-32B, Llama 3.1 405B Instruct, and
-DeepSeek-V3 (671B). Below, you can see the number of passing tests for
+models of different sizes perform. We pay particular focus to
+the Pythia model suite[@biderman23], as they have checkpoints available across
+training runs and various scales. For measuring performance at larger sizes,
+we've included Qwen2.5-Coder-32B\AT{cite}, Llama 3.1 405B Instruct\AT{cite}, and
+DeepSeek-V3 (671B)\AT{cite}. Below, you can see the number of passing tests for
 each model.
 \todo{more through exploration of why?}
 
@@ -319,33 +318,32 @@ each model.
  high-level nullability tests](images/hl_model_results.svg){#fig:hl_scale}
 
 In [@Fig:hl_scale], we can see the number of passing tests for each
-model. We can see that generally models get better at larger
-sizes^[Pythia 12b performs worse than its 6.9b variant, though this
+model. We can see that generally models get better with scale.
+\todo{I don't think this footnote is clear enough to add anything}
+^[Pythia
+12b performs worse than its 6.9b variant, though this
 might be due to under-training at that size. Qwen 32B also performs
 about as well as Pythia 6.9b, it's not clear if this is due to model
-architecture or something else.]. Model performance on these tests is
+architecture or something else.]
+Model performance on these tests is
 approximately logarithmic in model size: models of 2.8 billion
 parameters can pass about half the tests, but it takes more than 405
-billion parameters to pass all of the tests
+billion parameters to pass all of the tests.
+\todo{interesting observation; seems to me that this is actually the case for all post-training evals. hmm, acutally it's also the case for pretraining loss --- see classic scaling laws papers: Kaplan et al, Chincilla, etc}
 
-Next, we want to know how the amount of training affects model
-performance on these tests. Luckily, Pythia also provides models at
-different training steps, all the way from step 2 to step
+Next, we want to understand the training dynamics at play here.
 143000. Below we can see how Pythia 6.9b performs on the tests during
-training:
+training from step 2 to 143000:\todo{let's use the same axes scaling at the tigges paper}
 
 ![A line graph showing how the performance of the Pythia
 6.9 model changes during training](images/hl_revision_results.svg){#fig:hl_time}
 
-Again, we see that while the model generally gets better at passing
-these tests during training, the performance is not always increasing.
-Also note that this plot is quite noisy, so in the sequel, we will
-show smoothed charts^[In our case, "smoothed" means that we average
-each training step point with the two points before it and the two
-after].
+Again, performance does not increase monotonically.
+This plot is quite noisy, so in the sequel, we will
+show smoothed^[rolling average with a window size of 5] charts.
 
 
-## Local vs Non-Local Type Correctness
+## Local vs Non-Local Type Correctness {#sec:grok}
 
 For most of our tests, writing correct code simply requires following
 the rules of Python's mypy type system. This type system requires that
@@ -356,6 +354,7 @@ signatures. Under mypy, these functions are allowed to do almost
 anything with their types. But at runtime, using values of the wrong
 type with these functions will result in a type error.
 
+\AT{too many clauses!}
 You could strengthen mypy's type rules to require that these untyped
 functions have some valid type they could be assigned which would
 cause the function to typecheck. This would prevent programs that pass
@@ -374,7 +373,7 @@ and then both.
 Let's make this more concrete.
 
 We say a model produces an answer that is "morally" (vs technically) correct if
-the code attempts to solve the problem asked of it. Each test case is paird with a
+the code attempts to solve the problem asked of it. Each test case is paired with a
 regex that tests if the model output produces code that touches all of the relevant
 concepts.
 \AS{put an example here?}
@@ -384,9 +383,9 @@ Here, we say the solution is
 ![A graph showing how often the Pythia 6.9b produces code that
 typechecks on the tests, vs produces code that shows true
 understanding.](images/hl_mypy_vs_grep.svg){#fig:hl_moral}
-\todo{write this section}
 
-# Measuring Nullability Understanding Internally
+# Measuring Nullability Understanding Internally {#sec:probing}
+\todo{write this section}
 ## Designing Prompts to Extract Nullability Activations
 
 \todo{we can probably just make this a brief part of the related work}
@@ -567,6 +566,29 @@ for different numbers of pretraining steps. Pure mass means probing
 starts better, but is quickly overtaken by mass means probing with
 linear regression on layer weights.](images/mm-vs-mmlr-410m.svg){#fig:mm-vs-mmlr-410}
 
+# Nullability Prediction Accuracy Across Training and Scale {#sec:results}
+
+We first measure the accuracy of Pythia models of various sizes and
+number of pre-training steps. We use a mass-means probe on all layers,
+with a linear regression determining the weights of each layer, since
+that is the probing method that we found works best overall. While we
+measured accuracy for every available Pythia model size, we exclude
+the smallest (14 million parameters) from this graph since it would
+exist entirely above the top of the graph.
+
+![The performance, measured in binary cross-entropy, of each Pythia
+ model size during pretraining. Since this graph is of loss, lower is
+ better](images/accuracy_during_pretraining.svg){#fig:models-and-steps}
+
+In [@Fig:models-and-steps], we can see how loss behaves as model size
+increases, and the number of pre-training steps increases. Generally,
+we see the loss decreases as models get bigger and are trained for
+longer. However, models with fewer than 1 billion parameters reach
+their lowest loss before the end of training, and loss increases
+after.\todo{this is not what overtrained means} This indicates that these models may be "overtrained", at least
+judging by this particular task. This is to be expected as Pythia
+trains all model sizes for the same number of steps, so some will be
+overtrained while others will be undertrained.
 
 # Related Work
 
@@ -587,29 +609,6 @@ Datasets](https://openreview.net/forum?id=CeJEfNKstt) by Marks and
 Tegmark. The paper discusses several reasons why mass mean probing
 might outperform linear regression.
 
-# Nullability Prediction Accuracy Across Training and Scale
-
-We first measure the accuracy of Pythia models of various sizes and
-number of pre-training steps. We use a mass-means probe on all layers,
-with a linear regression determining the weights of each layer, since
-that is the probing method that we found works best overall. While we
-measured accuracy for every available Pythia model size, we exclude
-the smallest (14 million parameters) from this graph since it would
-exist entirely above the top of the graph.
-
-![The performance, measured in binary cross-entropy, of each Pythia
- model size during pretraining. Since this graph is of loss, lower is
- better](images/accuracy_during_pretraining.svg){#fig:models-and-steps}
-
-In [@Fig:models-and-steps], we can see how loss behaves as model size
-increases, and the number of pre-training steps increases. Generally,
-we see the loss decreases as models get bigger and are trained for
-longer. However, models with fewer than 1 billion parameters reach
-their lowest loss before the end of training, and loss increases
-after. This indicates that these models may be "overtrained", at least
-judging by this particular task. This is to be expected as Pythia
-trains all model sizes for the same number of steps, so some will be
-overtrained while others will be undertrained.
 
 # References {.unnumbered}
 ::: {#refs}

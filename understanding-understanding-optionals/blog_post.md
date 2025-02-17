@@ -68,7 +68,7 @@ In this work, we contribute:
 * We find that models begin to understand nullability in
   a local scope, satisfying many requirements of the python
   typechecker, before they start to understand how nullability flows
-  across the program. ([@sec:grok, @sec:results])
+  across the program. ([@sec:grok], [@sec:results])
 
 # Overview
 
@@ -568,27 +568,32 @@ linear regression on layer weights.](images/mm-vs-mmlr-410m.svg){#fig:mm-vs-mmlr
 
 # Nullability Prediction Accuracy Across Training and Scale {#sec:results}
 
-We first measure the accuracy of Pythia models of various sizes and
-number of pre-training steps. We use a mass-means probe on all layers,
-with a linear regression determining the weights of each layer, since
-that is the probing method that we found works best overall. While we
+In this section, we study the performance of our nullability probes across time
+and scale [@tigges24].
+We use a mass-means probe [@li24] on all layers,
+with a linear regression determining the weights of each layer.
+@li24 and @zhou23 suggest that mass means probes are best for reading,
+while the direction perpendicular to the separating hyperplane is best for
+intervention.
+However, previous work leaves open the question of cross-layer weights. We use
+LR on the cross-layer weights because that is the probing method that we found
+works best overall.
+\AT{see section/appendix for further discussion}
+While we
 measured accuracy for every available Pythia model size, we exclude
-the smallest (14 million parameters) from this graph since it would
-exist entirely above the top of the graph.
+the smallest (14m) from this plot since it would
+exist entirely above the top of the plot.
 
 ![The performance, measured in binary cross-entropy, of each Pythia
  model size during pretraining. Since this graph is of loss, lower is
  better](images/accuracy_during_pretraining.svg){#fig:models-and-steps}
 
-In [@Fig:models-and-steps], we can see how loss behaves as model size
-increases, and the number of pre-training steps increases. Generally,
-we see the loss decreases as models get bigger and are trained for
-longer. However, models with fewer than 1 billion parameters reach
-their lowest loss before the end of training, and loss increases
-after.\todo{this is not what overtrained means} This indicates that these models may be "overtrained", at least
-judging by this particular task. This is to be expected as Pythia
-trains all model sizes for the same number of steps, so some will be
-overtrained while others will be undertrained.
+In [@Fig:models-and-steps], we plot loss against scale and time.
+As expected, we see that loss tends to decreases as models get bigger and are
+trained for longer. However, models with fewer than 1 billion parameters reach
+their minimum loss well before the end of training. This may be because the
+features beyond this point become more complex --- less linear, or the represented
+features themselves represent more subtle concepts. \AT{speculation}
 
 # Related Work
 

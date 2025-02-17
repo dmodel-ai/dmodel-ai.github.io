@@ -613,9 +613,9 @@ might outperform linear regression.
 # References {.unnumbered}
 ::: {#refs}
 :::
-
 \appendix
-# Appendix {.appendix}
+
+# Appendix
 
 ## Nullability In Python
 

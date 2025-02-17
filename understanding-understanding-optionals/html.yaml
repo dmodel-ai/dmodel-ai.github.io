@@ -7,5 +7,6 @@ css:
   - sidenote.css
 filters:
   - todo_filter.py
+  - appendix-filter.py
   - pandoc-crossref
   - citeproc

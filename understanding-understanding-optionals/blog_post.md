@@ -69,6 +69,7 @@ In this work, we contribute:
   a local scope, satisfying many requirements of the python
   typechecker, before they start to understand how nullability flows
   across the program. ([@sec:grok], [@sec:results])
+\AT{eventually we add the contribution about typing rules}
 
 # Overview
 

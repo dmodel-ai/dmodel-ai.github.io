@@ -1,4 +1,7 @@
-input-file: blog_post.md
+input-file:
+  - blog_post.md
+  - appendix_header.md
+  - appendicies.md
 number-sections: true
 standalone: true
 output-file: index.html

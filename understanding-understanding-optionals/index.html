@@ -698,9 +698,9 @@ Language Models</span>.”</span> arXiv. <a
 href="https://doi.org/10.48550/arXiv.2311.07911">https://doi.org/10.48550/arXiv.2311.07911</a>.
 </div>
 </div>
-<h1 class="unnumbered" id="appendix">A Appendix</h1>
-<h2 class="unnumbered" id="nullability-in-python">A.1 Nullability In
-Python</h2>
+<h1 class="unnumbered" id="appendicies">Appendicies</h1>
+<h1 class="unnumbered" id="nullability-in-python">A Nullability In
+Python</h1>
 <p>To see how nullability appears in Python, Let’s look at an example
 program in Python that uses nullability:</p>
 <div class="sourceCode" id="cb12"><pre
@@ -732,10 +732,10 @@ occurrences, we find that they have type <code>Optional[User]</code>,
 <code>User</code>, <code>Optional[str]</code>, <code>User</code>, and
 <code>str</code> respectively. That is, the first and third are
 nullable, and the rest are not.</p>
-<h2 class="unnumbered"
-id="detailed-high-level-nullability-test-results">A.2 Detailed
-High-Level Nullability Test Results</h2>
-<h3 class="unnumbered" id="across-scale">A.2.1 Across Scale</h3>
+<h1 class="unnumbered"
+id="detailed-high-level-nullability-test-results">B Detailed High-Level
+Nullability Test Results</h1>
+<h2 class="unnumbered" id="across-scale">B.1 Across Scale</h2>
 <p>You can see in fig. <a href="#fig:hl_scale">1</a> that the smallest
 three models don’t pass any test. After that, the trend line for tests
 passed goes upwards, but it’s not monotonic: Pythia 410m passes only one
@@ -772,7 +772,7 @@ by Pythia 12b is the identify function, returning None when the input is
 None and returning a string when the input is a string. Neither of these
 cases is correct, as the main function expects this to return a Number
 that can be added to one.</p>
-<h3 class="unnumbered" id="across-time">A.2.2 Across Time</h3>
+<h2 class="unnumbered" id="across-time">B.2 Across Time</h2>
 <p>We say in fig. <a href="#fig:hl_time">2</a> that while the model
 generally gets better at passing these tests during training, the
 performance is not always increasing. Zooming in on a particular test,
@@ -814,7 +814,7 @@ that the value parameter is nullable at step 104000, but “forgets” it
 during further training. It regains the ability to pass the test at
 several points during training, but by the end of training, it’s back to
 treating <code>value</code> as if it was always a string.</p>
-<h3 class="unnumbered" id="common-mistakes">A.2.3 Common Mistakes</h3>
+<h2 class="unnumbered" id="common-mistakes">B.3 Common Mistakes</h2>
 <p>As expected, type annotations are particularly difficult for these
 models. When asked to complete the type of get_square in the following
 code, no model in the Pythia series can successfully output the Optional
@@ -888,8 +888,8 @@ likely has a bias from its training data that functions called
 <code>count_chars</code> always take non-nullable strings. Similarly,
 when test 4 is changed so that process_values becomes string_complexity,
 it goes from consistently passing to almost always failing.</p>
-<h2 class="unnumbered" id="mass-mean-probing-vs-linear-regression">A.3
-Mass Mean Probing vs Linear Regression</h2>
+<h1 class="unnumbered" id="mass-mean-probing-vs-linear-regression">C
+Mass Mean Probing vs Linear Regression</h1>
 <p>We were initially very surprised to find that mass means probing
 would perform better than linear regression. After all, linear
 regression is a much more powerful technique for fitting data. And mass

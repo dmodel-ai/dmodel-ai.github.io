@@ -180,8 +180,8 @@ href="#sec:probing">4</a>)</p></li>
 <li><p>We find that models begin to understand nullability in a local
 scope, satisfying many requirements of the python typechecker, before
 they start to understand how nullability flows across the program.
-(sec. <a href="#sec:grok">3.1</a>, sec. <a
-href="#sec:results">5</a>)</p></li>
+(sec. <a href="#sec:grok">3.1</a>, sec. <a href="#sec:results">5</a>)
+<span class="aside AT">AT: eventually we add the contribution about typing rules</span></p></li>
 </ul>
 <h1 data-number="2" id="overview"><span
 class="header-section-number">2</span> Overview</h1>
@@ -295,6 +295,7 @@ give the entire internal state of the model at each token, and they can
 tell us what the model is “thinking” when processing that token. With
 the right tests, we can tell if the model is “thinking” that the current
 token is an optional variable, or a non-optional variable.</p>
+<span class=aside>READING DIAGRAMS HERE</span>
 <p>In Section [SECTION] we’ll describe our external tests of nullability
 understanding in more detail, and in Section [SECTION] we’ll describe
 measuring the models internal states in detail. Finally, we’ll go over
@@ -303,6 +304,72 @@ some related work, and present final experiments.</p>
 class="header-section-number">3</span> Measuring Nullability
 Understanding
 Externally<span class="aside AT">AT: Externally = token-level?</span></h1>
+<p>We begin by measuring model nullability understanding externally,
+because it provides a “skyline” or upper-bound estimate on our ability
+to extract internal concepts of nullability. To do this, we have the
+model complete simple partial programs that require an understanding of
+nullability.</p>
+<p>But before we do, we’ll want to be more precise about exactly what
+we’re measuring. To that end, we’ll take the notion of different “rules”
+for nullability that we discuseed informally in the overview, and bring
+it into a formal typing system. We’re not going to try to describe all
+the typing rules of python, so we’ll restrict ourselves in three
+dimensions.</p>
+<p>First, we’ll reduce the number of python features that we handle by
+actually working in a subset of python. This means we can skip worrying
+about the semantics of complicated features, and just focus on the
+features neccesary for understanding optionality in a semi-realistic
+setting.</p>
+<p>Second, we’ll reduce the expressivity of our typing system to only
+include the two types we’re interested in: either a value is nullable,
+or its not. This is going to make the type system unsound, in that it
+will allow type errorsat runtime in ways that wouldn’t be possible under
+the standard typing, but none of those wil be optionality test
+errors.</p>
+<p>Finally, we’ll disallow the conversion of non optional types to
+booleans in the context of <code>if</code> statements. So while
+<code>if x == 0:</code> will be a correctly typed expression when x is
+an int, <code>if x:</code> will not, even though in normal python they
+are equivalent. This is a necessary practicality, because otherwise, the
+model could circumvent our type tests by doing bare ifs which work on
+both optional and non-optional types. But to prevent bare ifs from ever
+being the correct completion for a non-optional type, we’ll design our
+tests so that there are never any values that would convert to False,
+namely the number zero and the empty string.</p>
+<span class="aside AS">AS: Some of the following should probably go in the appendix</span>
+<p>So lets start by defining some syntax of our Python subset we’ll be
+analyzing<a href="#fn1" class="footnote-ref" id="fnref1"
+role="doc-noteref"><sup>1</sup></a>:</p>
+<p>We won’t worry too much about the semantics on a formal level, since
+it’s the same as Python’s semantics on this subset, and we’ll mostly be
+using it informally to justify typing rules here. But we do want to
+formally define our typing rules, since we’ll be measuring the models
+understanding of particular rules. We’ll be using two propositions for
+typing in this language. There’s <code>WellTyped(stmt, env)</code> which
+says that the statement <code>stmt</code> is well typed in environment
+<code>env</code>. And there’s WellTypedExpression(expr, type, env),
+which says that <code>expr</code> is well typed with type
+<code>type</code> in environment <code>env</code>. We’ll use some
+standard notation for this, writing WellTyped(stmt, env) as <span
+class="math inline">env ⊢ stmt</span> and WellTypedExpression(expr,
+type, env) as <span class="math inline">env ⊢ expr : type</span>.</p>
+<p><span class="math display">$$
+\tag{Const}
+\frac{Constant\text{ != None}}{\vdash Constant : \text{NonNullable}}\\
+\hspace{1.0cm}
+\frac{}{\vdash None : \text{Nullable}}\\
+$$</span></p>
+<p><span class="math display">$$
+\tag{Var}
+\frac{\Gamma \vdash e : t \hspace{0.5cm} \Gamma, i : t \vdash Assign}
+     {\Gamma \vdash i = e \text{ ; } p}
+$$</span></p>
+<p><span class="math display">$$
+\tag{Abs}
+\frac{\Gamma, i_0 : t_0, i_1 : t_1, ... \vdash p}
+     {\Gamma, \vdash \text{def } ident(i_0 : t_0, i_1 : t_1,...):\text{
+; } p}
+$$</span></p>
 <p>We begin with a “skyline” estimate of model understanding of
 nullability (a la <span class="citation" data-cites="feng24binding">Feng
 and Steinhardt (2024)</span>). We measure how well different models can
@@ -316,25 +383,25 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a hr
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  some_numbers <span class="op">=</span> [<span class="dv">1</span>, <span class="op">-</span><span class="dv">4</span>, <span class="va">None</span>, <span class="op">-</span><span class="dv">3</span>, <span class="dv">10</span>, <span class="op">-</span><span class="dv">1</span>, <span class="va">None</span>, <span class="va">None</span>, <span class="dv">8</span>]</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  result: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> num <span class="kw">in</span> some_numbers:</span></code></pre></div>
-<p>The program<a href="#fn1" class="footnote-ref" id="fnref1"
-role="doc-noteref"><sup>1</sup></a> is constructed such that there are a
+<p>The program<a href="#fn2" class="footnote-ref" id="fnref2"
+role="doc-noteref"><sup>2</sup></a> is constructed such that there are a
 very limited number of valid next lines in the program, and all of them
-demonstrate some knowledge of the concept of nullability.<a href="#fn2"
-class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+demonstrate some knowledge of the concept of nullability.<a href="#fn3"
+class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
 <p>This test is on the simpler side, but we can challenge the model
 more, adding layers of indirection between the source and sink of
 nullable values, testing the model’s <em>interprocedural</em>
 understanding.</p>
 <p>We can also test how well models understand type annotations
 separately; since the inclusion of type annotations in Python is not
-required<a href="#fn3" class="footnote-ref" id="fnref3"
-role="doc-noteref"><sup>3</sup></a>, most of the Python code used as
+required<a href="#fn4" class="footnote-ref" id="fnref4"
+role="doc-noteref"><sup>4</sup></a>, most of the Python code used as
 training data operates in an untyped fashion, so models may understand
 the dynamic flow of nullable values but not their static type
 annotations. Test 5, below, tests the model’s understanding of
 <code>Optional</code> types annotations. The trailing colon makes a type
-expression the only valid completion<a href="#fn4" class="footnote-ref"
-id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
+expression the only valid completion<a href="#fn5" class="footnote-ref"
+id="fnref5" role="doc-noteref"><sup>5</sup></a></p>
 <p><em>Test 5</em>:</p>
 <div class="sourceCode" id="cb10"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_48() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
@@ -368,8 +435,8 @@ sizes of model perform on the high-level nullability tests</figcaption>
 passing tests for each model. We can see that generally models get
 better with scale.
 <span class=aside>I don't think this footnote is clear enough to add anything</span>
-<a href="#fn5" class="footnote-ref" id="fnref5"
-role="doc-noteref"><sup>5</sup></a> Model performance on these tests is
+<a href="#fn6" class="footnote-ref" id="fnref6"
+role="doc-noteref"><sup>6</sup></a> Model performance on these tests is
 approximately logarithmic in model size: models of 2.8 billion
 parameters can pass about half the tests, but it takes more than 405
 billion parameters to pass all of the tests.
@@ -385,8 +452,8 @@ alt="Figure 2: A line graph showing how the performance of the Pythia 6.9 model 
 performance of the Pythia 6.9 model changes during training</figcaption>
 </figure>
 <p>Again, performance does not increase monotonically. This plot is
-quite noisy, so in the sequel, we will show smoothed<a href="#fn6"
-class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>
+quite noisy, so in the sequel, we will show smoothed<a href="#fn7"
+class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>
 charts.</p>
 <h2 data-number="3.1" id="sec:grok"><span
 class="header-section-number">3.1</span> Local vs Non-Local Type
@@ -399,6 +466,7 @@ they involve functions that are <em>not</em> annotated with type
 signatures. Under mypy, these functions are allowed to do almost
 anything with their types. But at runtime, using values of the wrong
 type with these functions will result in a type error.</p>
+<span class="aside AT">AT: too many clauses!</span>
 <p>You could strengthen mypy’s type rules to require that these untyped
 functions have some valid type they could be assigned which would cause
 the function to typecheck. This would prevent programs that pass the
@@ -429,10 +497,12 @@ that shows true understanding.</figcaption>
 <h1 data-number="4" id="sec:probing"><span
 class="header-section-number">4</span> Measuring Nullability
 Understanding Internally</h1>
+<span class=aside>write this section</span>
 <h2 data-number="4.1"
 id="designing-prompts-to-extract-nullability-activations"><span
 class="header-section-number">4.1</span> Designing Prompts to Extract
 Nullability Activations</h2>
+<span class=aside>we can probably just make this a brief part of the related work</span>
 <p>At this point, we’ve figured out how to roughly measure nullability
 understanding in the output of various language models, but we still
 don’t know what their internal representations might look like or when
@@ -546,8 +616,8 @@ and then took the difference of the averages as our base reading vector.
 This is called “mass mean probing” in the literature, and empirically
 has been shown to generalize better in high dimensional space than
 trying to learn a linear model through logistic regression.<a
-href="#fn7" class="footnote-ref" id="fnref7"
-role="doc-noteref"><sup>7</sup></a></p>
+href="#fn8" class="footnote-ref" id="fnref8"
+role="doc-noteref"><sup>8</sup></a></p>
 <p>In this reading vector, the impact of each layer based on the
 magnitude of difference in that layer, instead of separate a notion of
 how “important” that layer is to differentiating positive and negative
@@ -648,6 +718,7 @@ represent more subtle concepts.
 <span class="aside AT">AT: speculation</span></p>
 <h1 data-number="6" id="related-work"><span
 class="header-section-number">6</span> Related Work</h1>
+<span class="aside AT">AT: mention the tigges paper on circuits across scale, the feng and steinhardt papers, etc</span>
 <p>As previously discussed, <a
 href="https://arxiv.org/abs/2310.01405">“Representation Engineering: A
 Top-Down Approach to AI Transparency”</a> by Zhou et al is the most
@@ -902,14 +973,18 @@ outperformed linear regression on the test data.</p>
 role="doc-endnotes">
 <hr />
 <ol>
-<li id="fn1"><p> This partial program is only four lines, with type
+<li id="fn1"><p>Python allows newlines and semicolons to separate
+statements. In this grammer we’ll show semicolons, but in all cases they
+can be replaced with a newline<a href="#fnref1" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p> This partial program is only four lines, with type
 annotations. A <code>some_numbers</code> array is created that includes
 positive numbers, negative numbers, and None values, giving it type
 <code>Optional[int]</code>. A list <code>result</code> is constructed to
 give the model a sense of dataflow, and then a loop loops over
-<code>some_numbers</code>.<a href="#fnref1" class="footnote-back"
+<code>some_numbers</code>.<a href="#fnref2" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>The loop indicates that the next few lines need to
+<li id="fn3"><p>The loop indicates that the next few lines need to
 process <code>num</code> in some way, and the fact that it comes from
 <code>some_numbers</code> means it has the type
 <code>Optional[int]</code>. <code>num</code> can’t be directly appended
@@ -927,28 +1002,28 @@ we can use this program to test models for nullability understanding by
 asking them to complete the program another lines, then see if they
 produce something that matches these valid lines with the regular
 expression <code>num\s*(is\s*(not)?|==)\s*None|isinstance\(num</code>.<a
-href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>Technically this is known as “Optional typing”, but
+href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Technically this is known as “Optional typing”, but
 that’s confusing in the context of this post. Not to be confused with
-Gradual Typing, as introduced by Siek et al.<a href="#fnref3"
+Gradual Typing, as introduced by Siek et al.<a href="#fnref4"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn4"><p>This is because function declarations with a colon and
+<li id="fn5"><p>This is because function declarations with a colon and
 no type, like <code>def fn(x:)</code> are not valid python. Since we’ve
 already seen a usage of <code>get_square</code> that is passed a None
 value, it wouldn’t be type-valid to complete the program with just
 <code>int</code>. So a model can be tested on its understanding of
 <code>Optional</code> annotations by seeing if its completion of the
-partial program includes <code>Optional[int]</code>.<a href="#fnref4"
+partial program includes <code>Optional[int]</code>.<a href="#fnref5"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn5"><p>Pythia 12b performs worse than its 6.9b variant, though
+<li id="fn6"><p>Pythia 12b performs worse than its 6.9b variant, though
 this might be due to under-training at that size. Qwen 32B also performs
 about as well as Pythia 6.9b, it’s not clear if this is due to model
-architecture or something else.<a href="#fnref5" class="footnote-back"
+architecture or something else.<a href="#fnref6" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn6"><p>rolling average with a window size of 5<a href="#fnref6"
+<li id="fn7"><p>rolling average with a window size of 5<a href="#fnref7"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn7"><p>see the appendix section “Mass Mean Probing vs Linear
-Regression” for more on this<a href="#fnref7" class="footnote-back"
+<li id="fn8"><p>see the appendix section “Mass Mean Probing vs Linear
+Regression” for more on this<a href="#fnref8" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>

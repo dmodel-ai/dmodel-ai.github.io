@@ -227,6 +227,99 @@ some related work, and present final experiments.
 
 # Measuring Nullability Understanding Externally\AT{Externally = token-level?} {#sec:bench}
 
+We begin by measuring model nullability understanding externally,
+because it provides a "skyline" or upper-bound estimate on our ability
+to extract internal concepts of nullability. To do this, we have the
+model complete simple partial programs that require an understanding
+of nullability.
+
+But before we do, we'll want to be more precise about exactly what
+we're measuring. To that end, we'll take the notion of different
+"rules" for nullability that we discuseed informally in the overview,
+and bring it into a formal typing system. We're not going to try to
+describe all the typing rules of python, so we'll restrict ourselves
+in three dimensions.
+
+First, we'll reduce the number of python features that we handle by
+actually working in a subset of python. This means we can skip
+worrying about the semantics of complicated features, and just focus
+on the features neccesary for understanding optionality in a
+semi-realistic setting.
+
+Second, we'll reduce the expressivity of our typing system to only
+include the two types we're interested in: either a value is nullable,
+or its not. This is going to make the type system unsound, in that it
+will allow type errorsat runtime in ways that wouldn't be possible
+under the standard typing, but none of those wil be optionality test
+errors.
+
+Finally, we'll disallow the conversion of non optional types to
+booleans in the context of `if` statements. So while `if x == 0:` will
+be a correctly typed expression when x is an int, `if x:` will not,
+even though in normal python they are equivalent. This is a necessary
+practicality, because otherwise, the model could circumvent our type
+tests by doing bare ifs which work on both optional and non-optional
+types. But to prevent bare ifs from ever being the correct completion
+for a non-optional type, we'll design our tests so that there are
+never any values that would convert to False, namely the number zero
+and the empty string.
+
+\AS{Some of the following should probably go in the appendix}
+
+So lets start by defining some syntax of our Python subset we'll be
+analyzing^[Python allows newlines and semicolons to separate
+statements. In this grammer we'll show semicolons, but in all cases
+they can be replaced with a newline]:
+
+\begin{aligned}
+Program =& \epsilon | Stmt;Program\\
+Stmt =& Import | FnDef | Assn | ForLoop | If | Expr | Return\\
+Import =& \text{from } Ident \text{ import } Ident\\
+FnDef =& \text{def } Ident (DeclArgs)\text{: ; }Program \\
+       &| \text{def } Ident (DeclArgs) \text{->} Type: \text{ ; } Program\\
+DeclArgs =& \epsilon | Ident | Ident : Type | Ident \text{,} ArgsList | Ident : Type\text{,} ArgsList\\
+Type =& \text{int} | \text{str} | \text{None} | \text{Optional[}Type\text{]}\\
+Assn =& Ident \text{ = } Expr\\
+ForLoop =& \text{for } ident \text{ in } ident\text{: ; } program\\
+If =& \text{if } expr \text{: ; } program\\
+Expr =& Ident | Ident\text{ }Op\text{ }Ident | Ident \text{(} ParamsList \text{)} | Constant\\
+ParamsList =& \epsilon | Expr | Expr\text{, }ParamsList\\
+Return =& \text{return }Expr
+\end{aligned}
+
+We won't worry too much about the semantics on a formal level, since
+it's the same as Python's semantics on this subset, and we'll mostly
+be using it informally to justify typing rules here. But we do want to
+formally define our typing rules, since we'll be measuring the models
+understanding of particular rules. We'll be using two propositions for
+typing in this language. There's `WellTyped(stmt, env)` which says
+that the statement `stmt` is well typed in environment `env`. And
+there's WellTypedExpression(expr, type, env), which says that `expr`
+is well typed with type `type` in environment `env`. We'll use some
+standard notation for this, writing WellTyped(stmt, env) as
+$\text{env} \vdash \text{stmt}$ and WellTypedExpression(expr, type,
+env) as $\text{env} \vdash \text{expr} : \text{type}$.
+
+$$
+\tag{Const}
+\frac{Constant\text{ != None}}{\vdash Constant : \text{NonNullable}}\\
+\hspace{1.0cm}
+\frac{}{\vdash None : \text{Nullable}}\\
+$$
+
+$$
+\tag{Var}
+\frac{\Gamma \vdash e : t \hspace{0.5cm} \Gamma, i : t \vdash Assign}
+     {\Gamma \vdash i = e \text{ ; } p}
+$$
+
+$$
+\tag{Abs}
+\frac{\Gamma, i_0 : t_0, i_1 : t_1, ... \vdash p}
+     {\Gamma, \vdash \text{def } ident(i_0 : t_0, i_1 : t_1,...):\text{ ; } p}
+$$
+
+
 We begin with a "skyline" estimate of model understanding of nullability
 (a la @feng24binding). We measure how well different models can
 understand the concept. To do this, we have the model

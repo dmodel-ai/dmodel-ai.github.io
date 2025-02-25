@@ -263,7 +263,6 @@ types. But to prevent bare ifs from ever being the correct completion
 for a non-optional type, we'll design our tests so that there are
 never any values that would convert to False, namely the number zero
 and the empty string.
-
 \AS{Some of the following should probably go in the appendix}
 
 So lets start by defining some syntax of our Python subset we'll be
@@ -292,13 +291,13 @@ it's the same as Python's semantics on this subset, and we'll mostly
 be using it informally to justify typing rules here. But we do want to
 formally define our typing rules, since we'll be measuring the models
 understanding of particular rules. We'll be using two propositions for
-typing in this language. There's `WellTyped(stmt, env)` which says
+typing in this language. There's `WellTypedStmt(stmt, env)` which says
 that the statement `stmt` is well typed in environment `env`. And
-there's WellTypedExpression(expr, type, env), which says that `expr`
+there's `WellTypedExpression(expr, type, env)`, which says that `expr`
 is well typed with type `type` in environment `env`. We'll use some
-standard notation for this, writing WellTyped(stmt, env) as
-$\text{env} \vdash \text{stmt}$ and WellTypedExpression(expr, type,
-env) as $\text{env} \vdash \text{expr} : \text{type}$.
+standard notation for this, writing `WellTypedStmt(stmt, env)` as
+$\text{env} \vdash \text{stmt} \vartriangleright \text{ok}$ and `WellTypedExpression(expr, type,
+env)` as $\text{env} \vdash \text{expr} : \text{type}$.
 
 $$
 \tag{Const}
@@ -309,16 +308,51 @@ $$
 
 $$
 \tag{Var}
-\frac{\Gamma \vdash e : t \hspace{0.5cm} \Gamma, i : t \vdash Assign}
-     {\Gamma \vdash i = e \text{ ; } p}
+\frac{\Gamma \vdash e : t \hspace{1cm} \Gamma, i : t \vdash p \vartriangleright \text{ok}}
+     {\Gamma \vdash i = e \text{ ; } p \vartriangleright \text{ok}}
 $$
 
 $$
 \tag{Abs}
-\frac{\Gamma, i_0 : t_0, i_1 : t_1, ... \vdash p}
-     {\Gamma, \vdash \text{def } ident(i_0 : t_0, i_1 : t_1,...):\text{ ; } p}
+\frac{\Gamma, i_0 : \alpha(t_0), i_1 : \alpha(t_1), ... \vdash p \vartriangleright \text{ok}}
+     {\Gamma \vdash \text{def } ident(i_0 : t_0, i_1 : t_1,...) -> t_r:\text{ ; } p \vartriangleright \text{ok}}\\
 $$
 
+$$
+\tag{App}
+\frac{\Gamma, f : t_0 \rightarrow t_1 ... \rightarrow t_r \vdash p \vartriangleright \text{ok}}
+     {\Gamma \vdash (\text{def } f (i_0 : t_0, i_1 : t_1, ...)\text{ -> }t_r:\text{ ; } b)\text{ ; } p \vartriangleright \text{ok}}
+$$
+
+$$
+\tag{IfIn}
+\frac{\Gamma \vdash x : t \hspace{1cm} \Gamma, x : \text{NonNullable} \vdash p \vartriangleright \text{ok}}
+     {\Gamma \vdash \text{if } x \text{ is not None: ; } p \vartriangleright \text{ok}}
+$$
+
+$$
+\tag{IfOut}
+\frac{\substack{(\forall p', \Gamma, x\text{ : Nullable} \vdash p' \vartriangleright \text{ok} \implies \Gamma \vdash p_0; p' \vartriangleright \text{ok})\\
+      \lor
+      (\forall p', \Gamma, x\text{ : Nullable} \vdash p' \vartriangleright \text{ok}\implies \Gamma \vdash p_1; p'\vartriangleright \text{ok})\\
+      \hspace{1cm} \Gamma, x\text{ : Nullable} \vdash p_2 \vartriangleright \text{ok}}}
+     {\Gamma \vdash (\text{if } e \text{: ; }p_0\text{ ; else: ; } p_1) \text{ ; } p_2 \vartriangleright \text{ok}}
+$$
+
+$$
+\tag{For}
+\frac{\Gamma \vdash y\text{ : List } t \hspace{1cm} \Gamma, x : t \vdash p \vartriangleright \text{ok}}
+     {\Gamma \vdash \text{for } x\text{ in } y\text{: ; } p \vartriangleright \text{ok}}
+$$
+
+Where:
+\begin{aligned}
+\forall t : Type,&\\
+   \alpha(Optional[t]) =& Nullable\\
+   \alpha(List[t]) =& List[\alpha(t)]\\
+   \text{otherwise:}\\
+   \alpha(t) =& NonNullable
+\end{aligned}
 
 We begin with a "skyline" estimate of model understanding of nullability
 (a la @feng24binding). We measure how well different models can

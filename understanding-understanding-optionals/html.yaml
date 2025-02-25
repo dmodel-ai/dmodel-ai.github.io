@@ -5,6 +5,8 @@ input-file:
 number-sections: true
 standalone: true
 output-file: index.html
+html-math-method:
+  method: mathjax
 css:
   - pandoc.css
   - sidenote.css

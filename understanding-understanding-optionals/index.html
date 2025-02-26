@@ -353,14 +353,14 @@ role="doc-noteref"><sup>1</sup></a>:</p>
 \left[\begin{array}{l}
 \texttt{def $Ident$($DeclArgs$):}\\
 \qquad Program
-\end{array}\right]
-{\huge|}
+\end{array}\right]\\
+&amp;{\huge|}
 \left[\begin{array}{l}
 \texttt{def $Ident$($DeclArgs$) -&gt; $Type$}:\\
 \qquad Program
 \end{array}\right]\\
-[DeclArgs]   =&amp; [\epsilon] | [Ident] | [Ident : Type] | [Ident
-\texttt{,} DeclArgs]
+[DeclArgs]   =&amp; [\epsilon] | [Ident] | [Ident : Type]\\
+              &amp;| [Ident \texttt{,} DeclArgs]
 | [Ident : Type\texttt{,} DeclArgs]\\
 [Type]       =&amp; [\texttt{int}] | [\texttt{str}] | [\texttt{None}] |
 [\texttt{Optional[}Type\texttt{]}] | [\texttt{List[}Type\texttt{]}]\\
@@ -376,9 +376,12 @@ role="doc-noteref"><sup>1</sup></a>:</p>
 \qquad program
 \end{array}\right]\\
 [Expr]       =&amp; [Ident] | [Ident\texttt{ }Op\texttt{ }Ident] |
-[Ident \texttt{(} ParamsList \texttt{)}] | [Constant]\\
+[Ident \texttt{(} ParamsList \texttt{)}] \\
+              &amp;| [Constant] | [\texttt{[$ListConts$]}] |
+[\texttt{[]}]\\
 [ParamsList] =&amp; [\epsilon] | [Expr] | [Expr\texttt{, }ParamsList]\\
 [Op]         =&amp; [+] | [-] | [*] | [/]\\
+[ListConts]  =&amp; [Expr] | [Expr,ListConts]\\
 [Return]     =&amp; [\texttt{return }Expr]
 \end{aligned}\]</span>
 <p>We won’t worry too much about the semantics on a formal level, since
@@ -397,9 +400,16 @@ class="math inline">\(t\)</span> in environment <span
 class="math inline">\(\Gamma\)</span>.</p>
 <p><span class="math display">\[
 \tag{Const}
-\frac{Constant\neq\texttt{None}}{\vdash Constant: \text{NonNullable}}\\
+\frac{Constant\neq\texttt{None}}{\vdash Constant: \text{Atom}}\\
 \hspace{1.0cm}
-\frac{}{\vdash \texttt{None}: \text{Nullable}}\\
+\frac{}{\forall t, \vdash \texttt{None}: \text{Nullable[$t$]}}\\
+\]</span></p>
+<p><span class="math display">\[
+\tag{List}
+\frac{\Gamma \vdash i_0 : t, i_1 : t, ...}
+     {\Gamma \vdash \texttt{[$i_0$, $i_1$, ...]} : \text{List[$t$]}}
+\hspace{1.0cm}
+\frac{}{\forall t, \vdash \texttt{[]}: \text{List[$t$]}}
 \]</span></p>
 <p><span class="math display">\[
 \tag{Weaken}
@@ -493,10 +503,10 @@ p_2
 Where:
 <span class="math display">\[\begin{aligned}
 \forall t : Type,&amp;\\
-   \alpha(Optional[t]) =&amp; Nullable\\
+   \alpha(Optional[t]) =&amp; Nullable[\alpha(t)]\\
    \alpha(List[t]) =&amp; List[\alpha(t)]\\
    \text{otherwise:}\\
-   \alpha(t) =&amp; NonNullable
+   \alpha(t) =&amp; Atom
 \end{aligned}\]</span>
 <p>The rules above are sufficient for our purposes for dealing with
 fully type annotated programs. But what about programs with functions

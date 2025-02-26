@@ -330,8 +330,8 @@ $$
 
 $$
 \tag{List}
-\frac{\Gamma \vdash i_0 : t, i_1 : t, ...}
-     {\Gamma \vdash \texttt{[$i_0$, $i_1$, ...]} : \text{List[$t$]}}
+\frac{\Gamma \vdash x_0 : t, x_1 : t, ...}
+     {\Gamma \vdash \texttt{[$x_0$, $x_1$, ...]} : \text{List[$t$]}}
 \hspace{1.0cm}
 \frac{}{\forall t, \vdash \texttt{[]}: \text{List[$t$]}}
 $$
@@ -343,19 +343,19 @@ $$
 
 $$
 \tag{Var}
-\Gamma \vdash e: t \hspace{1cm} \Gamma, i: t \vdash [p] \vartriangleright \text{ok}
+\Gamma \vdash e: t \hspace{1cm} \Gamma, x: t \vdash [p] \vartriangleright \text{ok}
 \over
-\Gamma \vdash \left[\begin{array}{l}\texttt{$i$ = $e$}\\ p\end{array}\right] \vartriangleright \text{ok}
+\Gamma \vdash \left[\begin{array}{l}\texttt{$x$ = $e$}\\ p\end{array}\right] \vartriangleright \text{ok}
 $$
 
 \begin{gather}
-\Gamma, i_0: \alpha(t_0), i_1: \alpha(t_1), ... \vdash [b] \vartriangleright \text{ok}\\
+\Gamma, x_0: \alpha(t_0), x_1: \alpha(t_1), ... \vdash [b] \vartriangleright \text{ok}\\
 \tag{Def}
 \Gamma, f : t_0 \rightarrow t_1 ... \rightarrow t_r \vdash [p] \vartriangleright \text{ok} \hspace{1cm} \text{Returns($b$, $t_r$)}
 \over
 \Gamma \vdash
 \left[\begin{array}{l}
-\texttt{def $f$($i_0$: $t_0$, $i_1$: $t_1$, ...) -> $t_r$:}\\
+\texttt{def $f$($x_0$: $t_0$, $x_1$: $t_1$, ...) -> $t_r$:}\\
 \qquad b\\
 p
 \end{array}\right]
@@ -366,6 +366,10 @@ $$
 \tag{App}
 \frac{\Gamma \vdash f : t_0 \rightarrow t_1 ... \rightarrow t_r \hspace{1cm} \Gamma \vdash x_0 : t_0, x_1 : t_1, ...}
      {\Gamma \vdash f(x_0, x_1, ...) : t_r}
+$$
+
+$$
+\tag{Op}
 $$
 
 <!--
@@ -445,13 +449,13 @@ type. So, for normaly mypy typechecking, we add the following typing
 rules:
 
 \begin{gather}
-\Gamma, i_0 : Any, i_1 : Any, ... \vdash [b] \vartriangleright \text{ok}\\
+\Gamma, x_0 : Any, x_1 : Any, ... \vdash [b] \vartriangleright \text{ok}\\
 \tag{DynDef}
 \Gamma, f : Any \rightarrow ... \rightarrow Any \vdash [p] \vartriangleright \text{ok}
 \over
 \Gamma \vdash
 \left[\begin{array}{l}
-\texttt{def $f$($i_0$, $i_1$, ...):}\\
+\texttt{def $f$($x_0$, $x_1$, ...):}\\
 \qquad b\\
 p
 \end{array}\right]
@@ -476,13 +480,13 @@ one that would prevent runtime type errors. We'll call this stronger
 type system mypy++. Instead of the Dyn- rules, it has this one:
 
 \begin{gather}
-\Gamma, i_0 : t_0, i_1 : t_1, ... \vdash [b] \vartriangleright \text{ok}\\
+\Gamma, x_0 : t_0, x_1 : t_1, ... \vdash [b] \vartriangleright \text{ok}\\
 \tag{InferDef}
-\Gamma, f : i_0 \rightarrow i_1 \rightarrow ... \rightarrow t_r \vdash [p] \vartriangleright \text{ok}
+\Gamma, f : x_0 \rightarrow x_1 \rightarrow ... \rightarrow t_r \vdash [p] \vartriangleright \text{ok}
 \over
 \Gamma \vdash
 \left[\begin{array}{l}
-\texttt{def $f$($i_0$, $i_1$, ...):}\\
+\texttt{def $f$($x_0$, $x_1$, ...):}\\
 \qquad b\\
 p
 \end{array}\right]

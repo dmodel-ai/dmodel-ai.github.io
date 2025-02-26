@@ -339,7 +339,7 @@ $$
 
 $$
 \tag{Weaken}
-\frac{\Gamma \vdash x: t}{\Gamma \vdash x: \text{Nullable}}
+\frac{\Gamma \vdash x: t}{\Gamma \vdash x: \text{Nullable[$t$]}}
 $$
 
 $$

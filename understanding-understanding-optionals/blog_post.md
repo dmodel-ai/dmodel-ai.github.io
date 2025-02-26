@@ -369,7 +369,19 @@ $$
 $$
 
 $$
-\tag{Op}
+\tag{OpInt}
+\Gamma \vdash x_0 : int, x_1 : int, \bigotimes \text{ in [\texttt{+, -, *, /}]}
+\over
+\Gamma \vdash x_0 \bigotimes x_1 : int
+$$
+
+$$
+\tag{OpString}
+\frac{\Gamma \vdash s_0 : \texttt{str}, s_1 : \texttt{str}}
+     {\Gamma \vdash s_0 + s_1 : \texttt{str}}
+\hspace{1cm}
+\frac{\Gamma \vdash s : \texttt{str}, x: \texttt{int}}
+     {\Gamma \vdash s * x : \texttt{str}}
 $$
 
 <!--

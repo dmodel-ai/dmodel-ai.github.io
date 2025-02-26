@@ -363,8 +363,10 @@ role="doc-noteref"><sup>1</sup></a>:</p>
 [DeclArgs]   =&amp; [\epsilon] | [Ident] | [Ident : Type]\\
               &amp;| [Ident \texttt{,} DeclArgs]
 | [Ident : Type\texttt{,} DeclArgs]\\
-[Type]       =&amp; [\texttt{int}] | [\texttt{str}] | [\texttt{None}] |
-[\texttt{Optional[}Type\texttt{]}] | [\texttt{List[}Type\texttt{]}]\\
+[Type]       =&amp; [\texttt{int}] | [\texttt{str}] | [\texttt{bool}] |
+[\texttt{None}] \\
+              &amp;| [\texttt{Optional[}Type\texttt{]}] |
+[\texttt{List[}Type\texttt{]}]\\
 [Assn]       =&amp; [Ident \texttt{ = } Expr]\\
 [ForLoop]    =&amp;
 \left[\begin{array}{l}

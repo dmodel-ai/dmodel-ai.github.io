@@ -307,7 +307,7 @@ they can be replaced with a newline]:
 [Expr]       =& [Ident] | [Ident\texttt{ }Op\texttt{ }Ident] | [Ident \texttt{(} ParamsList \texttt{)}] \\
               &| [Constant] | [\texttt{[$ListConts$]}] | [\texttt{[]}]\\
 [ParamsList] =& [\epsilon] | [Expr] | [Expr\texttt{, }ParamsList]\\
-[Op]         =& [+] | [-] | [*] | [/]\\
+[Op]         =& [\texttt{+}] | [\texttt{-}] | [\texttt{*}] | [\texttt{/}] | [\texttt{<}] | [\texttt{>}] | [\texttt{<=}] | [\texttt{>=}] | [\texttt{is}] | [\texttt{is not}] | [\texttt{==}] | [\texttt{!=}]\\
 [ListConts]  =& [Expr] | [Expr,ListConts]\\
 \end{aligned}
 

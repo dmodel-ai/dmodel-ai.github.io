@@ -275,7 +275,8 @@ they can be replaced with a newline]:
 
 \begin{aligned}
 \left[Program\right]  =& [\epsilon] {\huge|} \left[\begin{array}{l}Stmt\\Program\end{array}\right]\\
-[Stmt]       =& [Import] | [FnDef] | [Assn] | [ForLoop] | [If] | [Expr] | [Return]\\
+[Stmt]       =& [Import] | [FnDef] | [Assn] | [ForLoop] | [If] | [Expr] \\
+              &| [Return]\\
 [Import]     =& [\texttt{from } Ident \texttt{ import } Ident]\\
 [FnDef]      =&
 \left[\begin{array}{l}

@@ -424,6 +424,60 @@ Where:
    \alpha(t) =& NonNullable
 \end{aligned}
 
+The rules above are sufficient for our purposes for dealing with fully
+type annotated programs. But what about programs with functions that
+aren't type annotated, or are only partially annotated? The mypy type
+system that Python uses treats unannotated functions as dynamically
+typed, allowing them to typecheck as any type. Similarly, function
+parameters without a type annotation are implicitly convertable to any
+type. So, for normaly mypy typechecking, we add the following typing
+rules:
+
+\begin{gather}
+\Gamma, i_0 : Any, i_1 : Any, ... \vdash [b] \vartriangleright \text{ok}\\
+\tag{DynDef}
+\Gamma, f : Any \rightarrow ... \rightarrow Any \vdash [p] \vartriangleright \text{ok}
+\over
+\Gamma \vdash
+\left[\begin{array}{l}
+\texttt{def $f$($i_0$, $i_1$, ...):}\\
+\qquad b\\
+p
+\end{array}\right]
+\vartriangleright \text{ok}
+\end{gather}
+
+$$
+\tag{DynConvert}
+\frac{\Gamma \vdash x : t}
+     {\Gamma \vdash x : Any}
+     \hspace{0.5cm}
+\frac{\Gamma \vdash x : Any}
+     {\Gamma \vdash x : t}
+$$
+
+These rules allow more python programs to check statically, but they
+mean that some python programs will pass the static checks but still
+throw type errors at runtime. Importantly for us, they can throw
+runtime type errors about optionality. A well-written piece of code
+would not just satisfy this type system then, but actually a stronger
+one that would prevent runtime type errors. We'll call this stronger
+type system mypy++. Instead of the Dyn- rules, it has this one:
+
+\begin{gather}
+\Gamma, i_0 : t_0, i_1 : t_1, ... \vdash [b] \vartriangleright \text{ok}\\
+\tag{InferDef}
+\Gamma, f : i_0 \rightarrow i_1 \rightarrow ... \rightarrow t_r \vdash [p] \vartriangleright \text{ok}
+\over
+\Gamma \vdash
+\left[\begin{array}{l}
+\texttt{def $f$($i_0$, $i_1$, ...):}\\
+\qquad b\\
+p
+\end{array}\right]
+\vartriangleright \text{ok}
+\end{gather}
+
 We begin with a "skyline" estimate of model understanding of nullability
 (a la @feng24binding). We measure how well different models can
 understand the concept. To do this, we have the model

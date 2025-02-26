@@ -522,11 +522,11 @@ p_2
 \]</span></p>
 Where:
 <span class="math display">\[\begin{aligned}
-\forall t : Type,&amp;\\
-   \alpha(Optional[t]) =&amp; Nullable[\alpha(t)]\\
-   \alpha(List[t]) =&amp; List[\alpha(t)]\\
+\forall t,&amp;\\
+   \alpha(\texttt{Optional}[t]) =&amp; \texttt{Nullable}[\alpha(t)]\\
+   \alpha(\texttt{List}[t]) =&amp; \texttt{List}[\alpha(t)]\\
    \text{otherwise:}\\
-   \alpha(t) =&amp; Atom
+   \alpha(t) =&amp; \texttt{Atom}
 \end{aligned}\]</span>
 <p>The rules above are sufficient for our purposes for dealing with
 fully type annotated programs. But what about programs with functions

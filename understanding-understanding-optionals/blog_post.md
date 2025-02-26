@@ -445,11 +445,11 @@ $$
 
 Where:
 \begin{aligned}
-\forall t : Type,&\\
-   \alpha(Optional[t]) =& Nullable[\alpha(t)]\\
-   \alpha(List[t]) =& List[\alpha(t)]\\
+\forall t,&\\
+   \alpha(\texttt{Optional}[t]) =& \texttt{Nullable}[\alpha(t)]\\
+   \alpha(\texttt{List}[t]) =& \texttt{List}[\alpha(t)]\\
    \text{otherwise:}\\
-   \alpha(t) =& Atom
+   \alpha(t) =& \texttt{Atom}
 \end{aligned}
 
 The rules above are sufficient for our purposes for dealing with fully

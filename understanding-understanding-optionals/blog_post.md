@@ -246,14 +246,7 @@ worrying about the semantics of complicated features, and just focus
 on the features neccesary for understanding optionality in a
 semi-realistic setting.
 
-Second, we'll reduce the expressivity of our typing system to only
-include the two types we're interested in: either a value is nullable,
-or its not. This is going to make the type system unsound, in that it
-will allow type errorsat runtime in ways that wouldn't be possible
-under the standard typing, but none of those wil be optionality test
-errors.
-
-Finally, we'll disallow the conversion of non optional types to
+Second, we'll disallow the conversion of non optional types to
 booleans in the context of `if` statements. So while `if x == 0:` will
 be a correctly typed expression when x is an int, `if x:` will not,
 even though in normal python they are equivalent. This is a necessary

@@ -377,15 +377,26 @@ $$
 -->
 
 $$
+\hspace{-1cm}{
 \tag{IfIn}
-\Gamma \vdash x : \text{Nullable[$t$]} \hspace{1cm} \Gamma, x : t \vdash [p] \vartriangleright \text{ok}
+\Gamma \vdash x : \text{Nullable[$t$]} \hspace{1cm}
+\Gamma, x : t \vdash [p] \vartriangleright \text{ok} \hspace{1cm}
+\bigotimes \text{in} [\texttt{is not, !=}]
 \over
 \Gamma \vdash
 \left[\begin{array}{l}
-\texttt{if $x$ is not None:}\\
+\texttt{if $x$:}\\
 \qquad p
 \end{array}\right]
 \vartriangleright \text{ok}
+\hspace{1cm}
+\Gamma \vdash
+\left[\begin{array}{l}
+\texttt{if $x$ $\bigotimes$ None:}\\
+\qquad p
+\end{array}\right]
+\vartriangleright \text{ok}
+}
 $$
 
 $$

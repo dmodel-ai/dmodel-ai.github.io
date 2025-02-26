@@ -271,19 +271,40 @@ statements. In this grammer we'll show semicolons, but in all cases
 they can be replaced with a newline]:
 
 \begin{aligned}
-Program =& \epsilon | Stmt;Program\\
-Stmt =& Import | FnDef | Assn | ForLoop | If | Expr | Return\\
-Import =& \text{from } Ident \text{ import } Ident\\
-FnDef =& \text{def } Ident (DeclArgs)\text{: ; }Program \\
-       &| \text{def } Ident (DeclArgs) \text{->} Type: \text{ ; } Program\\
-DeclArgs =& \epsilon | Ident | Ident : Type | Ident \text{,} ArgsList | Ident : Type\text{,} ArgsList\\
-Type =& \text{int} | \text{str} | \text{None} | \text{Optional[}Type\text{]}\\
-Assn =& Ident \text{ = } Expr\\
-ForLoop =& \text{for } ident \text{ in } ident\text{: ; } program\\
-If =& \text{if } expr \text{: ; } program\\
-Expr =& Ident | Ident\text{ }Op\text{ }Ident | Ident \text{(} ParamsList \text{)} | Constant\\
-ParamsList =& \epsilon | Expr | Expr\text{, }ParamsList\\
-Return =& \text{return }Expr
+\end{aligned}
+
+\begin{aligned}
+\left[Program\right]  =& [\epsilon] {\huge|} \left[\begin{array}{l}Stmt\\Program\end{array}\right]\\
+[Stmt]       =& [Import] | [FnDef] | [Assn] | [ForLoop] | [If] | [Expr] | [Return]\\
+[Import]     =& [\texttt{from } Ident \texttt{ import } Ident]\\
+[FnDef]      =&
+\left[\begin{array}{l}
+\texttt{def $Ident$($DeclArgs$):}\\
+\qquad Program
+\end{array}\right]
+{\huge|}
+\left[\begin{array}{l}
+\texttt{def $Ident$($DeclArgs$) -> $Type$}:\\
+\qquad Program
+\end{array}\right]\\
+[DeclArgs]   =& [\epsilon] | [Ident] | [Ident : Type] | [Ident \texttt{,} DeclArgs]
+ | [Ident : Type\texttt{,} DeclArgs]\\
+[Type]       =& [\texttt{int}] | [\texttt{str}] | [\texttt{None}] | [\texttt{Optional[}Type\texttt{]}] | [\texttt{List[}Type\texttt{]}]\\
+[Assn]       =& [Ident \texttt{ = } Expr]\\
+[ForLoop]    =&
+\left[\begin{array}{l}
+\texttt{for $ident$ in $ident$:}\\
+\qquad program
+\end{array}\right]\\
+[If]         =&
+\left[\begin{array}{l}
+\texttt{if $expr$:}\\
+\qquad program
+\end{array}\right]\\
+[Expr]       =& [Ident] | [Ident\texttt{ }Op\texttt{ }Ident] | [Ident \texttt{(} ParamsList \texttt{)}] | [Constant]\\
+[ParamsList] =& [\epsilon] | [Expr] | [Expr\texttt{, }ParamsList]\\
+[Op]         =& [+] | [-] | [*] | [/]\\
+[Return]     =& [\texttt{return }Expr]
 \end{aligned}
 
 We won't worry too much about the semantics on a formal level, since
@@ -291,58 +312,107 @@ it's the same as Python's semantics on this subset, and we'll mostly
 be using it informally to justify typing rules here. But we do want to
 formally define our typing rules, since we'll be measuring the models
 understanding of particular rules. We'll be using two propositions for
-typing in this language. There's `WellTypedStmt(stmt, env)` which says
-that the statement `stmt` is well typed in environment `env`. And
-there's `WellTypedExpression(expr, type, env)`, which says that `expr`
-is well typed with type `type` in environment `env`. We'll use some
-standard notation for this, writing `WellTypedStmt(stmt, env)` as
-$\text{env} \vdash \text{stmt} \vartriangleright \text{ok}$ and `WellTypedExpression(expr, type,
-env)` as $\text{env} \vdash \text{expr} : \text{type}$.
+typing in this language. There's $\Gamma \vdash \left[p\right]
+\vartriangleright \texttt{ok}$, which says that the program $p$ is
+well typed in environment $\Gamma$. And there's $\Gamma \vdash e : t$,
+which says that $e$ is well typed with type $t$ in environment
+$\Gamma$.
 
 $$
 \tag{Const}
-\frac{Constant\text{ != None}}{\vdash Constant : \text{NonNullable}}\\
+\frac{Constant\neq\texttt{None}}{\vdash Constant: \text{NonNullable}}\\
 \hspace{1.0cm}
-\frac{}{\vdash None : \text{Nullable}}\\
+\frac{}{\vdash \texttt{None}: \text{Nullable}}\\
+$$
+
+$$
+\tag{Weaken}
+\frac{\Gamma \vdash x: t}{\Gamma \vdash x: \text{Nullable}}
 $$
 
 $$
 \tag{Var}
-\frac{\Gamma \vdash e : t \hspace{1cm} \Gamma, i : t \vdash p \vartriangleright \text{ok}}
-     {\Gamma \vdash i = e \text{ ; } p \vartriangleright \text{ok}}
+\Gamma \vdash e: t \hspace{1cm} \Gamma, i: t \vdash [p] \vartriangleright \text{ok}
+\over
+\Gamma \vdash \left[\begin{array}{l}\texttt{$i$ = $e$}\\ p\end{array}\right] \vartriangleright \text{ok}
 $$
 
-$$
-\tag{Abs}
-\frac{\Gamma, i_0 : \alpha(t_0), i_1 : \alpha(t_1), ... \vdash p \vartriangleright \text{ok}}
-     {\Gamma \vdash \text{def } ident(i_0 : t_0, i_1 : t_1,...) -> t_r:\text{ ; } p \vartriangleright \text{ok}}\\
-$$
+\begin{gather}
+\Gamma, i_0: \alpha(t_0), i_1: \alpha(t_1), ... \vdash [b] \vartriangleright \text{ok}\\
+\tag{Def}
+\Gamma, f : t_0 \rightarrow t_1 ... \rightarrow t_r \vdash [p] \vartriangleright \text{ok} \hspace{1cm} \text{Returns($b$, $t_r$)}
+\over
+\Gamma \vdash
+\left[\begin{array}{l}
+\texttt{def $f$($i_0$: $t_0$, $i_1$: $t_1$, ...) -> $t_r$:}\\
+\qquad b\\
+p
+\end{array}\right]
+\vartriangleright \text{ok}
+\end{gather}
 
 $$
 \tag{App}
-\frac{\Gamma, f : t_0 \rightarrow t_1 ... \rightarrow t_r \vdash p \vartriangleright \text{ok}}
-     {\Gamma \vdash (\text{def } f (i_0 : t_0, i_1 : t_1, ...)\text{ -> }t_r:\text{ ; } b)\text{ ; } p \vartriangleright \text{ok}}
+\frac{\Gamma \vdash f : t_0 \rightarrow t_1 ... \rightarrow t_r \hspace{1cm} \Gamma \vdash x_0 : t_0, x_1 : t_1, ...}
+     {\Gamma \vdash f(x_0, x_1, ...) : t_r}
 $$
+
+<!--
+$$
+\tag{Return}
+\frac{\text{Returns(}p_0, t\text{)} \lor \text{Returns(}p_1, t\text{)}
+$$
+-->
 
 $$
 \tag{IfIn}
-\frac{\Gamma \vdash x : t \hspace{1cm} \Gamma, x : \text{NonNullable} \vdash p \vartriangleright \text{ok}}
-     {\Gamma \vdash \text{if } x \text{ is not None: ; } p \vartriangleright \text{ok}}
+\Gamma \vdash x : t \hspace{1cm} \Gamma, x : \text{Nullable} \vdash [p] \vartriangleright \text{ok}
+\over
+\Gamma \vdash
+\left[\begin{array}{l}
+\texttt{if $x$ is not None:}\\
+\qquad p
+\end{array}\right]
+\vartriangleright \text{ok}
 $$
 
 $$
 \tag{IfOut}
-\frac{\substack{(\forall p', \Gamma, x\text{ : Nullable} \vdash p' \vartriangleright \text{ok} \implies \Gamma \vdash p_0; p' \vartriangleright \text{ok})\\
-      \lor
-      (\forall p', \Gamma, x\text{ : Nullable} \vdash p' \vartriangleright \text{ok}\implies \Gamma \vdash p_1; p'\vartriangleright \text{ok})\\
-      \hspace{1cm} \Gamma, x\text{ : Nullable} \vdash p_2 \vartriangleright \text{ok}}}
-     {\Gamma \vdash (\text{if } e \text{: ; }p_0\text{ ; else: ; } p_1) \text{ ; } p_2 \vartriangleright \text{ok}}
+\Gamma \vdash
+\left[\begin{array}{l}
+p_0\\
+p_2
+\end{array}\right]
+\vartriangleright \text{ok}
+\hspace{1cm}
+\Gamma \vdash
+\left[\begin{array}{l}
+p_1\\
+p_2
+\end{array}\right]
+\vartriangleright \text{ok}
+\over
+\Gamma \vdash
+\left[\begin{array}{l}
+\texttt{if $e$:}\\
+\qquad p_0\\
+\texttt{else:}\\
+\qquad p_1\\
+p_2
+\end{array}\right]
+\vartriangleright \text{ok}
 $$
 
 $$
 \tag{For}
-\frac{\Gamma \vdash y\text{ : List } t \hspace{1cm} \Gamma, x : t \vdash p \vartriangleright \text{ok}}
-     {\Gamma \vdash \text{for } x\text{ in } y\text{: ; } p \vartriangleright \text{ok}}
+\Gamma \vdash y\text{ : List } t \hspace{1cm} \Gamma, x : t \vdash [p] \vartriangleright \text{ok}
+\over
+\Gamma \vdash
+\left[\begin{array}{l}
+\texttt{for $x$ in  $y$:}\\
+\qquad p
+\end{array}\right]
+\vartriangleright \text{ok}
 $$
 
 Where:

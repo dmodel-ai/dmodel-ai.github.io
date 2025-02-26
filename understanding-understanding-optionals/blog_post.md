@@ -320,9 +320,11 @@ $\Gamma$.
 
 $$
 \tag{Const}
-\frac{Constant\neq\texttt{None}}{\vdash Constant: \text{NonNullable}}\\
+\frac{Constant\neq\texttt{None}}{\vdash Constant: \text{Atom}}\\
 \hspace{1.0cm}
-\frac{}{\vdash \texttt{None}: \text{Nullable}}\\
+\frac{}{\forall t, \vdash \texttt{None}: \text{Nullable[$t$]}}\\
+$$
+
 $$
 
 $$
@@ -418,10 +420,10 @@ $$
 Where:
 \begin{aligned}
 \forall t : Type,&\\
-   \alpha(Optional[t]) =& Nullable\\
+   \alpha(Optional[t]) =& Nullable[\alpha(t)]\\
    \alpha(List[t]) =& List[\alpha(t)]\\
    \text{otherwise:}\\
-   \alpha(t) =& NonNullable
+   \alpha(t) =& Atom
 \end{aligned}
 
 The rules above are sufficient for our purposes for dealing with fully

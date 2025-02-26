@@ -281,13 +281,14 @@ they can be replaced with a newline]:
 \left[\begin{array}{l}
 \texttt{def $Ident$($DeclArgs$):}\\
 \qquad Program
-\end{array}\right]
-{\huge|}
+\end{array}\right]\\
+&{\huge|}
 \left[\begin{array}{l}
 \texttt{def $Ident$($DeclArgs$) -> $Type$}:\\
 \qquad Program
 \end{array}\right]\\
-[DeclArgs]   =& [\epsilon] | [Ident] | [Ident : Type] | [Ident \texttt{,} DeclArgs]
+[DeclArgs]   =& [\epsilon] | [Ident] | [Ident : Type]\\
+              &| [Ident \texttt{,} DeclArgs]
  | [Ident : Type\texttt{,} DeclArgs]\\
 [Type]       =& [\texttt{int}] | [\texttt{str}] | [\texttt{None}] | [\texttt{Optional[}Type\texttt{]}] | [\texttt{List[}Type\texttt{]}]\\
 [Assn]       =& [Ident \texttt{ = } Expr]\\
@@ -301,9 +302,11 @@ they can be replaced with a newline]:
 \texttt{if $expr$:}\\
 \qquad program
 \end{array}\right]\\
-[Expr]       =& [Ident] | [Ident\texttt{ }Op\texttt{ }Ident] | [Ident \texttt{(} ParamsList \texttt{)}] | [Constant]\\
+[Expr]       =& [Ident] | [Ident\texttt{ }Op\texttt{ }Ident] | [Ident \texttt{(} ParamsList \texttt{)}] \\
+              &| [Constant] | [\texttt{[$ListConts$]}] | [\texttt{[]}]\\
 [ParamsList] =& [\epsilon] | [Expr] | [Expr\texttt{, }ParamsList]\\
 [Op]         =& [+] | [-] | [*] | [/]\\
+[ListConts]  =& [Expr] | [Expr,ListConts]\\
 [Return]     =& [\texttt{return }Expr]
 \end{aligned}
 
@@ -325,6 +328,12 @@ $$
 \frac{}{\forall t, \vdash \texttt{None}: \text{Nullable[$t$]}}\\
 $$
 
+$$
+\tag{List}
+\frac{\Gamma \vdash i_0 : t, i_1 : t, ...}
+     {\Gamma \vdash \texttt{[$i_0$, $i_1$, ...]} : \text{List[$t$]}}
+\hspace{1.0cm}
+\frac{}{\forall t, \vdash \texttt{[]}: \text{List[$t$]}}
 $$
 
 $$

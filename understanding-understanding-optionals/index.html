@@ -348,7 +348,7 @@ role="doc-noteref"><sup>1</sup></a>:</p>
 \left[\begin{array}{l}Stmt\\Program\end{array}\right]\\
 [Stmt]       =&amp; [Import] | [FnDef] | [Assn] | [ForLoop] | [If] |
 [Expr] \\
-              &amp;| [Return]\\
+              &amp;| [\texttt{return }Expr]\\
 [Import]     =&amp; [\texttt{from } Ident \texttt{ import } Ident]\\
 [FnDef]      =&amp;
 \left[\begin{array}{l}
@@ -383,7 +383,6 @@ role="doc-noteref"><sup>1</sup></a>:</p>
 [ParamsList] =&amp; [\epsilon] | [Expr] | [Expr\texttt{, }ParamsList]\\
 [Op]         =&amp; [+] | [-] | [*] | [/]\\
 [ListConts]  =&amp; [Expr] | [Expr,ListConts]\\
-[Return]     =&amp; [\texttt{return }Expr]
 \end{aligned}\]</span>
 <p>We won’t worry too much about the semantics on a formal level, since
 it’s the same as Python’s semantics on this subset, and we’ll mostly be

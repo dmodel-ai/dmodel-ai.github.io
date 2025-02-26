@@ -276,7 +276,7 @@ they can be replaced with a newline]:
 \begin{aligned}
 \left[Program\right]  =& [\epsilon] {\huge|} \left[\begin{array}{l}Stmt\\Program\end{array}\right]\\
 [Stmt]       =& [Import] | [FnDef] | [Assn] | [ForLoop] | [If] | [Expr] \\
-              &| [Return]\\
+              &| [\texttt{return }Expr]\\
 [Import]     =& [\texttt{from } Ident \texttt{ import } Ident]\\
 [FnDef]      =&
 \left[\begin{array}{l}
@@ -308,7 +308,6 @@ they can be replaced with a newline]:
 [ParamsList] =& [\epsilon] | [Expr] | [Expr\texttt{, }ParamsList]\\
 [Op]         =& [+] | [-] | [*] | [/]\\
 [ListConts]  =& [Expr] | [Expr,ListConts]\\
-[Return]     =& [\texttt{return }Expr]
 \end{aligned}
 
 We won't worry too much about the semantics on a formal level, since

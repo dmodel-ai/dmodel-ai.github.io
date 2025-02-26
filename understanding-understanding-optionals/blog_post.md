@@ -296,12 +296,12 @@ they can be replaced with a newline]:
 [ForLoop]    =&
 \left[\begin{array}{l}
 \texttt{for $ident$ in $ident$:}\\
-\qquad program
+\qquad Program
 \end{array}\right]\\
 [If]         =&
 \left[\begin{array}{l}
 \texttt{if $expr$:}\\
-\qquad program
+\qquad Program
 \end{array}\right]\\
 [Expr]       =& [Ident] | [Ident\texttt{ }Op\texttt{ }Ident] | [Ident \texttt{(} ParamsList \texttt{)}] \\
               &| [Constant] | [\texttt{[$ListConts$]}] | [\texttt{[]}]\\

@@ -369,22 +369,6 @@ $$
      {\Gamma \vdash f(x_0, x_1, ...) : t_r}
 $$
 
-$$
-\tag{OpInt}
-\Gamma \vdash x_0 : \texttt{int}, x_1 : \texttt{int}, \bigotimes \text{ in [\texttt{+, -, *, /}]}
-\over
-\Gamma \vdash x_0 \bigotimes x_1 : \texttt{int}
-$$
-
-$$
-\tag{OpString}
-\frac{\Gamma \vdash s_0 : \texttt{str}, s_1 : \texttt{str}}
-     {\Gamma \vdash s_0 + s_1 : \texttt{str}}
-\hspace{1cm}
-\frac{\Gamma \vdash s : \texttt{str}, x: \texttt{int}}
-     {\Gamma \vdash s * x : \texttt{str}}
-$$
-
 <!--
 $$
 \tag{Return}
@@ -441,6 +425,37 @@ $$
 \qquad p
 \end{array}\right]
 \vartriangleright \text{ok}
+$$
+
+$$
+\tag{OpInt}
+\Gamma \vdash x_0 : \texttt{int}, x_1 : \texttt{int}, \bigotimes \text{ in [\texttt{+, -, *, /}]}
+\over
+\Gamma \vdash x_0 \bigotimes x_1 : \texttt{int}
+$$
+
+$$
+\hspace{-1.5cm}
+\tag{OpString}
+\frac{\Gamma \vdash s_0 : \texttt{str}, s_1 : \texttt{str}}
+     {\Gamma \vdash s_0 + s_1 : \texttt{str}}
+\hspace{1cm}
+\frac{\Gamma \vdash s : \texttt{str}, x: \texttt{int}}
+     {\Gamma \vdash s * x : \texttt{str}}
+$$
+
+$$
+\hspace{-1.5cm}
+\tag{OpEquality}
+\frac{\Gamma \vdash x_0 : t, x_1 : t, \bigotimes \text{ in } [\texttt{==, !=, is, is not}]}
+     {\Gamma \vdash x_0 \bigotimes x_1 : \texttt{bool}}
+$$
+
+$$
+\hspace{-2cm}
+\tag{OpComparison}
+\frac{\Gamma \vdash x_0 : \texttt{int}, x_1 : \texttt{int}, \bigotimes \text{ in } [\texttt{<, >, <=, >=}]}
+     {\Gamma \vdash x_0 \bigotimes x_1 : \texttt{bool}}
 $$
 
 Where:

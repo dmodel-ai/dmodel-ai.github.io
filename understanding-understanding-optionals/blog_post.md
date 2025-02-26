@@ -371,9 +371,9 @@ $$
 
 $$
 \tag{OpInt}
-\Gamma \vdash x_0 : int, x_1 : int, \bigotimes \text{ in [\texttt{+, -, *, /}]}
+\Gamma \vdash x_0 : \texttt{int}, x_1 : \texttt{int}, \bigotimes \text{ in [\texttt{+, -, *, /}]}
 \over
-\Gamma \vdash x_0 \bigotimes x_1 : int
+\Gamma \vdash x_0 \bigotimes x_1 : \texttt{int}
 $$
 
 $$

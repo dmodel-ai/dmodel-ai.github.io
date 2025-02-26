@@ -326,20 +326,20 @@ $$
 \tag{Const}
 \frac{Constant\neq\texttt{None}}{\vdash Constant: \text{Atom}}\\
 \hspace{1.0cm}
-\frac{}{\forall t, \vdash \texttt{None}: \text{Nullable[$t$]}}\\
+\frac{}{\forall t, \vdash \texttt{None}: \texttt{Optional[$t$]}}\\
 $$
 
 $$
 \tag{List}
 \frac{\Gamma \vdash x_0 : t, x_1 : t, ...}
-     {\Gamma \vdash \texttt{[$x_0$, $x_1$, ...]} : \text{List[$t$]}}
+     {\Gamma \vdash \texttt{[$x_0$, $x_1$, ...]} : \texttt{List[$t$]}}
 \hspace{1.0cm}
-\frac{}{\forall t, \vdash \texttt{[]}: \text{List[$t$]}}
+\frac{}{\forall t, \vdash \texttt{[]}: \texttt{List[$t$]}}
 $$
 
 $$
 \tag{Weaken}
-\frac{\Gamma \vdash x: t}{\Gamma \vdash x: \text{Nullable[$t$]}}
+\frac{\Gamma \vdash x: t}{\Gamma \vdash x: \texttt{Optional[$t$]}}
 $$
 
 $$
@@ -350,7 +350,7 @@ $$
 $$
 
 \begin{gather}
-\Gamma, x_0: \alpha(t_0), x_1: \alpha(t_1), ... \vdash [b] \vartriangleright \text{ok}\\
+\Gamma, x_0: t_0, x_1: t_1, ... \vdash [b] \vartriangleright \text{ok}\\
 \tag{Def}
 \Gamma, f : t_0 \rightarrow t_1 ... \rightarrow t_r \vdash [p] \vartriangleright \text{ok} \hspace{1cm} \text{Returns($b$, $t_r$)}
 \over
@@ -379,7 +379,7 @@ $$
 $$
 \hspace{-1cm}{
 \tag{IfIn}
-\Gamma \vdash x : \text{Nullable[$t$]} \hspace{1cm}
+\Gamma \vdash x : \texttt{Optional[$t$]} \hspace{1cm}
 \Gamma, x : t \vdash [p] \vartriangleright \text{ok} \hspace{1cm}
 \bigotimes \text{in} [\texttt{is not, !=}]
 \over
@@ -428,7 +428,7 @@ $$
 
 $$
 \tag{For}
-\Gamma \vdash y\text{ : List } t \hspace{1cm} \Gamma, x : t \vdash [p] \vartriangleright \text{ok}
+\Gamma \vdash y\texttt{ : List } t \hspace{1cm} \Gamma, x : t \vdash [p] \vartriangleright \text{ok}
 \over
 \Gamma \vdash
 \left[\begin{array}{l}
@@ -468,15 +468,6 @@ $$
 \frac{\Gamma \vdash x_0 : \texttt{int}, x_1 : \texttt{int}, \bigotimes \text{ in } [\texttt{<, >, <=, >=}]}
      {\Gamma \vdash x_0 \bigotimes x_1 : \texttt{bool}}
 $$
-
-Where:
-\begin{aligned}
-\forall t,&\\
-   \alpha(\texttt{Optional}[t]) =& \texttt{Nullable}[\alpha(t)]\\
-   \alpha(\texttt{List}[t]) =& \texttt{List}[\alpha(t)]\\
-   \text{otherwise:}\\
-   \alpha(t) =& \texttt{Atom}
-\end{aligned}
 
 The rules above are sufficient for our purposes for dealing with fully
 type annotated programs. But what about programs with functions that

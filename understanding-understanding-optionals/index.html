@@ -21,7 +21,6 @@
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
     /* CSS for syntax highlighting */
     html { -webkit-text-size-adjust: 100%; }
     pre > code.sourceCode { white-space: pre; position: relative; }
@@ -111,14 +110,17 @@
   <link rel="stylesheet" href="pandoc.css" />
   <link rel="stylesheet" href="sidenote.css" />
   <script src="sidenotes.js"></script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
+  type="text/javascript"></script>
 </head>
 <body>
 <header id="title-block-header">
 <h1 class="title">Understanding Models Understanding Nullability</h1>
 <p class="author"><a href="https://www.alexsanchezstern.com">Alex
 Sanchez-Stern</a> and <a href="https://ani.sh">Anish Tondwalkar</a></p>
-<p class="date"><span
-class="math inline"><em>d</em><sub><em>m</em><em>o</em><em>d</em><em>e</em><em>l</em></sub></span></p>
+<p class="date"><span class="math inline">\(d_{model}\)</span></p>
 <div class="abstract">
 <div class="abstract-title">Abstract</div>
 Large language models have demonstrated impressive emergent
@@ -149,13 +151,12 @@ capabilities.</p>
 engineering<span class="aside AT">AT: which work?</span> has produced
 promising results which give hope towards understanding more and more of
 the internal thought processes of LLMs. Here at <span
-class="math inline"><em>d</em><sub><em>m</em><em>o</em><em>d</em><em>e</em><em>l</em></sub></span>
-, we can think of no better place to apply these new techniques than
-program understanding, where there are many abstract properties that can
-be symbolically determined. The vast work done in programming language
-theory over the past hundred years provides many tools for scaling an
-understanding of the internal thought processes of language models as
-they write
+class="math inline">\(d_{model}\)</span> , we can think of no better
+place to apply these new techniques than program understanding, where
+there are many abstract properties that can be symbolically determined.
+The vast work done in programming language theory over the past hundred
+years provides many tools for scaling an understanding of the internal
+thought processes of language models as they write
 code.<span class="aside AT">AT: for examples, see cite, cite</span></p>
 <p>In that spirit, we wanted to start with a simple property that comes
 up in every programming languages, nullability. Nullable values are
@@ -335,41 +336,221 @@ model could circumvent our type tests by doing bare ifs which work on
 both optional and non-optional types. But to prevent bare ifs from ever
 being the correct completion for a non-optional type, we’ll design our
 tests so that there are never any values that would convert to False,
-namely the number zero and the empty string.</p>
-<span class="aside AS">AS: Some of the following should probably go in the appendix</span>
+namely the number zero and the empty string.
+<span class="aside AS">AS: Some of the following should probably go in the appendix</span></p>
 <p>So lets start by defining some syntax of our Python subset we’ll be
 analyzing<a href="#fn1" class="footnote-ref" id="fnref1"
 role="doc-noteref"><sup>1</sup></a>:</p>
+<span class="math display">\[\begin{aligned}
+\end{aligned}\]</span>
+<span class="math display">\[\begin{aligned}
+\left[Program\right]  =&amp; [\epsilon] {\huge|}
+\left[\begin{array}{l}Stmt\\Program\end{array}\right]\\
+[Stmt]       =&amp; [Import] | [FnDef] | [Assn] | [ForLoop] | [If] |
+[Expr] | [Return]\\
+[Import]     =&amp; [\texttt{from } Ident \texttt{ import } Ident]\\
+[FnDef]      =&amp;
+\left[\begin{array}{l}
+\texttt{def $Ident$($DeclArgs$):}\\
+\qquad Program
+\end{array}\right]
+{\huge|}
+\left[\begin{array}{l}
+\texttt{def $Ident$($DeclArgs$) -&gt; $Type$}:\\
+\qquad Program
+\end{array}\right]\\
+[DeclArgs]   =&amp; [\epsilon] | [Ident] | [Ident : Type] | [Ident
+\texttt{,} DeclArgs]
+| [Ident : Type\texttt{,} DeclArgs]\\
+[Type]       =&amp; [\texttt{int}] | [\texttt{str}] | [\texttt{None}] |
+[\texttt{Optional[}Type\texttt{]}] | [\texttt{List[}Type\texttt{]}]\\
+[Assn]       =&amp; [Ident \texttt{ = } Expr]\\
+[ForLoop]    =&amp;
+\left[\begin{array}{l}
+\texttt{for $ident$ in $ident$:}\\
+\qquad program
+\end{array}\right]\\
+[If]         =&amp;
+\left[\begin{array}{l}
+\texttt{if $expr$:}\\
+\qquad program
+\end{array}\right]\\
+[Expr]       =&amp; [Ident] | [Ident\texttt{ }Op\texttt{ }Ident] |
+[Ident \texttt{(} ParamsList \texttt{)}] | [Constant]\\
+[ParamsList] =&amp; [\epsilon] | [Expr] | [Expr\texttt{, }ParamsList]\\
+[Op]         =&amp; [+] | [-] | [*] | [/]\\
+[Return]     =&amp; [\texttt{return }Expr]
+\end{aligned}\]</span>
 <p>We won’t worry too much about the semantics on a formal level, since
 it’s the same as Python’s semantics on this subset, and we’ll mostly be
 using it informally to justify typing rules here. But we do want to
 formally define our typing rules, since we’ll be measuring the models
 understanding of particular rules. We’ll be using two propositions for
-typing in this language. There’s <code>WellTyped(stmt, env)</code> which
-says that the statement <code>stmt</code> is well typed in environment
-<code>env</code>. And there’s WellTypedExpression(expr, type, env),
-which says that <code>expr</code> is well typed with type
-<code>type</code> in environment <code>env</code>. We’ll use some
-standard notation for this, writing WellTyped(stmt, env) as <span
-class="math inline">env ⊢ stmt</span> and WellTypedExpression(expr,
-type, env) as <span class="math inline">env ⊢ expr : type</span>.</p>
-<p><span class="math display">$$
+typing in this language. There’s <span class="math inline">\(\Gamma
+\vdash \left[p\right]
+\vartriangleright \texttt{ok}\)</span>, which says that the program
+<span class="math inline">\(p\)</span> is well typed in environment
+<span class="math inline">\(\Gamma\)</span>. And there’s <span
+class="math inline">\(\Gamma \vdash e : t\)</span>, which says that
+<span class="math inline">\(e\)</span> is well typed with type <span
+class="math inline">\(t\)</span> in environment <span
+class="math inline">\(\Gamma\)</span>.</p>
+<p><span class="math display">\[
 \tag{Const}
-\frac{Constant\text{ != None}}{\vdash Constant : \text{NonNullable}}\\
+\frac{Constant\neq\texttt{None}}{\vdash Constant: \text{NonNullable}}\\
 \hspace{1.0cm}
-\frac{}{\vdash None : \text{Nullable}}\\
-$$</span></p>
-<p><span class="math display">$$
+\frac{}{\vdash \texttt{None}: \text{Nullable}}\\
+\]</span></p>
+<p><span class="math display">\[
+\tag{Weaken}
+\frac{\Gamma \vdash x: t}{\Gamma \vdash x: \text{Nullable}}
+\]</span></p>
+<p><span class="math display">\[
 \tag{Var}
-\frac{\Gamma \vdash e : t \hspace{0.5cm} \Gamma, i : t \vdash Assign}
-     {\Gamma \vdash i = e \text{ ; } p}
-$$</span></p>
-<p><span class="math display">$$
-\tag{Abs}
-\frac{\Gamma, i_0 : t_0, i_1 : t_1, ... \vdash p}
-     {\Gamma, \vdash \text{def } ident(i_0 : t_0, i_1 : t_1,...):\text{
-; } p}
-$$</span></p>
+\Gamma \vdash e: t \hspace{1cm} \Gamma, i: t \vdash [p]
+\vartriangleright \text{ok}
+\over
+\Gamma \vdash \left[\begin{array}{l}\texttt{$i$ = $e$}\\
+p\end{array}\right] \vartriangleright \text{ok}
+\]</span></p>
+<p><span class="math display">\[\begin{gather}
+\Gamma, i_0: \alpha(t_0), i_1: \alpha(t_1), ... \vdash [b]
+\vartriangleright \text{ok}\\
+\tag{Def}
+\Gamma, f : t_0 \rightarrow t_1 ... \rightarrow t_r \vdash [p]
+\vartriangleright \text{ok} \hspace{1cm} \text{Returns($b$, $t_r$)}
+\over
+\Gamma \vdash
+\left[\begin{array}{l}
+\texttt{def $f$($i_0$: $t_0$, $i_1$: $t_1$, ...) -&gt; $t_r$:}\\
+\qquad b\\
+p
+\end{array}\right]
+\vartriangleright \text{ok}
+\end{gather}\]</span></p>
+<p><span class="math display">\[
+\tag{App}
+\frac{\Gamma \vdash f : t_0 \rightarrow t_1 ... \rightarrow t_r
+\hspace{1cm} \Gamma \vdash x_0 : t_0, x_1 : t_1, ...}
+     {\Gamma \vdash f(x_0, x_1, ...) : t_r}
+\]</span></p>
+<!--
+$$
+\tag{Return}
+\frac{\text{Returns(}p_0, t\text{)} \lor \text{Returns(}p_1, t\text{)}
+$$
+-->
+<p><span class="math display">\[
+\tag{IfIn}
+\Gamma \vdash x : t \hspace{1cm} \Gamma, x : \text{Nullable} \vdash [p]
+\vartriangleright \text{ok}
+\over
+\Gamma \vdash
+\left[\begin{array}{l}
+\texttt{if $x$ is not None:}\\
+\qquad p
+\end{array}\right]
+\vartriangleright \text{ok}
+\]</span></p>
+<p><span class="math display">\[
+\tag{IfOut}
+\Gamma \vdash
+\left[\begin{array}{l}
+p_0\\
+p_2
+\end{array}\right]
+\vartriangleright \text{ok}
+\hspace{1cm}
+\Gamma \vdash
+\left[\begin{array}{l}
+p_1\\
+p_2
+\end{array}\right]
+\vartriangleright \text{ok}
+\over
+\Gamma \vdash
+\left[\begin{array}{l}
+\texttt{if $e$:}\\
+\qquad p_0\\
+\texttt{else:}\\
+\qquad p_1\\
+p_2
+\end{array}\right]
+\vartriangleright \text{ok}
+\]</span></p>
+<p><span class="math display">\[
+\tag{For}
+\Gamma \vdash y\text{ : List } t \hspace{1cm} \Gamma, x : t \vdash [p]
+\vartriangleright \text{ok}
+\over
+\Gamma \vdash
+\left[\begin{array}{l}
+\texttt{for $x$ in  $y$:}\\
+\qquad p
+\end{array}\right]
+\vartriangleright \text{ok}
+\]</span></p>
+Where:
+<span class="math display">\[\begin{aligned}
+\forall t : Type,&amp;\\
+   \alpha(Optional[t]) =&amp; Nullable\\
+   \alpha(List[t]) =&amp; List[\alpha(t)]\\
+   \text{otherwise:}\\
+   \alpha(t) =&amp; NonNullable
+\end{aligned}\]</span>
+<p>The rules above are sufficient for our purposes for dealing with
+fully type annotated programs. But what about programs with functions
+that aren’t type annotated, or are only partially annotated? The mypy
+type system that Python uses treats unannotated functions as dynamically
+typed, allowing them to typecheck as any type. Similarly, function
+parameters without a type annotation are implicitly convertable to any
+type. So, for normaly mypy typechecking, we add the following typing
+rules:</p>
+<p><span class="math display">\[\begin{gather}
+\Gamma, i_0 : Any, i_1 : Any, ... \vdash [b] \vartriangleright
+\text{ok}\\
+\tag{DynDef}
+\Gamma, f : Any \rightarrow ... \rightarrow Any \vdash [p]
+\vartriangleright \text{ok}
+\over
+\Gamma \vdash
+\left[\begin{array}{l}
+\texttt{def $f$($i_0$, $i_1$, ...):}\\
+\qquad b\\
+p
+\end{array}\right]
+\vartriangleright \text{ok}
+\end{gather}\]</span></p>
+<p><span class="math display">\[
+\tag{DynConvert}
+\frac{\Gamma \vdash x : t}
+     {\Gamma \vdash x : Any}
+     \hspace{0.5cm}
+\frac{\Gamma \vdash x : Any}
+     {\Gamma \vdash x : t}
+\]</span></p>
+<p>These rules allow more python programs to check statically, but they
+mean that some python programs will pass the static checks but still
+throw type errors at runtime. Importantly for us, they can throw runtime
+type errors about optionality. A well-written piece of code would not
+just satisfy this type system then, but actually a stronger one that
+would prevent runtime type errors. We’ll call this stronger type system
+mypy++. Instead of the Dyn- rules, it has this one:</p>
+<p><span class="math display">\[\begin{gather}
+\Gamma, i_0 : t_0, i_1 : t_1, ... \vdash [b] \vartriangleright
+\text{ok}\\
+\tag{InferDef}
+\Gamma, f : i_0 \rightarrow i_1 \rightarrow ... \rightarrow t_r \vdash
+[p] \vartriangleright \text{ok}
+\over
+\Gamma \vdash
+\left[\begin{array}{l}
+\texttt{def $f$($i_0$, $i_1$, ...):}\\
+\qquad b\\
+p
+\end{array}\right]
+\vartriangleright \text{ok}
+\end{gather}\]</span></p>
 <p>We begin with a “skyline” estimate of model understanding of
 nullability (a la <span class="citation" data-cites="feng24binding">Feng
 and Steinhardt (2024)</span>). We measure how well different models can

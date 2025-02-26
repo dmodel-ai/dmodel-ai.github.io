@@ -383,7 +383,10 @@ role="doc-noteref"><sup>1</sup></a>:</p>
               &amp;| [Constant] | [\texttt{[$ListConts$]}] |
 [\texttt{[]}]\\
 [ParamsList] =&amp; [\epsilon] | [Expr] | [Expr\texttt{, }ParamsList]\\
-[Op]         =&amp; [+] | [-] | [*] | [/]\\
+[Op]         =&amp; [\texttt{+}] | [\texttt{-}] | [\texttt{*}] |
+[\texttt{/}] | [\texttt{&lt;}] | [\texttt{&gt;}] | [\texttt{&lt;=}] |
+[\texttt{&gt;=}] | [\texttt{is}] | [\texttt{is not}] | [\texttt{==}] |
+[\texttt{!=}]\\
 [ListConts]  =&amp; [Expr] | [Expr,ListConts]\\
 \end{aligned}\]</span>
 <p>We won’t worry too much about the semantics on a formal level, since

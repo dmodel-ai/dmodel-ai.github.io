@@ -291,7 +291,8 @@ they can be replaced with a newline]:
 [DeclArgs]   =& [\epsilon] | [Ident] | [Ident : Type]\\
               &| [Ident \texttt{,} DeclArgs]
  | [Ident : Type\texttt{,} DeclArgs]\\
-[Type]       =& [\texttt{int}] | [\texttt{str}] | [\texttt{None}] | [\texttt{Optional[}Type\texttt{]}] | [\texttt{List[}Type\texttt{]}]\\
+[Type]       =& [\texttt{int}] | [\texttt{str}] | [\texttt{bool}] | [\texttt{None}] \\
+              &| [\texttt{Optional[}Type\texttt{]}] | [\texttt{List[}Type\texttt{]}]\\
 [Assn]       =& [Ident \texttt{ = } Expr]\\
 [ForLoop]    =&
 \left[\begin{array}{l}

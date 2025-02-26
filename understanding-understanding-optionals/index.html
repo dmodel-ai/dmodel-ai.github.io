@@ -347,7 +347,8 @@ role="doc-noteref"><sup>1</sup></a>:</p>
 \left[Program\right]  =&amp; [\epsilon] {\huge|}
 \left[\begin{array}{l}Stmt\\Program\end{array}\right]\\
 [Stmt]       =&amp; [Import] | [FnDef] | [Assn] | [ForLoop] | [If] |
-[Expr] | [Return]\\
+[Expr] \\
+              &amp;| [Return]\\
 [Import]     =&amp; [\texttt{from } Ident \texttt{ import } Ident]\\
 [FnDef]      =&amp;
 \left[\begin{array}{l}

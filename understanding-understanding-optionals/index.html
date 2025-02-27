@@ -444,12 +444,6 @@ p
 \hspace{1cm} \Gamma \vdash x_0 : t_0, x_1 : t_1, ...}
      {\Gamma \vdash f(x_0, x_1, ...) : t_r}
 \]</span></p>
-<!--
-$$
-\tag{Return}
-\frac{\text{Returns(}p_0, t\text{)} \lor \text{Returns(}p_1, t\text{)}
-$$
--->
 <p><span class="math display">\[
 \hspace{-1cm}{
 \tag{IfIn}
@@ -539,6 +533,48 @@ in [\texttt{+, -, *, /}]}
 \frac{\Gamma \vdash x_0 : \texttt{int}, x_1 : \texttt{int}, \bigotimes
 \text{ in } [\texttt{&lt;, &gt;, &lt;=, &gt;=}]}
      {\Gamma \vdash x_0 \bigotimes x_1 : \texttt{bool}}
+\]</span></p>
+<p>With:</p>
+<p><span class="math display">\[
+\tag{ReturnReturn}
+\frac{\Gamma \vdash e : t}{\vdash \text{Returns(\texttt{return $e$},
+$t$)}}
+\]</span> <span class="math display">\[
+\tag{NoReturnExpression}
+\frac{\Gamma \vdash e : t}{\vdash \text{NoReturn([$e$])}}
+\]</span> <span class="math display">\[
+\tag{NoReturnAssign}
+\frac{}{\vdash \text{NoReturn([\texttt{$i$ = $e$}])}}
+\]</span> <span class="math display">\[
+\tag{ReturnIf}
+\frac{\Gamma \vdash \text{Returns($p$, $t$)}}
+     {\Gamma \vdash \text{Returns(}\left[\begin{array}{l}\texttt{if
+$e$:}\\ \quad p\end{array}\right],t\text{)}}
+\hspace{1cm}
+\]</span></p>
+<p><span class="math display">\[\begin{gather}
+\Gamma \vdash \left(\text{Returns($p_0$, $t$)} \land
+\text{Returns($p_1$, $t$)}\right)\lor \\
+\Gamma \vdash \left(\text{Returns($p_0$, $t$)} \land
+\text{NoReturns($p_1$)}\right) \lor\\
+\tag{ReturnIfElse}
+\Gamma \vdash \left(\text{NoReturns($p_0$)} \land \text{Returns($p_1$,
+$t$)}\right)
+\over
+\Gamma \vdash \text{Returns(}\left[\begin{array}{l}
+\texttt{if $e$:}\\
+\quad p_0\\
+\texttt{else:}\\
+\quad p_1
+\end{array}\right]\text{, $t$)}
+\end{gather}\]</span></p>
+<p><span class="math display">\[
+\tag{ReturnFor}
+\frac{\Gamma \vdash \text{Returns($p$, $t$)}}
+     {\Gamma \vdash \text{Returns(}\left[\begin{array}{l}
+     \texttt{for $x$ in $y$:}\\
+     \quad p
+     \end{array}\right]\text{, $t$)}}
 \]</span></p>
 <p>The rules above are sufficient for our purposes for dealing with
 fully type annotated programs. But what about programs with functions

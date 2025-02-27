@@ -273,12 +273,12 @@ they can be replaced with a newline]:
 [FnDef]      =&
 \left[\begin{array}{l}
 \texttt{def $Ident$($DeclArgs$):}\\
-\qquad Program
+\quad Program
 \end{array}\right]\\
 &{\huge|}
 \left[\begin{array}{l}
 \texttt{def $Ident$($DeclArgs$) -> $Type$}:\\
-\qquad Program
+\quad Program
 \end{array}\right]\\
 [DeclArgs]   =& [\epsilon] | [Ident] | [Ident : Type]\\
               &| [Ident \texttt{,} DeclArgs]
@@ -289,12 +289,12 @@ they can be replaced with a newline]:
 [ForLoop]    =&
 \left[\begin{array}{l}
 \texttt{for $ident$ in $ident$:}\\
-\qquad Program
+\quad Program
 \end{array}\right]\\
 [If]         =&
 \left[\begin{array}{l}
 \texttt{if $expr$:}\\
-\qquad Program
+\quad Program
 \end{array}\right]\\
 [Expr]       =& [Ident] | [Ident\texttt{ }Op\texttt{ }Ident] | [Ident \texttt{(} ParamsList \texttt{)}] \\
               &| [Constant] | [\texttt{[$ListConts$]}] | [\texttt{[]}]\\
@@ -350,7 +350,7 @@ $$
 \Gamma \vdash
 \left[\begin{array}{l}
 \texttt{def $f$($x_0$: $t_0$, $x_1$: $t_1$, ...) -> $t_r$:}\\
-\qquad b\\
+\quad b\\
 p
 \end{array}\right]
 \vartriangleright \text{ok}
@@ -379,14 +379,14 @@ $$
 \Gamma \vdash
 \left[\begin{array}{l}
 \texttt{if $x$:}\\
-\qquad p
+\quad p
 \end{array}\right]
 \vartriangleright \text{ok}
 \hspace{1cm}
 \Gamma \vdash
 \left[\begin{array}{l}
 \texttt{if $x$ $\bigotimes$ None:}\\
-\qquad p
+\quad p
 \end{array}\right]
 \vartriangleright \text{ok}
 }
@@ -411,9 +411,9 @@ p_2
 \Gamma \vdash
 \left[\begin{array}{l}
 \texttt{if $e$:}\\
-\qquad p_0\\
+\quad p_0\\
 \texttt{else:}\\
-\qquad p_1\\
+\quad p_1\\
 p_2
 \end{array}\right]
 \vartriangleright \text{ok}
@@ -426,7 +426,7 @@ $$
 \Gamma \vdash
 \left[\begin{array}{l}
 \texttt{for $x$ in  $y$:}\\
-\qquad p
+\quad p
 \end{array}\right]
 \vartriangleright \text{ok}
 $$
@@ -479,7 +479,7 @@ rules:
 \Gamma \vdash
 \left[\begin{array}{l}
 \texttt{def $f$($x_0$, $x_1$, ...):}\\
-\qquad b\\
+\quad b\\
 p
 \end{array}\right]
 \vartriangleright \text{ok}
@@ -510,7 +510,7 @@ type system mypy++. Instead of the Dyn- rules, it has this one:
 \Gamma \vdash
 \left[\begin{array}{l}
 \texttt{def $f$($x_0$, $x_1$, ...):}\\
-\qquad b\\
+\quad b\\
 p
 \end{array}\right]
 \vartriangleright \text{ok}

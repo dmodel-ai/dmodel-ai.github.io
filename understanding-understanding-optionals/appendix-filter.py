@@ -11,8 +11,9 @@ Pandoc filter that:
 """
 
 from pandocfilters import toJSONFilter, Header, RawBlock, Str, Space
+from typing import Any
 
-def make_label(stack):
+def make_label(stack: list[int]) -> str:
     """
     Convert [x, y, z, ...] into "Letter.y.z..."
     where x is the 1-based letter index (1 => A, 2 => B, etc.)
@@ -27,7 +28,15 @@ def make_label(stack):
         subs = ".".join(str(n) for n in stack[1:])
         return f"{letter}.{subs}"
 
-def appendix_filter(key, value, fmt, meta):
+# Class to typecheck function attributes, as suggested in https://github.com/python/mypy/issues/2087
+class AppendixFilter:
+    in_appendix: bool
+    num_stack: list[int]
+    def call(self, key: str, value: tuple[str, str], fmt: Any, meta: Any) -> "list[None] | Header":
+        ...
+
+appendix_filter: AppendixFilter
+def appendix_filter(key: str, value: Any, fmt: Any, meta: Any) -> "list[None] | Header": # type: ignore[no-redef]
     if not hasattr(appendix_filter, "in_appendix"):
         appendix_filter.in_appendix = False
     if not hasattr(appendix_filter, "num_stack"):
@@ -51,23 +60,24 @@ def appendix_filter(key, value, fmt, meta):
             appendix_filter.num_stack.pop()
         while len(appendix_filter.num_stack) < level:
             appendix_filter.num_stack.append(0)
-        
+
         # Increment the counter at this level
         appendix_filter.num_stack[-1] += 1
-        
+
         # Construct the alphanumeric label (e.g., "A", "B.1", "C.2.3")
         label = make_label(appendix_filter.num_stack)
-        
+
         # Prepend the label to the heading text
         new_inlines = [Str(label), Space()] + inlines
-        
+
         # Mark unnumbered so Pandoc won't re-number them
         if "unnumbered" not in classes:
             classes.append("unnumbered")
-        
-        return Header(level, [identifier, classes, kvs], new_inlines)
+        result = Header(level, [identifier, classes, kvs], new_inlines)
+        return result
+    return None
 
-def main():
+def main()-> None:
     toJSONFilter(appendix_filter)
 
 if __name__ == "__main__":

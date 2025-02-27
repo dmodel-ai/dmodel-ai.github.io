@@ -395,7 +395,9 @@ typing in this language. There’s <span class="math inline">\(\Gamma
 class="math inline">\(\Gamma \vdash e : t\)</span>, which says that
 <span class="math inline">\(e\)</span> is well typed with type <span
 class="math inline">\(t\)</span> in environment <span
-class="math inline">\(\Gamma\)</span>.</p>
+class="math inline">\(\Gamma\)</span>. When we exclude the , we mean
+that the judgement is true under any typing environment, including the
+empty one.</p>
 <p><span class="math display">\[
 \tag{Const}
 \frac{Constant\neq\texttt{None}}{\vdash Constant: \text{Atom}}\\

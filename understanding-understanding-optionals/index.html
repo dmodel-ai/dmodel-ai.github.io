@@ -371,10 +371,11 @@ role="doc-noteref"><sup>1</sup></a>:</p>
 \texttt{if $expr$:}\\
 \quad Program
 \end{array}\right]\\
-[Expr]       =&amp; [Ident] | [Ident\texttt{ }Op\texttt{ }Ident] |
-[Ident \texttt{(} ParamsList \texttt{)}] \\
-              &amp;| [Constant] | [\texttt{[$ListConts$]}] |
-[\texttt{[]}]\\
+[Expr]       =&amp; [Ident] | [Constant] | [Expr\texttt{ }Op\texttt{
+}Expr]\\
+              &amp;| [Ident \texttt{(} ParamsList \texttt{)}]|
+[\texttt{$Expr$ if $Expr$ else $Expr$}]\\
+              &amp;| [\texttt{[$ListConts$]}] | [\texttt{[]}]\\
 [ParamsList] =&amp; [\epsilon] | [Expr] | [Expr\texttt{, }ParamsList]\\
 [Op]         =&amp; [\texttt{+}] | [\texttt{-}] | [\texttt{*}] |
 [\texttt{/}] | [\texttt{&lt;}] | [\texttt{&gt;}] | [\texttt{&lt;=}] |
@@ -491,6 +492,12 @@ p_2
 p_2
 \end{array}\right]
 \vartriangleright \text{ok}
+\]</span></p>
+<p><span class="math display">\[
+\tag{IfExpr}
+\frac{\Gamma \vdash (e_b : \text{Optional[$t_0$]} \lor e_b :
+\texttt{bool}), e_1 : t, e_2 : t}
+     {\Gamma \vdash \texttt{$e_1$ if $e_b$ else $e_2$} : t}
 \]</span></p>
 <p><span class="math display">\[
 \tag{For}

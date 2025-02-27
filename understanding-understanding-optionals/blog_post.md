@@ -246,17 +246,16 @@ worrying about the semantics of complicated features, and just focus
 on the features neccesary for understanding optionality in a
 semi-realistic setting.
 
-Second, we'll disallow the conversion of non optional types to
-booleans in the context of `if` statements. So while `if x == 0:` will
-be a correctly typed expression when x is an int, `if x:` will not,
-even though in normal python they are equivalent. This is a necessary
-practicality, because otherwise, the model could circumvent our type
-tests by doing bare ifs which work on both optional and non-optional
-types. But to prevent bare ifs from ever being the correct completion
-for a non-optional type, we'll design our tests so that there are
-never any values that would convert to False, namely the number zero
-and the empty string.
-\AS{Some of the following should probably go in the appendix}
+Second, we'll define all non-None values as converting to the boolean
+value True, instead of numbers converting to False when they are zero
+and strings converting to False when they are empty. This is a
+necessary practicality, because otherwise, the model could circumvent
+our type tests by doing bare ifs which work on both optional and
+non-optional types. But to prevent bare ifs from ever being the
+correct completion for a non-optional type, we'll design our tests so
+that there are never any values that would convert to False, namely
+the number zero and the empty string.  \AS{Some of the following
+should probably go in the appendix}
 
 So lets start by defining some syntax of our Python subset we'll be
 analyzing^[Python allows newlines and semicolons to separate

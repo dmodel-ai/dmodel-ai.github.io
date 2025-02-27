@@ -314,8 +314,8 @@ nullability.</p>
 we’re measuring. To that end, we’ll take the notion of different “rules”
 for nullability that we discuseed informally in the overview, and bring
 it into a formal typing system. We’re not going to try to describe all
-the typing rules of python, so we’ll restrict ourselves in three
-dimensions.</p>
+the typing rules of python, so we’ll restrict ourselves in a couple of
+ways.</p>
 <p>First, we’ll reduce the number of python features that we handle by
 actually working in a subset of python. This means we can skip worrying
 about the semantics of complicated features, and just focus on the
@@ -329,13 +329,446 @@ tests by doing bare ifs which work on both optional and non-optional
 types. But to prevent bare ifs from ever being the correct completion
 for a non-optional type, we’ll design our tests so that there are never
 any values that would convert to False, namely the number zero and the
-empty string. <span class="aside AS">AS: Some of the following
-should probably go in the appendix</span></p>
-<p>So lets start by defining some syntax of our Python subset we’ll be
-analyzing<a href="#fn1" class="footnote-ref" id="fnref1"
-role="doc-noteref"><sup>1</sup></a>:</p>
-<span class="math display">\[\begin{aligned}
-\end{aligned}\]</span>
+empty string.</p>
+<p>The full syntax and typing rules of our subset of Python are
+described in Appendix <a href="#sec:formalrules">B</a>.</p>
+<p>We begin with a “skyline” estimate of model understanding of
+nullability (a la <span class="citation" data-cites="feng24binding">Feng
+and Steinhardt (2024)</span>). We measure how well different models can
+understand the concept. To do this, we have the model complete simple
+partial programs that require an understanding of nullability. We refer
+to this suite of programs as <code>NullabilityEval</code>. For
+example,</p>
+<p><em>Test 4</em>:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  some_numbers <span class="op">=</span> [<span class="dv">1</span>, <span class="op">-</span><span class="dv">4</span>, <span class="va">None</span>, <span class="op">-</span><span class="dv">3</span>, <span class="dv">10</span>, <span class="op">-</span><span class="dv">1</span>, <span class="va">None</span>, <span class="va">None</span>, <span class="dv">8</span>]</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  result: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> num <span class="kw">in</span> some_numbers:</span></code></pre></div>
+<p>The program<a href="#fn1" class="footnote-ref" id="fnref1"
+role="doc-noteref"><sup>1</sup></a> is constructed such that there are a
+very limited number of valid next lines in the program, and all of them
+demonstrate some knowledge of the concept of nullability.<a href="#fn2"
+class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+<p>This test is on the simpler side, but we can challenge the model
+more, adding layers of indirection between the source and sink of
+nullable values, testing the model’s <em>interprocedural</em>
+understanding.</p>
+<p>We can also test how well models understand type annotations
+separately; since the inclusion of type annotations in Python is not
+required<a href="#fn3" class="footnote-ref" id="fnref3"
+role="doc-noteref"><sup>3</sup></a>, most of the Python code used as
+training data operates in an untyped fashion, so models may understand
+the dynamic flow of nullable values but not their static type
+annotations. Test 5, below, tests the model’s understanding of
+<code>Optional</code> types annotations. The trailing colon makes a type
+expression the only valid completion<a href="#fn4" class="footnote-ref"
+id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
+<p><em>Test 5</em>:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_48() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  number: Optional[<span class="bu">int</span>] <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  square <span class="op">=</span> get_square(number)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> square <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f&quot;Square of the number is </span><span class="sc">{</span>square<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">&quot;No number provided to square&quot;</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_square(number:</span></code></pre></div>
+<p>All of the tests in this benchmark suite are composed of three
+functions or less, where the largest function is seven lines long.</p>
+<p>We measure the difficulty of these tests by measuring how models of
+different sizes perform. We pay particular focus to the Pythia model
+suite<span class="citation" data-cites="biderman23">(Biderman et al.
+2023)</span>, as they have checkpoints available across training runs
+and various scales. For measuring performance at larger sizes, we’ve
+included Qwen2.5-Coder-32B<span class="aside AT">AT: cite</span>, Llama
+3.1 405B Instruct<span class="aside AT">AT: cite</span>, and DeepSeek-V3
+(671B)<span class="aside AT">AT: cite</span>. Below, you can see the
+number of passing tests for each model.
+<span class=aside>more through exploration of why?</span></p>
+<figure id="fig:hl_scale">
+<img src="images/hl_model_results.svg"
+alt="Figure 1: A bar graph showing how several sizes of model perform on the high-level nullability tests" />
+<figcaption aria-hidden="true">Figure 1: A bar graph showing how several
+sizes of model perform on the high-level nullability tests</figcaption>
+</figure>
+<p>In Fig. <a href="#fig:hl_scale">1</a>, we can see the number of
+passing tests for each model. We can see that generally models get
+better with scale.
+<span class=aside>I don't think this footnote is clear enough to add anything</span>
+<a href="#fn5" class="footnote-ref" id="fnref5"
+role="doc-noteref"><sup>5</sup></a> Model performance on these tests is
+approximately logarithmic in model size: models of 2.8 billion
+parameters can pass about half the tests, but it takes more than 405
+billion parameters to pass all of the tests.
+<span class=aside>interesting observation; seems to me that this is actually the case for all post-training evals. hmm, acutally it's also the case for pretraining loss --- see classic scaling laws papers: Kaplan et al, Chincilla, etc</span></p>
+<p>Next, we want to understand the training dynamics at play here.
+143000. Below we can see how Pythia 6.9b performs on the tests during
+training from step 2 to
+143000:<span class=aside>let's use the same axes scaling at the tigges paper</span></p>
+<figure id="fig:hl_time">
+<img src="images/hl_revision_results.svg"
+alt="Figure 2: A line graph showing how the performance of the Pythia 6.9 model changes during training" />
+<figcaption aria-hidden="true">Figure 2: A line graph showing how the
+performance of the Pythia 6.9 model changes during training</figcaption>
+</figure>
+<p>Again, performance does not increase monotonically. This plot is
+quite noisy, so in the sequel, we will show smoothed<a href="#fn6"
+class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>
+charts.</p>
+<h2 data-number="3.1" id="sec:grok"><span
+class="header-section-number">3.1</span> Local vs Non-Local Type
+Correctness</h2>
+<p>For most of our tests, writing correct code simply requires following
+the rules of Python’s mypy type system. This type system requires that
+types be internally consistent within functions, and match function type
+signatures if they exist. But six of our tests are different, because
+they involve functions that are <em>not</em> annotated with type
+signatures. Under mypy, these functions are allowed to do almost
+anything with their types. But at runtime, using values of the wrong
+type with these functions will result in a type error.</p>
+<span class="aside AT">AT: too many clauses!</span>
+<p>You could strengthen mypy’s type rules to require that these untyped
+functions have some valid type they could be assigned which would cause
+the function to typecheck. This would prevent programs that pass the
+typechecker from having runtime type errors. We can call this
+strengthened type system mypy+.</p>
+<p>Since mypy+ has strictly more typing rules than mypy, we would expect
+the model to take longer to learn how to satisfy it. And indeed this is
+the case: We find that models learn to satisfy the mypy typechecker</p>
+<p>One explanation of why the model gets worse before it gets better is
+that the model first learns the concepts need to solve the task, then
+learns the language of python — its syntax, static (under mypy), and
+dynamic semantics, and then both.
+<span class="aside AT">AT: cite something here. grokking, double descent, interp?</span>
+Let’s make this more concrete.</p>
+<p>We say a model produces an answer that is “morally” (vs technically)
+correct if the code attempts to solve the problem asked of it. Each test
+case is paired with a regex that tests if the model output produces code
+that touches all of the relevant concepts.
+<span class="aside AS">AS: put an example here?</span> Here, we say the
+solution is “technically” correct if it passes <code>mypy</code>.</p>
+<figure id="fig:hl_moral">
+<img src="images/hl_mypy_vs_grep.svg"
+alt="Figure 3: A graph showing how often the Pythia 6.9b produces code that typechecks on the tests, vs produces code that shows true understanding." />
+<figcaption aria-hidden="true">Figure 3: A graph showing how often the
+Pythia 6.9b produces code that typechecks on the tests, vs produces code
+that shows true understanding.</figcaption>
+</figure>
+<h1 data-number="4" id="sec:probing"><span
+class="header-section-number">4</span> Measuring Nullability
+Understanding Internally</h1>
+<span class=aside>write this section</span>
+<h2 data-number="4.1"
+id="designing-prompts-to-extract-nullability-activations"><span
+class="header-section-number">4.1</span> Designing Prompts to Extract
+Nullability Activations</h2>
+<span class=aside>we can probably just make this a brief part of the related work</span>
+<p>At this point, we’ve figured out how to roughly measure nullability
+understanding in the output of various language models, but we still
+don’t know what their internal representations might look like or when
+they emerge. To do this, we’re going to bring in some ideas described in
+Zhou et al’s paper <a
+href="https://arxiv.org/abs/2310.01405">“Representation Engineering: A
+Top-Down Approach to AI Transparency”</a>.</p>
+<p>As language models predict each token in a text, they run their tuned
+circuits over all the previous text. Tokens are first embedded into a
+high-dimensional “token space”, and each layer of the transformer model
+is made up of many parallel circuits which transform the previous layers
+output into new embeddings in a new space. Each layer can look not just
+at the output of the layer directly previous, but actually all previous
+layers, through a channel called a residual stream.</p>
+<p>The paper presents two main approaches to interpreting a language
+model; circuit-based, and representation-based. Circuit based
+interpretability aims to pair down the network to a key set of circuits
+which are sufficient to complete a particular task; this allows
+practitioners to point to a particular part of the model and say “this
+is where &lt;task&gt; is done”, much like neuroscientists assign
+functionality to different parts of our brain.</p>
+<p>On the other hand, representation-based interpretability looks at the
+activation values across the network, and how they vary based on
+different inputs, to extract “representations” of particular concepts.
+The paper shows how representations can be extracted for concepts like
+“happiness”, “honesty”, and “fairness”. First, they construct many
+prompts which cause the model to act in a way aligned with the concept,
+and many which cause the model to act in a way aligned against the
+concept. For instance, they might prompt the model with “Pretend you’re
+a dishonest person. The Eiffel Tower is” and “Pretend you’re an honest
+person. The Eiffel Tower isr”. Then, they take the internal activations
+which correspond to each, and try to extract a high-dimensional vector
+which points towards the states which are aligned, and away from the
+states that are not aligned. This vector can then be used as a linear
+model to measure how much of the concept is present in the model at any
+given time (for honesty, this can be a lie-detector). They can also use
+it, and similar techniques, to control the amount of the concept in a
+response, making it more or less honest, or more or less fair.</p>
+<figure>
+<img src="images/zhou.png"
+alt="An excerpt from Zhou et al showing the reading outputs for several concepts" />
+<figcaption aria-hidden="true">An excerpt from Zhou et al showing the
+reading outputs for several concepts</figcaption>
+</figure>
+<p>In our setting, we were able to avoid dealing with the ambiguities of
+natural language by only prompting with code. We decided to stick to
+analyzing the nullability of individual variable occurrences, instead of
+analyzing every expression. Specifically, we tried to capture the
+concept “the variable I just generated refers to an nullable quantity”,
+so our prompts looked like:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_1() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> find_value(data: List[<span class="bu">int</span>], target: <span class="bu">int</span>) <span class="op">-&gt;</span> Optional[<span class="bu">int</span>]:</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> value <span class="kw">in</span> data:</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> value <span class="op">==</span> target:</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> value</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">None</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  data <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>]</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  target <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  result <span class="op">=</span> find_value(data, target)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> result</span></code></pre></div>
+<p>To generate these kinds of prompts, we started by asking a few
+different chat models to generate for us programs that made use of
+nullability . We prompted each model with:</p>
+<blockquote>
+<p>Generate me 100 typed python programs that use the Optional type,
+along with type annotations for any undefined functions that they use.
+Make sure that the programs are unique, and each involves at least eight
+lines of logic. Number each program from 1 to 100. Please put all the
+programs in a single file, with a main function that tests each. Don’t
+include any text before or after the code, just the code. I will be
+using mypy with the –strict option to check the code.</p>
+</blockquote>
+<p>We queried o1, o1-mini, deepseek-coder, and claude-sonnet using this
+prompt, and then combined programs from the output of all of them into a
+single file. Then, we took every function and class in the resulting
+code file, and created a file with it and any recursive dependencies and
+imports from the file. Finally, we took each variable read occurrence in
+each function, and generated a prompt with the tokens up to and
+including that variable read, and labeled it with whether or not the
+mypy-inferred type is an Optional.</p>
+<h2 data-number="4.2" id="reading-vector-extraction"><span
+class="header-section-number">4.2</span> Reading Vector Extraction</h2>
+<p>To start, let’s look at how previous works have extracted reading
+vectors from sample activations. In the Zhou representation engineering
+paper, the authors extract a reading vector from the contrastive pairs
+of activations using principal component analysis (PCA).</p>
+<p>First, they take each pair of honest and dishonest promptings for the
+same stimulus, and get the difference between them, creating a set of
+contrast vectors. They randomly flip some of these contrast vectors, so
+that overall the set will vary a lot along the direction of the
+contrast. Since PCA assumes that the data is centered around the origin,
+they then took the mean of all these vectors, and translated all the
+vectors backwards along the mean vector, to create a set with the same
+variances but centered around the origin.</p>
+<p>Next, they use the PCA analysis from the sklearn library to get a set
+of “component” vectors, where the vectors are orthogonal to each other
+and explain the maximum variance of the samples in each prefix of the
+list. Components in PCA are bidirectional (they can come out of the
+analysis in either reflection, and both are equally correct), so next
+they flip any component vectors that are pointing more towards the
+negative samples than the positive samples. Then, they take the first
+component, the most important one, and use it as their reading
+vector.</p>
+<p>Our method for prompt generation didn’t admit contrastive pairs like
+in the previous methods, but instead just a bunch of unconnected
+positive and negative examples. So instead of doing PCA on contrast
+vectors, we averaged the positive examples and the negative examples,
+and then took the difference of the averages as our base reading vector.
+This is called “mass mean probing” in the literature, and empirically
+has been shown to generalize better in high dimensional space than
+trying to learn a linear model through logistic regression.<a
+href="#fn7" class="footnote-ref" id="fnref7"
+role="doc-noteref"><sup>7</sup></a></p>
+<p>In this reading vector, the impact of each layer based on the
+magnitude of difference in that layer, instead of separate a notion of
+how “important” that layer is to differentiating positive and negative
+examples. So we decided to try a few different methods of normalizing
+these layers to improve their overall accuracy as a linear model:</p>
+<ul>
+<li>No normalization; just the projection across the average
+difference.</li>
+<li>Normalizing each layers vector to a uniform length</li>
+<li>Dividing by the average amount that each layer activates on the
+positives samples</li>
+<li>Dividing by the average absolute amount that each layer activates on
+the positive samples</li>
+<li>Dividing by the square root of the average of squares of layer
+activations</li>
+</ul>
+<p>And we found that no normalization actually did the best of all three
+scaling methods. In domains like this one where we have a lot less
+training data points then dimensions, what techniques will generalize
+well to the test data can be hard to predict.</p>
+<p>Prior work focused their probing on a single layer, often handpicked
+based on prior papers. In our experiments, we decided to probe
+<em>all</em> layers using a mass means probe, and learn which ones were
+most important from the data. We tested two methods for doing so -
+either allowing the magnitude of the difference of means vector to
+determine the importance of the layer in the final probe, or to learn
+coefficients for each layer using linear regression. We found that which
+method is more accurate on test data varies over both model size and
+number of training steps.</p>
+<figure id="fig:mm-vs-mmlr-sizes">
+<img src="images/mm-vs-mmlr.svg"
+alt="Figure 4: The performance of pure mass means probing vs mass means probing with linear regression for different Pythia model sizes. Binary-cross entropy is plotted, so lower is better." />
+<figcaption aria-hidden="true">Figure 4: The performance of pure mass
+means probing vs mass means probing with linear regression for different
+Pythia model sizes. Binary-cross entropy is plotted, so lower is
+better.</figcaption>
+</figure>
+<p>In Fig. <a href="#fig:mm-vs-mmlr-sizes">4</a>, we can see that pure
+mass means probing gives lower loss for smaller models (those with less
+than 410 million parameters), but that for larger models weighting
+layers using linear regression gives lower loss consistently.</p>
+<figure id="fig:mm-vs-mmlr-160m">
+<img src="images/mm-vs-mmlr-160m.svg"
+alt="Figure 5: The performance of the two probing methods on the Pythia 160m model for different numbers of pretraining steps. There are regions where pure mass means scaling is better, and regions where linear regression on layer weights is better." />
+<figcaption aria-hidden="true">Figure 5: The performance of the two
+probing methods on the Pythia 160m model for different numbers of
+pretraining steps. There are regions where pure mass means scaling is
+better, and regions where linear regression on layer weights is
+better.</figcaption>
+</figure>
+<p>In Figs. <a href="#fig:mm-vs-mmlr-160m">5</a>, <a
+href="#fig:mm-vs-mmlr-410">6</a>, we look at how these scaling methods
+perform for different amounts of pretraining, for the model sizes
+nearest the boundary. We see that relative merit of each scaling method
+can vary significantly over pretraining steps.</p>
+<figure id="fig:mm-vs-mmlr-410">
+<img src="images/mm-vs-mmlr-410m.svg"
+alt="Figure 6: The performance of the two probing methods on the Pythia 410m model for different numbers of pretraining steps. Pure mass means probing starts better, but is quickly overtaken by mass means probing with linear regression on layer weights." />
+<figcaption aria-hidden="true">Figure 6: The performance of the two
+probing methods on the Pythia 410m model for different numbers of
+pretraining steps. Pure mass means probing starts better, but is quickly
+overtaken by mass means probing with linear regression on layer
+weights.</figcaption>
+</figure>
+<h1 data-number="5" id="sec:results"><span
+class="header-section-number">5</span> Nullability Prediction Accuracy
+Across Training and Scale</h1>
+<p>In this section, we study the performance of our nullability probes
+across time and scale <span class="citation"
+data-cites="tigges24">(Tigges et al. 2024)</span>. We use a mass-means
+probe <span class="citation" data-cites="li24">(Li et al. 2024)</span>
+on all layers, with a linear regression determining the weights of each
+layer. <span class="citation" data-cites="li24">Li et al. (2024)</span>
+and <span class="citation" data-cites="zhou23">Zhou et al. (2023)</span>
+suggest that mass means probes are best for reading, while the direction
+perpendicular to the separating hyperplane is best for intervention.
+However, previous work leaves open the question of cross-layer weights.
+We use LR on the cross-layer weights because that is the probing method
+that we found works best overall.
+<span class="aside AT">AT: see section/appendix for further discussion</span>
+While we measured accuracy for every available Pythia model size, we
+exclude the smallest (14m) from this plot since it would exist entirely
+above the top of the plot.</p>
+<figure id="fig:models-and-steps">
+<img src="images/accuracy_during_pretraining.svg"
+alt="Figure 7: The performance, measured in binary cross-entropy, of each Pythia model size during pretraining. Since this graph is of loss, lower is better" />
+<figcaption aria-hidden="true">Figure 7: The performance, measured in
+binary cross-entropy, of each Pythia model size during pretraining.
+Since this graph is of loss, lower is better</figcaption>
+</figure>
+<p>In Fig. <a href="#fig:models-and-steps">7</a>, we plot loss against
+scale and time. As expected, we see that loss tends to decreases as
+models get bigger and are trained for longer. However, models with fewer
+than 1 billion parameters reach their minimum loss well before the end
+of training. This may be because the features beyond this point become
+more complex — less linear, or the represented features themselves
+represent more subtle concepts.
+<span class="aside AT">AT: speculation</span></p>
+<h1 data-number="6" id="related-work"><span
+class="header-section-number">6</span> Related Work</h1>
+<span class="aside AT">AT: mention the tigges paper on circuits across scale, the feng and steinhardt papers, etc</span>
+<p>As previously discussed, <a
+href="https://arxiv.org/abs/2310.01405">“Representation Engineering: A
+Top-Down Approach to AI Transparency”</a> by Zhou et al is the most
+closely related work, consolidating some research on representation
+interpretability with linear probes. We apply similar techniques, but to
+program semantics and dataflow instead of natural language.</p>
+<p>Several techniques exist for constructing linear probes, but after
+experimental measurement we followed the mass means probing from <a
+href="https://openreview.net/forum?id=CeJEfNKstt">The Geometry of Truth:
+Emergent Linear Structure in Large Language Model Representations of
+True/False Datasets</a> by Marks and Tegmark. The paper discusses
+several reasons why mass mean probing might outperform linear
+regression.</p>
+<h1 class="unnumbered" id="references">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent"
+data-entry-spacing="0" role="list">
+<div id="ref-biderman23" class="csl-entry" role="listitem">
+Biderman, Stella, Hailey Schoelkopf, Quentin Anthony, Herbie Bradley,
+Kyle O’Brien, Eric Hallahan, Mohammad Aflah Khan, et al. 2023.
+<span>“Pythia: <span>A Suite</span> for <span>Analyzing Large Language
+Models Across Training</span> and <span>Scaling</span>.”</span> arXiv.
+<a
+href="https://doi.org/10.48550/arXiv.2304.01373">https://doi.org/10.48550/arXiv.2304.01373</a>.
+</div>
+<div id="ref-feng24binding" class="csl-entry" role="listitem">
+Feng, Jiahai, and Jacob Steinhardt. 2024. <span>“How Do <span>Language
+Models Bind Entities</span> in <span>Context</span>?”</span> arXiv. <a
+href="https://doi.org/10.48550/arXiv.2310.17191">https://doi.org/10.48550/arXiv.2310.17191</a>.
+</div>
+<div id="ref-li24" class="csl-entry" role="listitem">
+Li, Kenneth, Oam Patel, Fernanda Viégas, Hanspeter Pfister, and Martin
+Wattenberg. 2024. <span>“Inference-<span>Time Intervention</span>:
+<span>Eliciting Truthful Answers</span> from a <span>Language
+Model</span>.”</span> arXiv. <a
+href="https://doi.org/10.48550/arXiv.2306.03341">https://doi.org/10.48550/arXiv.2306.03341</a>.
+</div>
+<div id="ref-tigges24" class="csl-entry" role="listitem">
+Tigges, Curt, Michael Hanna, Qinan Yu, and Stella Biderman. 2024.
+<span>“<span>LLM Circuit Analyses Are Consistent Across Training</span>
+and <span>Scale</span>.”</span> arXiv. <a
+href="https://doi.org/10.48550/arXiv.2407.10827">https://doi.org/10.48550/arXiv.2407.10827</a>.
+</div>
+<div id="ref-zhou23" class="csl-entry" role="listitem">
+Zhou, Jeffrey, Tianjian Lu, Swaroop Mishra, Siddhartha Brahma, Sujoy
+Basu, Yi Luan, Denny Zhou, and Le Hou. 2023.
+<span>“Instruction-<span>Following Evaluation</span> for <span>Large
+Language Models</span>.”</span> arXiv. <a
+href="https://doi.org/10.48550/arXiv.2311.07911">https://doi.org/10.48550/arXiv.2311.07911</a>.
+</div>
+</div>
+<h1 class="unnumbered" id="appendicies">Appendicies</h1>
+<h1 class="unnumbered" id="nullability-in-python">A Nullability In
+Python</h1>
+<p>To see how nullability appears in Python, Let’s look at an example
+program in Python that uses nullability:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> User:</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, name: <span class="bu">str</span>, email: Optional[<span class="bu">str</span>]) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>         <span class="va">self</span>.name <span class="op">=</span> name</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.email <span class="op">=</span> email</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_user_email(user: Optional[User]) <span class="op">-&gt;</span> Optional[<span class="bu">str</span>]:</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> user <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> user.email <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> user.email</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>          <span class="cf">return</span> <span class="va">None</span></span></code></pre></div>
+<p>In the <code>get_user_email</code> function above, we can see from
+the type signature that it takes a nullable User value, and returns an
+nullable string. The first thing the function does is check if the input
+<code>user</code> is None or not. This program was actually generated by
+o1-mini, so we can already see that the model understands that the user
+object is nullable, and that it needs to be checked for None-ness before
+anything else can be done.</p>
+<p>We can say that there are five variable “occurances” in the program,
+each of which can be either nullable or not. There’s the first
+<code>user</code> in the if statement, the second <code>user</code> to
+the right of the <code>and</code> in <code>user.email</code>, there’s
+the <code>user.email</code> itself, the <code>user</code> on the second
+line, and finally the <code>user.email</code> on the second line. If we
+use Python’s typechecker, mypy, to check the types of each of these
+occurrences, we find that they have type <code>Optional[User]</code>,
+<code>User</code>, <code>Optional[str]</code>, <code>User</code>, and
+<code>str</code> respectively. That is, the first and third are
+nullable, and the rest are not.</p>
+<h1 class="unnumbered" id="sec:formalrules">B Python Subset Syntax and
+Typing Rules</h1>
+<p>Here we define the syntax and semantics of the Python subset we work
+with:</p>
 <span class="math display">\[\begin{aligned}
 \left[Program\right]  =&amp; [\epsilon] {\huge|}
 \left[\begin{array}{l}Stmt\\Program\end{array}\right]\\
@@ -636,443 +1069,10 @@ p
 \end{array}\right]
 \vartriangleright \text{ok}
 \end{gather}\]</span></p>
-<p>We begin with a “skyline” estimate of model understanding of
-nullability (a la <span class="citation" data-cites="feng24binding">Feng
-and Steinhardt (2024)</span>). We measure how well different models can
-understand the concept. To do this, we have the model complete simple
-partial programs that require an understanding of nullability. We refer
-to this suite of programs as <code>NullabilityEval</code>. For
-example,</p>
-<p><em>Test 4</em>:</p>
-<div class="sourceCode" id="cb9"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  some_numbers <span class="op">=</span> [<span class="dv">1</span>, <span class="op">-</span><span class="dv">4</span>, <span class="va">None</span>, <span class="op">-</span><span class="dv">3</span>, <span class="dv">10</span>, <span class="op">-</span><span class="dv">1</span>, <span class="va">None</span>, <span class="va">None</span>, <span class="dv">8</span>]</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  result: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> num <span class="kw">in</span> some_numbers:</span></code></pre></div>
-<p>The program<a href="#fn2" class="footnote-ref" id="fnref2"
-role="doc-noteref"><sup>2</sup></a> is constructed such that there are a
-very limited number of valid next lines in the program, and all of them
-demonstrate some knowledge of the concept of nullability.<a href="#fn3"
-class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
-<p>This test is on the simpler side, but we can challenge the model
-more, adding layers of indirection between the source and sink of
-nullable values, testing the model’s <em>interprocedural</em>
-understanding.</p>
-<p>We can also test how well models understand type annotations
-separately; since the inclusion of type annotations in Python is not
-required<a href="#fn4" class="footnote-ref" id="fnref4"
-role="doc-noteref"><sup>4</sup></a>, most of the Python code used as
-training data operates in an untyped fashion, so models may understand
-the dynamic flow of nullable values but not their static type
-annotations. Test 5, below, tests the model’s understanding of
-<code>Optional</code> types annotations. The trailing colon makes a type
-expression the only valid completion<a href="#fn5" class="footnote-ref"
-id="fnref5" role="doc-noteref"><sup>5</sup></a></p>
-<p><em>Test 5</em>:</p>
-<div class="sourceCode" id="cb10"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_48() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  number: Optional[<span class="bu">int</span>] <span class="op">=</span> <span class="va">None</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  square <span class="op">=</span> get_square(number)</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> square <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f&quot;Square of the number is </span><span class="sc">{</span>square<span class="sc">}</span><span class="ss">&quot;</span>)</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">&quot;No number provided to square&quot;</span>)</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_square(number:</span></code></pre></div>
-<p>All of the tests in this benchmark suite are composed of three
-functions or less, where the largest function is seven lines long.</p>
-<p>We measure the difficulty of these tests by measuring how models of
-different sizes perform. We pay particular focus to the Pythia model
-suite<span class="citation" data-cites="biderman23">(Biderman et al.
-2023)</span>, as they have checkpoints available across training runs
-and various scales. For measuring performance at larger sizes, we’ve
-included Qwen2.5-Coder-32B<span class="aside AT">AT: cite</span>, Llama
-3.1 405B Instruct<span class="aside AT">AT: cite</span>, and DeepSeek-V3
-(671B)<span class="aside AT">AT: cite</span>. Below, you can see the
-number of passing tests for each model.
-<span class=aside>more through exploration of why?</span></p>
-<figure id="fig:hl_scale">
-<img src="images/hl_model_results.svg"
-alt="Figure 1: A bar graph showing how several sizes of model perform on the high-level nullability tests" />
-<figcaption aria-hidden="true">Figure 1: A bar graph showing how several
-sizes of model perform on the high-level nullability tests</figcaption>
-</figure>
-<p>In Fig. <a href="#fig:hl_scale">1</a>, we can see the number of
-passing tests for each model. We can see that generally models get
-better with scale.
-<span class=aside>I don't think this footnote is clear enough to add anything</span>
-<a href="#fn6" class="footnote-ref" id="fnref6"
-role="doc-noteref"><sup>6</sup></a> Model performance on these tests is
-approximately logarithmic in model size: models of 2.8 billion
-parameters can pass about half the tests, but it takes more than 405
-billion parameters to pass all of the tests.
-<span class=aside>interesting observation; seems to me that this is actually the case for all post-training evals. hmm, acutally it's also the case for pretraining loss --- see classic scaling laws papers: Kaplan et al, Chincilla, etc</span></p>
-<p>Next, we want to understand the training dynamics at play here.
-143000. Below we can see how Pythia 6.9b performs on the tests during
-training from step 2 to
-143000:<span class=aside>let's use the same axes scaling at the tigges paper</span></p>
-<figure id="fig:hl_time">
-<img src="images/hl_revision_results.svg"
-alt="Figure 2: A line graph showing how the performance of the Pythia 6.9 model changes during training" />
-<figcaption aria-hidden="true">Figure 2: A line graph showing how the
-performance of the Pythia 6.9 model changes during training</figcaption>
-</figure>
-<p>Again, performance does not increase monotonically. This plot is
-quite noisy, so in the sequel, we will show smoothed<a href="#fn7"
-class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>
-charts.</p>
-<h2 data-number="3.1" id="sec:grok"><span
-class="header-section-number">3.1</span> Local vs Non-Local Type
-Correctness</h2>
-<p>For most of our tests, writing correct code simply requires following
-the rules of Python’s mypy type system. This type system requires that
-types be internally consistent within functions, and match function type
-signatures if they exist. But six of our tests are different, because
-they involve functions that are <em>not</em> annotated with type
-signatures. Under mypy, these functions are allowed to do almost
-anything with their types. But at runtime, using values of the wrong
-type with these functions will result in a type error.</p>
-<span class="aside AT">AT: too many clauses!</span>
-<p>You could strengthen mypy’s type rules to require that these untyped
-functions have some valid type they could be assigned which would cause
-the function to typecheck. This would prevent programs that pass the
-typechecker from having runtime type errors. We can call this
-strengthened type system mypy+.</p>
-<p>Since mypy+ has strictly more typing rules than mypy, we would expect
-the model to take longer to learn how to satisfy it. And indeed this is
-the case: We find that models learn to satisfy the mypy typechecker</p>
-<p>One explanation of why the model gets worse before it gets better is
-that the model first learns the concepts need to solve the task, then
-learns the language of python — its syntax, static (under mypy), and
-dynamic semantics, and then both.
-<span class="aside AT">AT: cite something here. grokking, double descent, interp?</span>
-Let’s make this more concrete.</p>
-<p>We say a model produces an answer that is “morally” (vs technically)
-correct if the code attempts to solve the problem asked of it. Each test
-case is paired with a regex that tests if the model output produces code
-that touches all of the relevant concepts.
-<span class="aside AS">AS: put an example here?</span> Here, we say the
-solution is “technically” correct if it passes <code>mypy</code>.</p>
-<figure id="fig:hl_moral">
-<img src="images/hl_mypy_vs_grep.svg"
-alt="Figure 3: A graph showing how often the Pythia 6.9b produces code that typechecks on the tests, vs produces code that shows true understanding." />
-<figcaption aria-hidden="true">Figure 3: A graph showing how often the
-Pythia 6.9b produces code that typechecks on the tests, vs produces code
-that shows true understanding.</figcaption>
-</figure>
-<h1 data-number="4" id="sec:probing"><span
-class="header-section-number">4</span> Measuring Nullability
-Understanding Internally</h1>
-<span class=aside>write this section</span>
-<h2 data-number="4.1"
-id="designing-prompts-to-extract-nullability-activations"><span
-class="header-section-number">4.1</span> Designing Prompts to Extract
-Nullability Activations</h2>
-<span class=aside>we can probably just make this a brief part of the related work</span>
-<p>At this point, we’ve figured out how to roughly measure nullability
-understanding in the output of various language models, but we still
-don’t know what their internal representations might look like or when
-they emerge. To do this, we’re going to bring in some ideas described in
-Zhou et al’s paper <a
-href="https://arxiv.org/abs/2310.01405">“Representation Engineering: A
-Top-Down Approach to AI Transparency”</a>.</p>
-<p>As language models predict each token in a text, they run their tuned
-circuits over all the previous text. Tokens are first embedded into a
-high-dimensional “token space”, and each layer of the transformer model
-is made up of many parallel circuits which transform the previous layers
-output into new embeddings in a new space. Each layer can look not just
-at the output of the layer directly previous, but actually all previous
-layers, through a channel called a residual stream.</p>
-<p>The paper presents two main approaches to interpreting a language
-model; circuit-based, and representation-based. Circuit based
-interpretability aims to pair down the network to a key set of circuits
-which are sufficient to complete a particular task; this allows
-practitioners to point to a particular part of the model and say “this
-is where &lt;task&gt; is done”, much like neuroscientists assign
-functionality to different parts of our brain.</p>
-<p>On the other hand, representation-based interpretability looks at the
-activation values across the network, and how they vary based on
-different inputs, to extract “representations” of particular concepts.
-The paper shows how representations can be extracted for concepts like
-“happiness”, “honesty”, and “fairness”. First, they construct many
-prompts which cause the model to act in a way aligned with the concept,
-and many which cause the model to act in a way aligned against the
-concept. For instance, they might prompt the model with “Pretend you’re
-a dishonest person. The Eiffel Tower is” and “Pretend you’re an honest
-person. The Eiffel Tower isr”. Then, they take the internal activations
-which correspond to each, and try to extract a high-dimensional vector
-which points towards the states which are aligned, and away from the
-states that are not aligned. This vector can then be used as a linear
-model to measure how much of the concept is present in the model at any
-given time (for honesty, this can be a lie-detector). They can also use
-it, and similar techniques, to control the amount of the concept in a
-response, making it more or less honest, or more or less fair.</p>
-<figure>
-<img src="images/zhou.png"
-alt="An excerpt from Zhou et al showing the reading outputs for several concepts" />
-<figcaption aria-hidden="true">An excerpt from Zhou et al showing the
-reading outputs for several concepts</figcaption>
-</figure>
-<p>In our setting, we were able to avoid dealing with the ambiguities of
-natural language by only prompting with code. We decided to stick to
-analyzing the nullability of individual variable occurrences, instead of
-analyzing every expression. Specifically, we tried to capture the
-concept “the variable I just generated refers to an nullable quantity”,
-so our prompts looked like:</p>
-<div class="sourceCode" id="cb11"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_1() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> find_value(data: List[<span class="bu">int</span>], target: <span class="bu">int</span>) <span class="op">-&gt;</span> Optional[<span class="bu">int</span>]:</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> value <span class="kw">in</span> data:</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> value <span class="op">==</span> target:</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> value</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">None</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  data <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>]</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  target <span class="op">=</span> <span class="dv">3</span></span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  result <span class="op">=</span> find_value(data, target)</span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> result</span></code></pre></div>
-<p>To generate these kinds of prompts, we started by asking a few
-different chat models to generate for us programs that made use of
-nullability . We prompted each model with:</p>
-<blockquote>
-<p>Generate me 100 typed python programs that use the Optional type,
-along with type annotations for any undefined functions that they use.
-Make sure that the programs are unique, and each involves at least eight
-lines of logic. Number each program from 1 to 100. Please put all the
-programs in a single file, with a main function that tests each. Don’t
-include any text before or after the code, just the code. I will be
-using mypy with the –strict option to check the code.</p>
-</blockquote>
-<p>We queried o1, o1-mini, deepseek-coder, and claude-sonnet using this
-prompt, and then combined programs from the output of all of them into a
-single file. Then, we took every function and class in the resulting
-code file, and created a file with it and any recursive dependencies and
-imports from the file. Finally, we took each variable read occurrence in
-each function, and generated a prompt with the tokens up to and
-including that variable read, and labeled it with whether or not the
-mypy-inferred type is an Optional.</p>
-<h2 data-number="4.2" id="reading-vector-extraction"><span
-class="header-section-number">4.2</span> Reading Vector Extraction</h2>
-<p>To start, let’s look at how previous works have extracted reading
-vectors from sample activations. In the Zhou representation engineering
-paper, the authors extract a reading vector from the contrastive pairs
-of activations using principal component analysis (PCA).</p>
-<p>First, they take each pair of honest and dishonest promptings for the
-same stimulus, and get the difference between them, creating a set of
-contrast vectors. They randomly flip some of these contrast vectors, so
-that overall the set will vary a lot along the direction of the
-contrast. Since PCA assumes that the data is centered around the origin,
-they then took the mean of all these vectors, and translated all the
-vectors backwards along the mean vector, to create a set with the same
-variances but centered around the origin.</p>
-<p>Next, they use the PCA analysis from the sklearn library to get a set
-of “component” vectors, where the vectors are orthogonal to each other
-and explain the maximum variance of the samples in each prefix of the
-list. Components in PCA are bidirectional (they can come out of the
-analysis in either reflection, and both are equally correct), so next
-they flip any component vectors that are pointing more towards the
-negative samples than the positive samples. Then, they take the first
-component, the most important one, and use it as their reading
-vector.</p>
-<p>Our method for prompt generation didn’t admit contrastive pairs like
-in the previous methods, but instead just a bunch of unconnected
-positive and negative examples. So instead of doing PCA on contrast
-vectors, we averaged the positive examples and the negative examples,
-and then took the difference of the averages as our base reading vector.
-This is called “mass mean probing” in the literature, and empirically
-has been shown to generalize better in high dimensional space than
-trying to learn a linear model through logistic regression.<a
-href="#fn8" class="footnote-ref" id="fnref8"
-role="doc-noteref"><sup>8</sup></a></p>
-<p>In this reading vector, the impact of each layer based on the
-magnitude of difference in that layer, instead of separate a notion of
-how “important” that layer is to differentiating positive and negative
-examples. So we decided to try a few different methods of normalizing
-these layers to improve their overall accuracy as a linear model:</p>
-<ul>
-<li>No normalization; just the projection across the average
-difference.</li>
-<li>Normalizing each layers vector to a uniform length</li>
-<li>Dividing by the average amount that each layer activates on the
-positives samples</li>
-<li>Dividing by the average absolute amount that each layer activates on
-the positive samples</li>
-<li>Dividing by the square root of the average of squares of layer
-activations</li>
-</ul>
-<p>And we found that no normalization actually did the best of all three
-scaling methods. In domains like this one where we have a lot less
-training data points then dimensions, what techniques will generalize
-well to the test data can be hard to predict.</p>
-<p>Prior work focused their probing on a single layer, often handpicked
-based on prior papers. In our experiments, we decided to probe
-<em>all</em> layers using a mass means probe, and learn which ones were
-most important from the data. We tested two methods for doing so -
-either allowing the magnitude of the difference of means vector to
-determine the importance of the layer in the final probe, or to learn
-coefficients for each layer using linear regression. We found that which
-method is more accurate on test data varies over both model size and
-number of training steps.</p>
-<figure id="fig:mm-vs-mmlr-sizes">
-<img src="images/mm-vs-mmlr.svg"
-alt="Figure 4: The performance of pure mass means probing vs mass means probing with linear regression for different Pythia model sizes. Binary-cross entropy is plotted, so lower is better." />
-<figcaption aria-hidden="true">Figure 4: The performance of pure mass
-means probing vs mass means probing with linear regression for different
-Pythia model sizes. Binary-cross entropy is plotted, so lower is
-better.</figcaption>
-</figure>
-<p>In Fig. <a href="#fig:mm-vs-mmlr-sizes">4</a>, we can see that pure
-mass means probing gives lower loss for smaller models (those with less
-than 410 million parameters), but that for larger models weighting
-layers using linear regression gives lower loss consistently.</p>
-<figure id="fig:mm-vs-mmlr-160m">
-<img src="images/mm-vs-mmlr-160m.svg"
-alt="Figure 5: The performance of the two probing methods on the Pythia 160m model for different numbers of pretraining steps. There are regions where pure mass means scaling is better, and regions where linear regression on layer weights is better." />
-<figcaption aria-hidden="true">Figure 5: The performance of the two
-probing methods on the Pythia 160m model for different numbers of
-pretraining steps. There are regions where pure mass means scaling is
-better, and regions where linear regression on layer weights is
-better.</figcaption>
-</figure>
-<p>In Figs. <a href="#fig:mm-vs-mmlr-160m">5</a>, <a
-href="#fig:mm-vs-mmlr-410">6</a>, we look at how these scaling methods
-perform for different amounts of pretraining, for the model sizes
-nearest the boundary. We see that relative merit of each scaling method
-can vary significantly over pretraining steps.</p>
-<figure id="fig:mm-vs-mmlr-410">
-<img src="images/mm-vs-mmlr-410m.svg"
-alt="Figure 6: The performance of the two probing methods on the Pythia 410m model for different numbers of pretraining steps. Pure mass means probing starts better, but is quickly overtaken by mass means probing with linear regression on layer weights." />
-<figcaption aria-hidden="true">Figure 6: The performance of the two
-probing methods on the Pythia 410m model for different numbers of
-pretraining steps. Pure mass means probing starts better, but is quickly
-overtaken by mass means probing with linear regression on layer
-weights.</figcaption>
-</figure>
-<h1 data-number="5" id="sec:results"><span
-class="header-section-number">5</span> Nullability Prediction Accuracy
-Across Training and Scale</h1>
-<p>In this section, we study the performance of our nullability probes
-across time and scale <span class="citation"
-data-cites="tigges24">(Tigges et al. 2024)</span>. We use a mass-means
-probe <span class="citation" data-cites="li24">(Li et al. 2024)</span>
-on all layers, with a linear regression determining the weights of each
-layer. <span class="citation" data-cites="li24">Li et al. (2024)</span>
-and <span class="citation" data-cites="zhou23">Zhou et al. (2023)</span>
-suggest that mass means probes are best for reading, while the direction
-perpendicular to the separating hyperplane is best for intervention.
-However, previous work leaves open the question of cross-layer weights.
-We use LR on the cross-layer weights because that is the probing method
-that we found works best overall.
-<span class="aside AT">AT: see section/appendix for further discussion</span>
-While we measured accuracy for every available Pythia model size, we
-exclude the smallest (14m) from this plot since it would exist entirely
-above the top of the plot.</p>
-<figure id="fig:models-and-steps">
-<img src="images/accuracy_during_pretraining.svg"
-alt="Figure 7: The performance, measured in binary cross-entropy, of each Pythia model size during pretraining. Since this graph is of loss, lower is better" />
-<figcaption aria-hidden="true">Figure 7: The performance, measured in
-binary cross-entropy, of each Pythia model size during pretraining.
-Since this graph is of loss, lower is better</figcaption>
-</figure>
-<p>In Fig. <a href="#fig:models-and-steps">7</a>, we plot loss against
-scale and time. As expected, we see that loss tends to decreases as
-models get bigger and are trained for longer. However, models with fewer
-than 1 billion parameters reach their minimum loss well before the end
-of training. This may be because the features beyond this point become
-more complex — less linear, or the represented features themselves
-represent more subtle concepts.
-<span class="aside AT">AT: speculation</span></p>
-<h1 data-number="6" id="related-work"><span
-class="header-section-number">6</span> Related Work</h1>
-<span class="aside AT">AT: mention the tigges paper on circuits across scale, the feng and steinhardt papers, etc</span>
-<p>As previously discussed, <a
-href="https://arxiv.org/abs/2310.01405">“Representation Engineering: A
-Top-Down Approach to AI Transparency”</a> by Zhou et al is the most
-closely related work, consolidating some research on representation
-interpretability with linear probes. We apply similar techniques, but to
-program semantics and dataflow instead of natural language.</p>
-<p>Several techniques exist for constructing linear probes, but after
-experimental measurement we followed the mass means probing from <a
-href="https://openreview.net/forum?id=CeJEfNKstt">The Geometry of Truth:
-Emergent Linear Structure in Large Language Model Representations of
-True/False Datasets</a> by Marks and Tegmark. The paper discusses
-several reasons why mass mean probing might outperform linear
-regression.</p>
-<h1 class="unnumbered" id="references">References</h1>
-<div id="refs" class="references csl-bib-body hanging-indent"
-data-entry-spacing="0" role="list">
-<div id="ref-biderman23" class="csl-entry" role="listitem">
-Biderman, Stella, Hailey Schoelkopf, Quentin Anthony, Herbie Bradley,
-Kyle O’Brien, Eric Hallahan, Mohammad Aflah Khan, et al. 2023.
-<span>“Pythia: <span>A Suite</span> for <span>Analyzing Large Language
-Models Across Training</span> and <span>Scaling</span>.”</span> arXiv.
-<a
-href="https://doi.org/10.48550/arXiv.2304.01373">https://doi.org/10.48550/arXiv.2304.01373</a>.
-</div>
-<div id="ref-feng24binding" class="csl-entry" role="listitem">
-Feng, Jiahai, and Jacob Steinhardt. 2024. <span>“How Do <span>Language
-Models Bind Entities</span> in <span>Context</span>?”</span> arXiv. <a
-href="https://doi.org/10.48550/arXiv.2310.17191">https://doi.org/10.48550/arXiv.2310.17191</a>.
-</div>
-<div id="ref-li24" class="csl-entry" role="listitem">
-Li, Kenneth, Oam Patel, Fernanda Viégas, Hanspeter Pfister, and Martin
-Wattenberg. 2024. <span>“Inference-<span>Time Intervention</span>:
-<span>Eliciting Truthful Answers</span> from a <span>Language
-Model</span>.”</span> arXiv. <a
-href="https://doi.org/10.48550/arXiv.2306.03341">https://doi.org/10.48550/arXiv.2306.03341</a>.
-</div>
-<div id="ref-tigges24" class="csl-entry" role="listitem">
-Tigges, Curt, Michael Hanna, Qinan Yu, and Stella Biderman. 2024.
-<span>“<span>LLM Circuit Analyses Are Consistent Across Training</span>
-and <span>Scale</span>.”</span> arXiv. <a
-href="https://doi.org/10.48550/arXiv.2407.10827">https://doi.org/10.48550/arXiv.2407.10827</a>.
-</div>
-<div id="ref-zhou23" class="csl-entry" role="listitem">
-Zhou, Jeffrey, Tianjian Lu, Swaroop Mishra, Siddhartha Brahma, Sujoy
-Basu, Yi Luan, Denny Zhou, and Le Hou. 2023.
-<span>“Instruction-<span>Following Evaluation</span> for <span>Large
-Language Models</span>.”</span> arXiv. <a
-href="https://doi.org/10.48550/arXiv.2311.07911">https://doi.org/10.48550/arXiv.2311.07911</a>.
-</div>
-</div>
-<h1 class="unnumbered" id="appendicies">Appendicies</h1>
-<h1 class="unnumbered" id="nullability-in-python">A Nullability In
-Python</h1>
-<p>To see how nullability appears in Python, Let’s look at an example
-program in Python that uses nullability:</p>
-<div class="sourceCode" id="cb12"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> User:</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, name: <span class="bu">str</span>, email: Optional[<span class="bu">str</span>]) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>         <span class="va">self</span>.name <span class="op">=</span> name</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.email <span class="op">=</span> email</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_user_email(user: Optional[User]) <span class="op">-&gt;</span> Optional[<span class="bu">str</span>]:</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> user <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> user.email <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> user.email</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>          <span class="cf">return</span> <span class="va">None</span></span></code></pre></div>
-<p>In the <code>get_user_email</code> function above, we can see from
-the type signature that it takes a nullable User value, and returns an
-nullable string. The first thing the function does is check if the input
-<code>user</code> is None or not. This program was actually generated by
-o1-mini, so we can already see that the model understands that the user
-object is nullable, and that it needs to be checked for None-ness before
-anything else can be done.</p>
-<p>We can say that there are five variable “occurances” in the program,
-each of which can be either nullable or not. There’s the first
-<code>user</code> in the if statement, the second <code>user</code> to
-the right of the <code>and</code> in <code>user.email</code>, there’s
-the <code>user.email</code> itself, the <code>user</code> on the second
-line, and finally the <code>user.email</code> on the second line. If we
-use Python’s typechecker, mypy, to check the types of each of these
-occurrences, we find that they have type <code>Optional[User]</code>,
-<code>User</code>, <code>Optional[str]</code>, <code>User</code>, and
-<code>str</code> respectively. That is, the first and third are
-nullable, and the rest are not.</p>
 <h1 class="unnumbered"
-id="detailed-high-level-nullability-test-results">B Detailed High-Level
+id="detailed-high-level-nullability-test-results">C Detailed High-Level
 Nullability Test Results</h1>
-<h2 class="unnumbered" id="across-scale">B.1 Across Scale</h2>
+<h2 class="unnumbered" id="across-scale">C.1 Across Scale</h2>
 <p>You can see in fig. <a href="#fig:hl_scale">1</a> that the smallest
 three models don’t pass any test. After that, the trend line for tests
 passed goes upwards, but it’s not monotonic: Pythia 410m passes only one
@@ -1109,7 +1109,7 @@ by Pythia 12b is the identify function, returning None when the input is
 None and returning a string when the input is a string. Neither of these
 cases is correct, as the main function expects this to return a Number
 that can be added to one.</p>
-<h2 class="unnumbered" id="across-time">B.2 Across Time</h2>
+<h2 class="unnumbered" id="across-time">C.2 Across Time</h2>
 <p>We say in fig. <a href="#fig:hl_time">2</a> that while the model
 generally gets better at passing these tests during training, the
 performance is not always increasing. Zooming in on a particular test,
@@ -1151,7 +1151,7 @@ that the value parameter is nullable at step 104000, but “forgets” it
 during further training. It regains the ability to pass the test at
 several points during training, but by the end of training, it’s back to
 treating <code>value</code> as if it was always a string.</p>
-<h2 class="unnumbered" id="common-mistakes">B.3 Common Mistakes</h2>
+<h2 class="unnumbered" id="common-mistakes">C.3 Common Mistakes</h2>
 <p>As expected, type annotations are particularly difficult for these
 models. When asked to complete the type of get_square in the following
 code, no model in the Pythia series can successfully output the Optional
@@ -1225,7 +1225,7 @@ likely has a bias from its training data that functions called
 <code>count_chars</code> always take non-nullable strings. Similarly,
 when test 4 is changed so that process_values becomes string_complexity,
 it goes from consistently passing to almost always failing.</p>
-<h1 class="unnumbered" id="mass-mean-probing-vs-linear-regression">C
+<h1 class="unnumbered" id="mass-mean-probing-vs-linear-regression">D
 Mass Mean Probing vs Linear Regression</h1>
 <p>We were initially very surprised to find that mass means probing
 would perform better than linear regression. After all, linear
@@ -1239,18 +1239,14 @@ outperformed linear regression on the test data.</p>
 role="doc-endnotes">
 <hr />
 <ol>
-<li id="fn1"><p>Python allows newlines and semicolons to separate
-statements. In this grammer we’ll show semicolons, but in all cases they
-can be replaced with a newline<a href="#fnref1" class="footnote-back"
-role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p> This partial program is only four lines, with type
+<li id="fn1"><p> This partial program is only four lines, with type
 annotations. A <code>some_numbers</code> array is created that includes
 positive numbers, negative numbers, and None values, giving it type
 <code>Optional[int]</code>. A list <code>result</code> is constructed to
 give the model a sense of dataflow, and then a loop loops over
-<code>some_numbers</code>.<a href="#fnref2" class="footnote-back"
+<code>some_numbers</code>.<a href="#fnref1" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>The loop indicates that the next few lines need to
+<li id="fn2"><p>The loop indicates that the next few lines need to
 process <code>num</code> in some way, and the fact that it comes from
 <code>some_numbers</code> means it has the type
 <code>Optional[int]</code>. <code>num</code> can’t be directly appended
@@ -1268,28 +1264,28 @@ we can use this program to test models for nullability understanding by
 asking them to complete the program another lines, then see if they
 produce something that matches these valid lines with the regular
 expression <code>num\s*(is\s*(not)?|==)\s*None|isinstance\(num</code>.<a
-href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn4"><p>Technically this is known as “Optional typing”, but
+href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Technically this is known as “Optional typing”, but
 that’s confusing in the context of this post. Not to be confused with
-Gradual Typing, as introduced by Siek et al.<a href="#fnref4"
+Gradual Typing, as introduced by Siek et al.<a href="#fnref3"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn5"><p>This is because function declarations with a colon and
+<li id="fn4"><p>This is because function declarations with a colon and
 no type, like <code>def fn(x:)</code> are not valid python. Since we’ve
 already seen a usage of <code>get_square</code> that is passed a None
 value, it wouldn’t be type-valid to complete the program with just
 <code>int</code>. So a model can be tested on its understanding of
 <code>Optional</code> annotations by seeing if its completion of the
-partial program includes <code>Optional[int]</code>.<a href="#fnref5"
+partial program includes <code>Optional[int]</code>.<a href="#fnref4"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn6"><p>Pythia 12b performs worse than its 6.9b variant, though
+<li id="fn5"><p>Pythia 12b performs worse than its 6.9b variant, though
 this might be due to under-training at that size. Qwen 32B also performs
 about as well as Pythia 6.9b, it’s not clear if this is due to model
-architecture or something else.<a href="#fnref6" class="footnote-back"
+architecture or something else.<a href="#fnref5" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn7"><p>rolling average with a window size of 5<a href="#fnref7"
+<li id="fn6"><p>rolling average with a window size of 5<a href="#fnref6"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn8"><p>see the appendix section “Mass Mean Probing vs Linear
-Regression” for more on this<a href="#fnref8" class="footnote-back"
+<li id="fn7"><p>see the appendix section “Mass Mean Probing vs Linear
+Regression” for more on this<a href="#fnref7" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>

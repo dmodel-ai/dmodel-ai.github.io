@@ -296,7 +296,7 @@ they can be replaced with a newline]:
 \texttt{if $expr$:}\\
 \quad Program
 \end{array}\right]\\
-[Expr]       =& [Ident] | [Ident\texttt{ }Op\texttt{ }Ident] | [Ident \texttt{(} ParamsList \texttt{)}] \\
+[Expr]       =& [Ident] | [Expr\texttt{ }Op\texttt{ }Expr] | [Ident \texttt{(} ParamsList \texttt{)}] \\
               &| [Constant] | [\texttt{[$ListConts$]}] | [\texttt{[]}]\\
 [ParamsList] =& [\epsilon] | [Expr] | [Expr\texttt{, }ParamsList]\\
 [Op]         =& [\texttt{+}] | [\texttt{-}] | [\texttt{*}] | [\texttt{/}] | [\texttt{<}] | [\texttt{>}] | [\texttt{<=}] | [\texttt{>=}] | [\texttt{is}] | [\texttt{is not}] | [\texttt{==}] | [\texttt{!=}]\\

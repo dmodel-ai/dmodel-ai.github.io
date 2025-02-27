@@ -312,7 +312,8 @@ typing in this language. There's $\Gamma \vdash \left[p\right]
 \vartriangleright \texttt{ok}$, which says that the program $p$ is
 well typed in environment $\Gamma$. And there's $\Gamma \vdash e : t$,
 which says that $e$ is well typed with type $t$ in environment
-$\Gamma$.
+$\Gamma$. When we exclude the \Gamma, we mean that the judgement is
+true under any typing environment, including the empty one.
 
 $$
 \tag{Const}

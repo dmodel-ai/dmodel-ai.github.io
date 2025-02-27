@@ -296,8 +296,9 @@ they can be replaced with a newline]:
 \texttt{if $expr$:}\\
 \quad Program
 \end{array}\right]\\
-[Expr]       =& [Ident] | [Expr\texttt{ }Op\texttt{ }Expr] | [Ident \texttt{(} ParamsList \texttt{)}] \\
-              &| [Constant] | [\texttt{[$ListConts$]}] | [\texttt{[]}]\\
+[Expr]       =& [Ident] | [Constant] | [Expr\texttt{ }Op\texttt{ }Expr]\\
+              &| [Ident \texttt{(} ParamsList \texttt{)}]| [\texttt{$Expr$ if $Expr$ else $Expr$}]\\
+              &| [\texttt{[$ListConts$]}] | [\texttt{[]}]\\
 [ParamsList] =& [\epsilon] | [Expr] | [Expr\texttt{, }ParamsList]\\
 [Op]         =& [\texttt{+}] | [\texttt{-}] | [\texttt{*}] | [\texttt{/}] | [\texttt{<}] | [\texttt{>}] | [\texttt{<=}] | [\texttt{>=}] | [\texttt{is}] | [\texttt{is not}] | [\texttt{==}] | [\texttt{!=}]\\
 [ListConts]  =& [Expr] | [Expr,ListConts]\\
@@ -410,6 +411,12 @@ p_2
 p_2
 \end{array}\right]
 \vartriangleright \text{ok}
+$$
+
+$$
+\tag{IfExpr}
+\frac{\Gamma \vdash (e_b : \text{Optional[$t_0$]} \lor e_b : \texttt{bool}), e_1 : t, e_2 : t}
+     {\Gamma \vdash \texttt{$e_1$ if $e_b$ else $e_2$} : t}
 $$
 
 $$

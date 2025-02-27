@@ -466,7 +466,7 @@ With:
 
 $$
 \tag{ReturnReturn}
-\frac{\Gamma \vdash e : t}{\vdash \text{Returns(\texttt{return $e$}, $t$)}}
+\frac{\Gamma \vdash e : t}{\Gamma \vdash \text{Returns(\texttt{return $e$}, $t$)}}
 $$
 $$
 \tag{NoReturnExpression}

@@ -362,13 +362,6 @@ $$
      {\Gamma \vdash f(x_0, x_1, ...) : t_r}
 $$
 
-<!--
-$$
-\tag{Return}
-\frac{\text{Returns(}p_0, t\text{)} \lor \text{Returns(}p_1, t\text{)}
-$$
--->
-
 $$
 \hspace{-1cm}{
 \tag{IfIn}
@@ -460,6 +453,50 @@ $$
 \tag{OpComparison}
 \frac{\Gamma \vdash x_0 : \texttt{int}, x_1 : \texttt{int}, \bigotimes \text{ in } [\texttt{<, >, <=, >=}]}
      {\Gamma \vdash x_0 \bigotimes x_1 : \texttt{bool}}
+$$
+
+With:
+
+$$
+\tag{ReturnReturn}
+\frac{\Gamma \vdash e : t}{\vdash \text{Returns(\texttt{return $e$}, $t$)}}
+$$
+$$
+\tag{NoReturnExpression}
+\frac{\Gamma \vdash e : t}{\vdash \text{NoReturn([$e$])}}
+$$
+$$
+\tag{NoReturnAssign}
+\frac{}{\vdash \text{NoReturn([\texttt{$i$ = $e$}])}}
+$$
+$$
+\tag{ReturnIf}
+\frac{\Gamma \vdash \text{Returns($p$, $t$)}}
+     {\Gamma \vdash \text{Returns(}\left[\begin{array}{l}\texttt{if $e$:}\\ \quad p\end{array}\right],t\text{)}}
+\hspace{1cm}
+$$
+
+\begin{gather}
+\Gamma \vdash \left(\text{Returns($p_0$, $t$)} \land \text{Returns($p_1$, $t$)}\right)\lor \\
+\Gamma \vdash \left(\text{Returns($p_0$, $t$)} \land \text{NoReturns($p_1$)}\right) \lor\\
+\tag{ReturnIfElse}
+\Gamma \vdash \left(\text{NoReturns($p_0$)} \land \text{Returns($p_1$, $t$)}\right)
+\over
+\Gamma \vdash \text{Returns(}\left[\begin{array}{l}
+\texttt{if $e$:}\\
+\quad p_0\\
+\texttt{else:}\\
+\quad p_1
+\end{array}\right]\text{, $t$)}
+\end{gather}
+
+$$
+\tag{ReturnFor}
+\frac{\Gamma \vdash \text{Returns($p$, $t$)}}
+     {\Gamma \vdash \text{Returns(}\left[\begin{array}{l}
+     \texttt{for $x$ in $y$:}\\
+     \quad p
+     \end{array}\right]\text{, $t$)}}
 $$
 
 The rules above are sufficient for our purposes for dealing with fully

@@ -309,13 +309,16 @@ Externally<span class="aside AT">AT: Externally = token-level?</span></h1>
 because it provides a “skyline” or upper-bound estimate on our ability
 to extract internal concepts of nullability. To do this, we have the
 model complete simple partial programs that require an understanding of
-nullability.</p>
-<p>But before we do, we’ll want to be more precise about exactly what
-we’re measuring. To that end, we’ll take the notion of different “rules”
-for nullability that we discuseed informally in the overview, and bring
-it into a formal typing system. We’re not going to try to describe all
-the typing rules of python, so we’ll restrict ourselves in a couple of
-ways.</p>
+nullability. We refer to this suite of programs as
+<code>NullabilityEval</code>. All of the tests in this benchmark suite
+are composed of three functions or less, where the largest function is
+seven lines long.</p>
+<p>But before we try to measure nullability understanding, we’ll want to
+be more precise about exactly what we’re measuring. To that end, we’ll
+take the notion of different “rules” for nullability that we discuseed
+informally in the overview, and bring it into a formal typing system.
+We’re not going to try to describe all the typing rules of python, so
+we’ll restrict ourselves in a couple of ways.</p>
 <p>First, we’ll reduce the number of python features that we handle by
 actually working in a subset of python. This means we can skip worrying
 about the semantics of complicated features, and just focus on the
@@ -331,15 +334,19 @@ for a non-optional type, we’ll design our tests so that there are never
 any values that would convert to False, namely the number zero and the
 empty string.</p>
 <p>The full syntax and typing rules of our subset of Python are
-described in Appendix <a href="#sec:formalrules">B</a>.</p>
-<p>We begin with a “skyline” estimate of model understanding of
-nullability (a la <span class="citation" data-cites="feng24binding">Feng
-and Steinhardt (2024)</span>). We measure how well different models can
-understand the concept. To do this, we have the model complete simple
-partial programs that require an understanding of nullability. We refer
-to this suite of programs as <code>NullabilityEval</code>. For
-example,</p>
-<p><em>Test 4</em>:</p>
+described in Appendix <a href="#sec:commonrules">B.1</a>.</p>
+<p>With these basic rules, we can construct basic program prefixes that
+test the models understanding of nullability.</p>
+<p>We measure the difficulty of these tests by measuring how models of
+different sizes perform. We pay particular focus to the Pythia model
+suite<span class="citation" data-cites="biderman23">(Biderman et al.
+2023)</span>, as they have checkpoints available across training runs
+and various scales. For measuring performance at larger sizes, we’ve
+included Qwen2.5-Coder-32B<span class="aside AT">AT: cite</span>, Llama
+3.1 405B Instruct<span class="aside AT">AT: cite</span>, and DeepSeek-V3
+(671B)<span class="aside AT">AT: cite</span>.</p>
+<p>Our first test is:</p>
+<p><em>Test 1</em>:</p>
 <div class="sourceCode" id="cb9"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  some_numbers <span class="op">=</span> [<span class="dv">1</span>, <span class="op">-</span><span class="dv">4</span>, <span class="va">None</span>, <span class="op">-</span><span class="dv">3</span>, <span class="dv">10</span>, <span class="op">-</span><span class="dv">1</span>, <span class="va">None</span>, <span class="va">None</span>, <span class="dv">8</span>]</span>
@@ -350,43 +357,177 @@ role="doc-noteref"><sup>1</sup></a> is constructed such that there are a
 very limited number of valid next lines in the program, and all of them
 demonstrate some knowledge of the concept of nullability.<a href="#fn2"
 class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
-<p>This test is on the simpler side, but we can challenge the model
-more, adding layers of indirection between the source and sink of
-nullable values, testing the model’s <em>interprocedural</em>
-understanding.</p>
-<p>We can also test how well models understand type annotations
-separately; since the inclusion of type annotations in Python is not
-required<a href="#fn3" class="footnote-ref" id="fnref3"
-role="doc-noteref"><sup>3</sup></a>, most of the Python code used as
-training data operates in an untyped fashion, so models may understand
-the dynamic flow of nullable values but not their static type
-annotations. Test 5, below, tests the model’s understanding of
-<code>Optional</code> types annotations. The trailing colon makes a type
-expression the only valid completion<a href="#fn4" class="footnote-ref"
-id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
-<p><em>Test 5</em>:</p>
+<p>We find that Pythia models as small as 1.4b can successfully complete
+this test, and that they learn to complete the test in the first third
+of training. Larger Pythia models learn to complete this test earlier,
+with Pythia 12b able to complete the test 20% of the way into training
+and Pythia 2.8b able to complete it 28% of the way into
+training.<span class="aside AS">AS: Update with smaller model numbers</span></p>
+<p>So, does this mean that Pythia models 1.4b and up understand all the
+typing rules necessary for this test? Actually, no. LLM’s pick up on a
+lot of information relationships in their training data that have
+statistical correlation, without it necessarily being causal. What this
+means in practice is that the models use things like variable names,
+whitespace, statement orderings, and constant values to guess at certain
+programming concepts. So, while many of the Pythia models can
+complete:</p>
 <div class="sourceCode" id="cb10"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_48() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  number: Optional[<span class="bu">int</span>] <span class="op">=</span> <span class="va">None</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  square <span class="op">=</span> get_square(number)</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> square <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f&quot;Square of the number is </span><span class="sc">{</span>square<span class="sc">}</span><span class="ss">&quot;</span>)</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">&quot;No number provided to square&quot;</span>)</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_square(number:</span></code></pre></div>
-<p>All of the tests in this benchmark suite are composed of three
-functions or less, where the largest function is seven lines long.</p>
-<p>We measure the difficulty of these tests by measuring how models of
-different sizes perform. We pay particular focus to the Pythia model
-suite<span class="citation" data-cites="biderman23">(Biderman et al.
-2023)</span>, as they have checkpoints available across training runs
-and various scales. For measuring performance at larger sizes, we’ve
-included Qwen2.5-Coder-32B<span class="aside AT">AT: cite</span>, Llama
-3.1 405B Instruct<span class="aside AT">AT: cite</span>, and DeepSeek-V3
-(671B)<span class="aside AT">AT: cite</span>. Below, you can see the
-number of passing tests for each model.
-<span class=aside>more through exploration of why?</span></p>
+class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>some_numbers <span class="op">=</span> [<span class="dv">1</span>, <span class="op">-</span><span class="dv">4</span>, <span class="va">None</span>, <span class="op">-</span><span class="dv">3</span>, <span class="dv">10</span>, <span class="op">-</span><span class="dv">1</span>, <span class="va">None</span>, <span class="va">None</span>, <span class="dv">8</span>]</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>result: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> num <span class="kw">in</span> some_numbers:</span></code></pre></div>
+<p>with a proper None check, changing the variable names and the
+constants into:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>foo <span class="op">=</span> [<span class="dv">60</span>, <span class="va">None</span>, <span class="op">-</span><span class="dv">33</span>]</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>bar: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> corejoice <span class="kw">in</span> foo:</span></code></pre></div>
+<p>causes all the Pythia models to fail the test. Fortunately, it turns
+out that many simpler typing rules do not exhibit such a strong reliance
+on variable naming and constants; in this case, it’s the for loop that
+causes the model to be confused with certain variable names. Stay tuned
+in the future for a more in-depth exploration of how the models behave
+on individual typing rules with different contexts and variable
+names.</p>
+<p>Besides for the variable name and constant value dependency, this
+test is on the simpler side. But we can challenge the model more, adding
+layers of indirection between the source and sink of nullable values,
+and testing the model’s <em>interprocedural</em> understanding. Here’s
+one such test:</p>
+<p><em>Test 2</em></p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Optional</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    some_numbers <span class="op">=</span> [<span class="dv">1</span>, <span class="op">-</span><span class="dv">4</span>, <span class="va">None</span>, <span class="op">-</span><span class="dv">3</span>, <span class="dv">10</span>, <span class="op">-</span><span class="dv">1</span>, <span class="va">None</span>, <span class="va">None</span>, <span class="dv">8</span>]</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(positive_numbers(some_numbers))</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> positive_numbers(numbers: <span class="bu">list</span>[Optional[<span class="bu">int</span>]]) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">int</span>]:</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    result: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> num <span class="kw">in</span> numbers:</span></code></pre></div>
+<p>In this test we’ve taken the same logic, and spread it across
+<code>main</code> and another function, <code>positive_numbers</code>.
+Ideally the model would have to think a little harder to understand that
+the <code>some_numbers</code> is flowing through the function call into
+the body of positive_numbers, causing the for loop body to need a None
+check. In practice though, we find this test is actually easier for the
+model to pass, with models as small as Pythia 1b passing it, and Pythia
+12b learning to pass it 13% of the way into training.</p>
+<p>It turns out that because of the type annotations on the
+<code>positive_numbers</code> function, the model doesn’t need to pay
+attention to <code>main</code> at all. It can just look at
+<code>positive_numbers</code>, and use the type annotation to know that
+result contains <code>Optional[int]</code>s, so that <code>num</code> is
+Nullable must be checked for None before proceeding. Looking at the type
+annotation turns out to be easier for the model than scanning through a
+list to determine if there are None and non-None values, resulting in an
+easier test overall.</p>
+<p>So how would we <em>actually</em> test for interprocedural
+nullability understanding in the model? Well, the type annotations on
+Python functions aren’t required<a href="#fn3" class="footnote-ref"
+id="fnref3" role="doc-noteref"><sup>3</sup></a>, so we can instead
+provide the model with an unannotated function, and see if it still
+understands the flow of values from the call site into the function
+body. Here’s a test that does that:</p>
+<p><em>Test 3</em></p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> x <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>        value <span class="op">=</span> <span class="st">&quot;&quot;</span><span class="op">*</span><span class="st">&quot;&quot;</span> <span class="op">*</span> x</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>        value <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> process_value(value) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(x)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_value(value):</span></code></pre></div>
+<p>Our base set of typing rules (listed as “Common Rules”) don’t handle
+unannotated functions though, so we’re going to have to add some more,
+and here we’re faced with a choice. The typing rules for normal Python
+say that functions without return type annotations return the Any type,
+and arguments without a type annotation have the type Any. In fact,
+normal mypy will not check unannotated functions at <em>all</em>, even
+for internal consistency; the <code>--check-untyped-defs</code> option
+will add some checking back, but the types of arguments and return type
+will still be Any. In Python a value of any type can be converted to an
+Any, and an Any can be converted to any value type.</p>
+<p>This means that it would be technically type safe to do anything in
+the body of <code>process_value</code> including just returning the
+argument, without a static type error. But at runtime, code that
+exploits this fact would still fail.</p>
+<p>If we want code that actually makes sense at runtime, we can
+strengthen our type checker a bit, by requiring that there be some valid
+(non-Any) type for the function that works at the call site and in the
+function body. We still won’t be requiring that this type is actually
+written down anywhere, but we will be requiring that it exist. This is
+called “type inference”, when we let the checker pick a type for us, as
+long as there is one that works. We’ll call this augmented type system
+mypy++.</p>
+<p>In Appendix <a href="#sec:unannotatedfuncs">B.2</a>, we formalize the
+unannotated function rules for mypy vs mypy++.</p>
+<p>This test is a bit trickier than our previous ones, and we find that
+there’s no consistent threshold of size at which Pythia models can pass
+it. Pythia 1b, 2.8b, and 6.9b pass the test in their final revisions,
+but Pythia 410m, 1.4b, and 12b don’t. The bigger models all have points
+in training where they can pass the test, but only intermittently. Even
+6.9b, the best performing size on this test, fails the test in its
+second-to-last available revision<a href="#fn4" class="footnote-ref"
+id="fnref4" role="doc-noteref"><sup>4</sup></a>.</p>
+<p>What the models <em>can</em> do well however, is learn to pass these
+tests in the mypy type system (as opposed to mypy++). In that system,
+where they don’t need to reason globally about the functions but only
+locally, this test is one of the easiest for the models to complete.</p>
+<p>Since this test suite is meant to be informative beyond the sizes of
+the Pythia models, we also add another layer of indirection to add more
+difficulty, in this test:</p>
+<p><em>Test 4</em></p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> handle_value(value, guard):</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> guard:</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> process_value(<span class="st">&quot;&quot;</span>Foobar<span class="st">&quot;&quot;</span>) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> process_value(value) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> x <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>        value <span class="op">=</span> <span class="st">&quot;&quot;</span><span class="op">*</span><span class="st">&quot;&quot;</span> <span class="op">*</span> x</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        value <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> handle_value(value, x <span class="op">&lt;</span> <span class="dv">10</span>)</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(x)</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_value(value):</span></code></pre></div>
+<p>With two layers of indirection, we start to hit the limits of the
+capabilities of even frontier models. Llama 405B is unable to
+successfully pass this test, as are smaller models like Qwen Coder 32B,
+while DeepSeek V3 (671B parameters) is able to pass it. However, Pythia
+6.9B is still able to pass this test pretty consistently.</p>
+<p>Finally, we can test how good the models are at writing their own
+type annotations for functions. Since most of the publicly available
+Python code is not type-annotated, you could imagine that LLM’s can
+reason about dataflow correctness without annotations better than they
+can write their own typing annotations. The next program tests the
+models ability to write its own type annotations; the trailling colon
+makes the type expression the only valid completion<a href="#fn5"
+class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a></p>
+<p><em>Test 5</em>:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_48() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  number: Optional[<span class="bu">int</span>] <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  square <span class="op">=</span> get_square(number)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> square <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f&quot;Square of the number is </span><span class="sc">{</span>square<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">&quot;No number provided to square&quot;</span>)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_square(number:</span></code></pre></div>
+<p>None of the Pythia models are able to succesfully pass this test,
+demonstrating that writing these annotaions is indeed difficult for
+LLM’s. Qwen Coder 32B is also incapable of passing this test, but both
+Llama 405B and DeepSeek V3 pass it.</p>
+<p>We wrote three variations of each of these tests, resulting in 15
+tests total. Below, you can see the number of passing tests for each
+model.</p>
+<span class=aside>more through exploration of why?</span>
 <figure id="fig:hl_scale">
 <img src="images/hl_model_results.svg"
 alt="Figure 1: A bar graph showing how several sizes of model perform on the high-level nullability tests" />
@@ -397,8 +538,8 @@ sizes of model perform on the high-level nullability tests</figcaption>
 passing tests for each model. We can see that generally models get
 better with scale.
 <span class=aside>I don't think this footnote is clear enough to add anything</span>
-<a href="#fn5" class="footnote-ref" id="fnref5"
-role="doc-noteref"><sup>5</sup></a> Model performance on these tests is
+<a href="#fn6" class="footnote-ref" id="fnref6"
+role="doc-noteref"><sup>6</sup></a> Model performance on these tests is
 approximately logarithmic in model size: models of 2.8 billion
 parameters can pass about half the tests, but it takes more than 405
 billion parameters to pass all of the tests.
@@ -414,8 +555,8 @@ alt="Figure 2: A line graph showing how the performance of the Pythia 6.9 model 
 performance of the Pythia 6.9 model changes during training</figcaption>
 </figure>
 <p>Again, performance does not increase monotonically. This plot is
-quite noisy, so in the sequel, we will show smoothed<a href="#fn6"
-class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>
+quite noisy, so in the sequel, we will show smoothed<a href="#fn7"
+class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>
 charts.</p>
 <h2 data-number="3.1" id="sec:grok"><span
 class="header-section-number">3.1</span> Local vs Non-Local Type
@@ -515,18 +656,18 @@ analyzing the nullability of individual variable occurrences, instead of
 analyzing every expression. Specifically, we tried to capture the
 concept “the variable I just generated refers to an nullable quantity”,
 so our prompts looked like:</p>
-<div class="sourceCode" id="cb11"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_1() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> find_value(data: List[<span class="bu">int</span>], target: <span class="bu">int</span>) <span class="op">-&gt;</span> Optional[<span class="bu">int</span>]:</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> value <span class="kw">in</span> data:</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> value <span class="op">==</span> target:</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> value</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">None</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  data <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>]</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  target <span class="op">=</span> <span class="dv">3</span></span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  result <span class="op">=</span> find_value(data, target)</span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> result</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_1() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> find_value(data: List[<span class="bu">int</span>], target: <span class="bu">int</span>) <span class="op">-&gt;</span> Optional[<span class="bu">int</span>]:</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> value <span class="kw">in</span> data:</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> value <span class="op">==</span> target:</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> value</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">None</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  data <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>]</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  target <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  result <span class="op">=</span> find_value(data, target)</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> result</span></code></pre></div>
 <p>To generate these kinds of prompts, we started by asking a few
 different chat models to generate for us programs that made use of
 nullability . We prompted each model with:</p>
@@ -578,8 +719,8 @@ and then took the difference of the averages as our base reading vector.
 This is called “mass mean probing” in the literature, and empirically
 has been shown to generalize better in high dimensional space than
 trying to learn a linear model through logistic regression.<a
-href="#fn7" class="footnote-ref" id="fnref7"
-role="doc-noteref"><sup>7</sup></a></p>
+href="#fn8" class="footnote-ref" id="fnref8"
+role="doc-noteref"><sup>8</sup></a></p>
 <p>In this reading vector, the impact of each layer based on the
 magnitude of difference in that layer, instead of separate a notion of
 how “important” that layer is to differentiating positive and negative
@@ -705,11 +846,6 @@ Models Across Training</span> and <span>Scaling</span>.”</span> arXiv.
 <a
 href="https://doi.org/10.48550/arXiv.2304.01373">https://doi.org/10.48550/arXiv.2304.01373</a>.
 </div>
-<div id="ref-feng24binding" class="csl-entry" role="listitem">
-Feng, Jiahai, and Jacob Steinhardt. 2024. <span>“How Do <span>Language
-Models Bind Entities</span> in <span>Context</span>?”</span> arXiv. <a
-href="https://doi.org/10.48550/arXiv.2310.17191">https://doi.org/10.48550/arXiv.2310.17191</a>.
-</div>
 <div id="ref-li24" class="csl-entry" role="listitem">
 Li, Kenneth, Oam Patel, Fernanda Viégas, Hanspeter Pfister, and Martin
 Wattenberg. 2024. <span>“Inference-<span>Time Intervention</span>:
@@ -736,17 +872,17 @@ href="https://doi.org/10.48550/arXiv.2311.07911">https://doi.org/10.48550/arXiv.
 Python</h1>
 <p>To see how nullability appears in Python, Let’s look at an example
 program in Python that uses nullability:</p>
-<div class="sourceCode" id="cb12"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> User:</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, name: <span class="bu">str</span>, email: Optional[<span class="bu">str</span>]) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>         <span class="va">self</span>.name <span class="op">=</span> name</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.email <span class="op">=</span> email</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_user_email(user: Optional[User]) <span class="op">-&gt;</span> Optional[<span class="bu">str</span>]:</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> user <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> user.email <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> user.email</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>          <span class="cf">return</span> <span class="va">None</span></span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> User:</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, name: <span class="bu">str</span>, email: Optional[<span class="bu">str</span>]) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>         <span class="va">self</span>.name <span class="op">=</span> name</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.email <span class="op">=</span> email</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_user_email(user: Optional[User]) <span class="op">-&gt;</span> Optional[<span class="bu">str</span>]:</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> user <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> user.email <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> user.email</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>          <span class="cf">return</span> <span class="va">None</span></span></code></pre></div>
 <p>In the <code>get_user_email</code> function above, we can see from
 the type signature that it takes a nullable User value, and returns an
 nullable string. The first thing the function does is check if the input
@@ -769,6 +905,7 @@ nullable, and the rest are not.</p>
 Typing Rules</h1>
 <p>Here we define the syntax and semantics of the Python subset we work
 with:</p>
+<h2 class="unnumbered" id="sec:commonrules">B.1 Common Rules</h2>
 <span class="math display">\[\begin{aligned}
 \left[Program\right]  =&amp; [\epsilon] {\huge|}
 \left[\begin{array}{l}Stmt\\Program\end{array}\right]\\
@@ -1016,6 +1153,8 @@ $t$)}\right)
      \quad p
      \end{array}\right]\text{, $t$)}}
 \]</span></p>
+<h2 class="unnumbered" id="sec:unannotatedfuncs">B.2 Unannotated
+Functions</h2>
 <p>The rules above are sufficient for our purposes for dealing with
 fully type annotated programs. But what about programs with functions
 that aren’t type annotated, or are only partially annotated? The mypy
@@ -1080,29 +1219,29 @@ test, while Pythia 160m passes three, and Pythia 6.9b passes the most
 tests, with 9, while Pythia 12b only passes 7. For instance, given the
 partial code:</p>
 <p><em>Test 3</em></p>
-<div class="sourceCode" id="cb13"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> x <span class="op">&gt;</span> <span class="dv">0</span>:</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="st">&quot;*&quot;</span> <span class="op">*</span> x</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="va">None</span></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  x <span class="op">=</span> process_value(value) <span class="op">+</span> <span class="dv">1</span></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(x)</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_value(value):</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> x <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="st">&quot;*&quot;</span> <span class="op">*</span> x</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  x <span class="op">=</span> process_value(value) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(x)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_value(value):</span></code></pre></div>
 <p>Pythia 6.9b completes <code>process_value</code> as:</p>
-<div class="sourceCode" id="cb14"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_value(value):</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> value <span class="kw">is</span> <span class="va">None</span>:</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">elif</span> <span class="bu">isinstance</span>(value, <span class="bu">str</span>):</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">int</span>(value)</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  ...</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_value(value):</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> value <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">elif</span> <span class="bu">isinstance</span>(value, <span class="bu">str</span>):</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">int</span>(value)</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  ...</span></code></pre></div>
 <p>While Pythia 12b completes it as:</p>
-<div class="sourceCode" id="cb15"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_value(value):</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> value</span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_value(value):</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> value</span></code></pre></div>
 <p>The code generated by Pythia 6.9b properly handles values of both
 NoneType and str and always returns an int, whereas the code generated
 by Pythia 12b is the identify function, returning None when the input is
@@ -1115,35 +1254,35 @@ generally gets better at passing these tests during training, the
 performance is not always increasing. Zooming in on a particular test,
 we can see what this looks like. When asked to complete this code:</p>
 <p><em>Test 12</em></p>
-<div class="sourceCode" id="cb16"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> handle_value(value, guard):</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> guard:</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> count_os(<span class="st">&quot;Foobar&quot;</span>) <span class="op">*</span> <span class="dv">2</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> count_os(value) <span class="op">//</span> <span class="dv">2</span></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> x <span class="op">&gt;</span> <span class="dv">0</span>:</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="st">&quot;*&quot;</span> <span class="op">*</span> x</span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="va">None</span></span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(handle_value(value, x <span class="op">&lt;</span> <span class="dv">10</span>))</span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> count_os(value):</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> handle_value(value, guard):</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> guard:</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> count_os(<span class="st">&quot;Foobar&quot;</span>) <span class="op">*</span> <span class="dv">2</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> count_os(value) <span class="op">//</span> <span class="dv">2</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> x <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="st">&quot;*&quot;</span> <span class="op">*</span> x</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(handle_value(value, x <span class="op">&lt;</span> <span class="dv">10</span>))</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> count_os(value):</span></code></pre></div>
 <p>Pythia 6.9b at training step 104000 produces the following definition
 of <code>count_os</code>:</p>
-<div class="sourceCode" id="cb17"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> count_os(value):</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> value <span class="kw">is</span> <span class="va">None</span>:</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">elif</span> <span class="bu">isinstance</span>(value, <span class="bu">str</span>):</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">len</span>(value)</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>...</span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> count_os(value):</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> value <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">elif</span> <span class="bu">isinstance</span>(value, <span class="bu">str</span>):</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">len</span>(value)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>...</span></code></pre></div>
 <p>While 1000 steps later, it produces a very different definition:</p>
-<div class="sourceCode" id="cb18"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> count_os(value):</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="bu">len</span>([s <span class="cf">for</span> s <span class="kw">in</span> os.listdir(os.path.join(os.getcwd(), value)) <span class="cf">if</span> s.start ...</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> count_os(value):</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="bu">len</span>([s <span class="cf">for</span> s <span class="kw">in</span> os.listdir(os.path.join(os.getcwd(), value)) <span class="cf">if</span> s.start ...</span></code></pre></div>
 <p>While the first definition handles value being None or a string, the
 second definition not only assumes it is a string but that it is a name
 of a folder in the current directory. In some sense the model “knows”
@@ -1157,66 +1296,66 @@ models. When asked to complete the type of get_square in the following
 code, no model in the Pythia series can successfully output the Optional
 argument type:</p>
 <p><em>Test 5</em></p>
-<div class="sourceCode" id="cb19"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_48() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  number: Optional[<span class="bu">int</span>] <span class="op">=</span> <span class="va">None</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  square <span class="op">=</span> get_square(number)</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> square <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f&quot;Square of the number is </span><span class="sc">{</span>square<span class="sc">}</span><span class="ss">&quot;</span>)</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">&quot;No number provided to square&quot;</span>)</span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_square(number:</span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_48() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  number: Optional[<span class="bu">int</span>] <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  square <span class="op">=</span> get_square(number)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> square <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f&quot;Square of the number is </span><span class="sc">{</span>square<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">&quot;No number provided to square&quot;</span>)</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_square(number:</span></code></pre></div>
 <p>These models also find it much easier to deal with a list that
 contains some None elements, than to deal with an atomic value that
 might be None. Pythia 6.9b consistently passes this test in the second
 half of training:</p>
 <p><em>Test 2</em></p>
-<div class="sourceCode" id="cb20"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Optional</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  some_numbers <span class="op">=</span> [<span class="dv">1</span>, <span class="op">-</span><span class="dv">4</span>, <span class="va">None</span>, <span class="op">-</span><span class="dv">3</span>, <span class="dv">10</span>, <span class="op">-</span><span class="dv">1</span>, <span class="va">None</span>, <span class="va">None</span>, <span class="dv">8</span>]</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(positive_numbers(some_numbers))</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> positive_numbers(numbers: <span class="bu">list</span>[Optional[<span class="bu">int</span>]]) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">int</span>]:</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  result: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> num <span class="kw">in</span> numbers:</span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Optional</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  some_numbers <span class="op">=</span> [<span class="dv">1</span>, <span class="op">-</span><span class="dv">4</span>, <span class="va">None</span>, <span class="op">-</span><span class="dv">3</span>, <span class="dv">10</span>, <span class="op">-</span><span class="dv">1</span>, <span class="va">None</span>, <span class="va">None</span>, <span class="dv">8</span>]</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(positive_numbers(some_numbers))</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> positive_numbers(numbers: <span class="bu">list</span>[Optional[<span class="bu">int</span>]]) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">int</span>]:</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  result: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> num <span class="kw">in</span> numbers:</span></code></pre></div>
 <p>But is much more challenged by this code:</p>
 <p><em>Test 3</em></p>
-<div class="sourceCode" id="cb21"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> x <span class="op">&gt;</span> <span class="dv">0</span>:</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="st">&quot;*&quot;</span> <span class="op">*</span> x</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="va">None</span></span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  x <span class="op">=</span> process_value(value) <span class="op">+</span> <span class="dv">1</span></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(x)</span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_value(value):</span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> x <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="st">&quot;*&quot;</span> <span class="op">*</span> x</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  x <span class="op">=</span> process_value(value) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(x)</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_value(value):</span></code></pre></div>
 <p>, intermittently being unable to complete it in a type-safe way up,
 including in the second-to-last training step. When another level of
 function indirection is added, the model becomes much better at
 completing it correctly; Pythia 6.9b consistently completes the
 following after step 93000:</p>
 <p><em>Test 4</em></p>
-<div class="sourceCode" id="cb22"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> handle_value(value, guard):</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> guard:</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> process_value(<span class="st">&quot;Foobar&quot;</span>) <span class="op">+</span> <span class="dv">1</span></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> process_value(value) <span class="op">+</span> <span class="dv">1</span></span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> x <span class="op">&gt;</span> <span class="dv">0</span>:</span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="st">&quot;*&quot;</span> <span class="op">*</span> x</span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="va">None</span></span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>  x <span class="op">=</span> handle_value(value, x <span class="op">&lt;</span> <span class="dv">10</span>)</span>
-<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(x)</span>
-<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_value(value):</span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> handle_value(value, guard):</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> guard:</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> process_value(<span class="st">&quot;Foobar&quot;</span>) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> process_value(value) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> x <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="st">&quot;*&quot;</span> <span class="op">*</span> x</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>  x <span class="op">=</span> handle_value(value, x <span class="op">&lt;</span> <span class="dv">10</span>)</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(x)</span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_value(value):</span></code></pre></div>
 <p>The names of functions are highly influential in the models
 understanding of their type semantics. When test 3 is changed so that
 <code>process_value</code> is instead called <code>count_chars</code>,
@@ -1269,23 +1408,26 @@ href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 that’s confusing in the context of this post. Not to be confused with
 Gradual Typing, as introduced by Siek et al.<a href="#fnref3"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn4"><p>This is because function declarations with a colon and
+<li id="fn4"><p>Despite this, it does pass the test 40% of the available
+revisions, about triple what the other closest sizes can accomplish<a
+href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>This is because function declarations with a colon and
 no type, like <code>def fn(x:)</code> are not valid python. Since we’ve
 already seen a usage of <code>get_square</code> that is passed a None
 value, it wouldn’t be type-valid to complete the program with just
 <code>int</code>. So a model can be tested on its understanding of
 <code>Optional</code> annotations by seeing if its completion of the
-partial program includes <code>Optional[int]</code>.<a href="#fnref4"
+partial program includes <code>Optional[int]</code>.<a href="#fnref5"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn5"><p>Pythia 12b performs worse than its 6.9b variant, though
+<li id="fn6"><p>Pythia 12b performs worse than its 6.9b variant, though
 this might be due to under-training at that size. Qwen 32B also performs
 about as well as Pythia 6.9b, it’s not clear if this is due to model
-architecture or something else.<a href="#fnref5" class="footnote-back"
+architecture or something else.<a href="#fnref6" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn6"><p>rolling average with a window size of 5<a href="#fnref6"
+<li id="fn7"><p>rolling average with a window size of 5<a href="#fnref7"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn7"><p>see the appendix section “Mass Mean Probing vs Linear
-Regression” for more on this<a href="#fnref7" class="footnote-back"
+<li id="fn8"><p>see the appendix section “Mass Mean Probing vs Linear
+Regression” for more on this<a href="#fnref8" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>

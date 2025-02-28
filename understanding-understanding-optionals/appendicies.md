@@ -40,6 +40,8 @@ and third are nullable, and the rest are not.
 Here we define the syntax and semantics of the Python subset we work
 with:
 
+## Common Rules {#sec:commonrules}
+
 \begin{aligned}
 \left[Program\right]  =& [\epsilon] {\huge|} \left[\begin{array}{l}Stmt\\Program\end{array}\right]\\
 [Stmt]       =& [Import] | [FnDef] | [Assn] | [ForLoop] | [If] | [Expr] \\
@@ -280,6 +282,8 @@ $$
      \quad p
      \end{array}\right]\text{, $t$)}}
 $$
+
+## Unannotated Functions {#sec:unannotatedfuncs}
 
 The rules above are sufficient for our purposes for dealing with fully
 type annotated programs. But what about programs with functions that

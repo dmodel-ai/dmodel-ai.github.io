@@ -42,7 +42,7 @@ with:
 
 ## Common Rules {#sec:commonrules}
 
-\begin{aligned}
+$$\begin{aligned}
 \left[Program\right]  =& [\epsilon] {\huge|} \left[\begin{array}{l}Stmt\\Program\end{array}\right]\\
 [Stmt]       =& [Import] | [FnDef] | [Assn] | [ForLoop] | [If] | [Expr] \\
               &| [\texttt{return }Expr]\\
@@ -79,7 +79,7 @@ with:
 [ParamsList] =& [\epsilon] | [Expr] | [Expr\texttt{, }ParamsList]\\
 [Op]         =& [\texttt{+}] | [\texttt{-}] | [\texttt{*}] | [\texttt{/}] | [\texttt{<}] | [\texttt{>}] | [\texttt{<=}] | [\texttt{>=}] | [\texttt{is}] | [\texttt{is not}] | [\texttt{==}] | [\texttt{!=}]\\
 [ListConts]  =& [Expr] | [Expr,ListConts]\\
-\end{aligned}
+\end{aligned}$$
 
 We won't worry too much about the semantics on a formal level, since
 it's the same as Python's semantics on this subset, and we'll mostly
@@ -90,7 +90,7 @@ typing in this language. There's $\Gamma \vdash \left[p\right]
 \vartriangleright \texttt{ok}$, which says that the program $p$ is
 well typed in environment $\Gamma$. And there's $\Gamma \vdash e : t$,
 which says that $e$ is well typed with type $t$ in environment
-$\Gamma$. When we exclude the \Gamma, we mean that the judgement is
+$\Gamma$. When we exclude the $\Gamma$, we mean that the judgement is
 true under any typing environment, including the empty one.
 
 $$

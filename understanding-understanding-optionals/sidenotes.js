@@ -15,6 +15,7 @@
 
   let sidenoteContainer = null;
   let sidenoteElements = [];
+  let figureElements = [];
   let footnoteRefs = [];
 
   // Main initialization
@@ -37,6 +38,7 @@
 
     // Insert into DOM.
     document.body.appendChild(sidenoteContainer);
+    figureElements = Array.from(document.querySelectorAll("figure"));
 
     // Build each sidenote and store references.
     footnoteRefs.forEach((ref, index) => {
@@ -115,14 +117,28 @@
 
       // If it would collide with the previous note, shift it down a bit.
       const minTop = currentBottom + 10; // 10px gap.
-      const finalTop = Math.max(localTop, minTop);
-
-      note.style.top = finalTop + "px";
-      note.style.left = "0"; // keep everything in one column.
+      let nextTop = Math.max(localTop, minTop);
 
       // Force layout so we can measure note height.
       const noteHeight = note.offsetHeight;
-      currentBottom = finalTop + noteHeight;
+      figureElements.forEach((fig, idx) => {
+          figRect = fig.getBoundingClientRect();
+          figTop = window.scrollY + figRect.top;
+          allowedOverlapPixels = 20;
+          // If the note overlaps a figure
+          if (nextTop < figTop && nextTop + noteHeight > figTop - allowedOverlapPixels) {
+              // If there's room to move it up without overlapping the previous note
+              if (localTop - minTop > nextTop + noteHeight - figTop - allowedOverlapPixels) {
+                  // Move it up
+                  nextTop-= nextTop + noteHeight - figTop - allowedOverlapPixels;
+              }
+          }
+      });
+      note.style.top = nextTop + "px";
+      note.style.left = "0"; // keep everything in one column.
+
+
+      currentBottom = nextTop + noteHeight;
     });
   }
 

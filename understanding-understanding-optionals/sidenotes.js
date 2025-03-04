@@ -17,6 +17,7 @@
   let sidenoteElements = [];
   let figureElements = [];
   let footnoteRefs = [];
+  let sidenoteMaxWidth = "24em";
 
   // Main initialization
   function initSidenotes() {
@@ -33,7 +34,6 @@
     // You can adjust the width/top/right for your layout.
     sidenoteContainer.style.position = "absolute";
     sidenoteContainer.style.top = "0";
-    sidenoteContainer.style.width = "24em";
     // We'll place it once we know where main content ends.
 
     // Insert into DOM.
@@ -98,6 +98,7 @@
     // We place the sidenote container at the right side of main.
     // You can tweak this offset.
     sidenoteContainer.style.left = (window.scrollX + mainRect.right + 40) + "px";
+    sidenoteContainer.style.width = "min(" + sidenoteMaxWidth + ", calc(100vw - " + sidenoteContainer.style.left + "))";
 
     // For vertical offset, we top-align with the top of main content.
     // You can tweak this offset or fix it at 0.

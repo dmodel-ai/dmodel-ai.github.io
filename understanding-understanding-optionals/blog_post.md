@@ -65,11 +65,10 @@ In this work, we contribute:
 * We find show that models develop an internal concept of
   nullability as they scale up and are trained for longer. ([@sec:probing])
 
-* We find that models begin to understand nullability in
-  a local scope, satisfying many requirements of the python
-  typechecker, before they start to understand how nullability flows
-  across the program. ([@sec:grok], [@sec:results])
-\AT{eventually we add the contribution about typing rules}
+* We find that models begin to understand nullability in a local
+  scope, satisfying many requirements of the python typechecker,
+  before they start to understand how nullability flows across the
+  program. ([@sec:bench], [@sec:results])
 
 # Overview
 
@@ -310,12 +309,12 @@ another lines, then see if they produce something that matches these
 valid lines with the regular expression
 `num\s*(is\s*(not)?|==)\s*None|isinstance\(num`.]
 
-We find that Pythia models as small as 1.4b can successfully complete
+We find that Pythia models as small as 2.8b can successfully complete
 this test, and that they learn to complete the test in the first third
 of training. Larger Pythia models learn to complete this test earlier,
 with Pythia 12b able to complete the test 20% of the way into training
 and Pythia 2.8b able to complete it 28% of the way into
-training.\AS{Update with smaller model numbers}
+training.
 
 So, does this mean that Pythia models 1.4b and up understand all the
 typing rules necessary for this test? Actually, no. LLM's pick up on a
@@ -525,73 +524,52 @@ model.
 In [@Fig:hl_scale], we can see the number of passing tests for each
 model. We can see that generally models get better with scale.
 \todo{I don't think this footnote is clear enough to add anything}
-^[Pythia
-12b performs worse than its 6.9b variant, though this
-might be due to under-training at that size. Qwen 32B also performs
-about as well as Pythia 6.9b, it's not clear if this is due to model
-architecture or something else.]
-Model performance on these tests is
+^[Pythia 12b performs worse than its 6.9b variant, though this might
+be due to under-training at that size. Qwen 32B also performs about as
+well as Pythia 6.9b, it's not clear if this is due to model
+architecture or something else.] Model performance on these tests is
 approximately logarithmic in model size: models of 2.8 billion
 parameters can pass about half the tests, but it takes more than 405
-billion parameters to pass all of the tests.
-\todo{interesting observation; seems to me that this is actually the case for all post-training evals. hmm, acutally it's also the case for pretraining loss --- see classic scaling laws papers: Kaplan et al, Chincilla, etc}
+billion parameters to pass all of the tests. This matches previous
+post- and pre-training evaluations of the capabilities of large
+language models\todo{cite, Kaplan et al, Chincilla}, indicating that
+these tests are well distributed.
 
-Next, we want to understand the training dynamics at play here.
-143000. Below we can see how Pythia 6.9b performs on the tests during
-training from step 2 to 143000:\todo{let's use the same axes scaling at the tigges paper}
+![A bar graph showing how the Pythia models perform in mypy vs
+ mypy++](images/hl_mypy_vs_grep_models.svg){#fig:hl_mypy}
+
+In [@Fig:hl_mypy], we can see the test result for the pythia models
+using the mypy and mypy++ type systems ([@Fig:hl_scale] uses
+mypy++). As we expected, the mypy results (red bar) are always above
+the mypy++ results (blue bar), as mypy++ is a stricter type
+system. There are six tests in the dataset involving non-annotated
+functions, and using the weaker mypy typesystem causes up to five more
+tests to pass than using mypy++^[We don't see all six non-annotated
+function tests passing under mypy, because models can still fail these
+tests by producing invalid syntax.]
+
+Next, we want to understand the training dynamics at play here. Below
+we can see how Pythia 6.9b performs on the tests during training from
+step 2 to 143000:\todo{let's use the same axes scaling at the tigges
+paper}
 
 ![A line graph showing how the performance of the Pythia
 6.9 model changes during training](images/hl_revision_results.svg){#fig:hl_time}
 
-Again, performance does not increase monotonically.
-This plot is quite noisy, so in the sequel, we will
-show smoothed^[rolling average with a window size of 5] charts.
+Again, performance does not increase monotonically.  This plot is
+quite noisy, so in the sequel, we will show smoothed^[rolling average
+with a window size of 5] charts.
 
-
-## Local vs Non-Local Type Correctness {#sec:grok}
-
-For most of our tests, writing correct code simply requires following
-the rules of Python's mypy type system. This type system requires that
-types be internally consistent within functions, and match function
-type signatures if they exist. But six of our tests are different,
-because they involve functions that are *not* annotated with type
-signatures. Under mypy, these functions are allowed to do almost
-anything with their types. But at runtime, using values of the wrong
-type with these functions will result in a type error.
-
-\AT{too many clauses!}
-You could strengthen mypy's type rules to require that these untyped
-functions have some valid type they could be assigned which would
-cause the function to typecheck. This would prevent programs that pass
-the typechecker from having runtime type errors. We can call this
-strengthened type system mypy+.
-
-Since mypy+ has strictly more typing rules than mypy, we would expect
-the model to take longer to learn how to satisfy it. And indeed this
-is the case: We find that models learn to satisfy the mypy typechecker
-
-One explanation of why the model gets worse before it gets better is that the
-model first learns the concepts need to solve the task, then learns the
-language of python --- its syntax, static (under mypy), and dynamic semantics,
-and then both.
-\AT{cite something here. grokking, double descent, interp?}
-Let's make this more concrete.
-
-We say a model produces an answer that is "morally" (vs technically) correct if
-the code attempts to solve the problem asked of it. Each test case is paired with a
-regex that tests if the model output produces code that touches all of the relevant
-concepts.
-\AS{put an example here?}
-Here, we say the solution is
-"technically" correct if it passes `mypy`.
+In the graph below, we see that each individual model also learns to
+write code which typechecks under mypy before it learns to write code
+which typechecks under mypy++ and throws no type errors at runtime.
 
 ![A graph showing how often the Pythia 6.9b produces code that
 typechecks on the tests, vs produces code that shows true
-understanding.](images/hl_mypy_vs_grep.svg){#fig:hl_moral}
+understanding.](images/hl_mypy_vs_grep_revisions.svg){#fig:hl_moral}
 
 # Measuring Nullability Understanding Internally {#sec:probing}
 \todo{write this section}
-## Designing Prompts to Extract Nullability Activations
 
 \todo{we can probably just make this a brief part of the related work}
 At this point, we’ve figured out how to roughly measure nullability
@@ -639,6 +617,8 @@ less honest, or more or less fair.
 
 ![An excerpt from Zhou et al showing the reading outputs for several
  concepts](images/zhou.png)
+
+## Designing Prompts to Extract Nullability Activations
 
 In our setting, we were able to avoid dealing with the ambiguities of
 natural language by only prompting with code. We decided to stick to
@@ -771,7 +751,7 @@ for different numbers of pretraining steps. Pure mass means probing
 starts better, but is quickly overtaken by mass means probing with
 linear regression on layer weights.](images/mm-vs-mmlr-410m.svg){#fig:mm-vs-mmlr-410}
 
-# Nullability Prediction Accuracy Across Training and Scale {#sec:results}
+## Probing Results Across Training and Scale {#sec:results}
 
 In this section, we study the performance of our nullability probes across time
 and scale [@tigges24].

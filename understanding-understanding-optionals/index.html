@@ -181,8 +181,8 @@ href="#sec:probing">4</a>)</p></li>
 <li><p>We find that models begin to understand nullability in a local
 scope, satisfying many requirements of the python typechecker, before
 they start to understand how nullability flows across the program.
-(sec. <a href="#sec:grok">3.1</a>, sec. <a href="#sec:results">5</a>)
-<span class="aside AT">AT: eventually we add the contribution about typing rules</span></p></li>
+(sec. <a href="#sec:bench">3</a>, sec. <a
+href="#sec:results">4.3</a>)</p></li>
 </ul>
 <h1 data-number="2" id="overview"><span
 class="header-section-number">2</span> Overview</h1>
@@ -357,12 +357,11 @@ role="doc-noteref"><sup>1</sup></a> is constructed such that there are a
 very limited number of valid next lines in the program, and all of them
 demonstrate some knowledge of the concept of nullability.<a href="#fn2"
 class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
-<p>We find that Pythia models as small as 1.4b can successfully complete
+<p>We find that Pythia models as small as 2.8b can successfully complete
 this test, and that they learn to complete the test in the first third
 of training. Larger Pythia models learn to complete this test earlier,
 with Pythia 12b able to complete the test 20% of the way into training
-and Pythia 2.8b able to complete it 28% of the way into
-training.<span class="aside AS">AS: Update with smaller model numbers</span></p>
+and Pythia 2.8b able to complete it 28% of the way into training.</p>
 <p>So, does this mean that Pythia models 1.4b and up understand all the
 typing rules necessary for this test? Actually, no. LLM’s pick up on a
 lot of information relationships in their training data that have
@@ -542,58 +541,46 @@ better with scale.
 role="doc-noteref"><sup>6</sup></a> Model performance on these tests is
 approximately logarithmic in model size: models of 2.8 billion
 parameters can pass about half the tests, but it takes more than 405
-billion parameters to pass all of the tests.
-<span class=aside>interesting observation; seems to me that this is actually the case for all post-training evals. hmm, acutally it's also the case for pretraining loss --- see classic scaling laws papers: Kaplan et al, Chincilla, etc</span></p>
-<p>Next, we want to understand the training dynamics at play here.
-143000. Below we can see how Pythia 6.9b performs on the tests during
-training from step 2 to
-143000:<span class=aside>let's use the same axes scaling at the tigges paper</span></p>
+billion parameters to pass all of the tests. This matches previous post-
+and pre-training evaluations of the capabilities of large language
+models<span class=aside>cite, Kaplan et al, Chincilla</span>, indicating
+that these tests are well distributed.</p>
+<figure id="fig:hl_mypy">
+<img src="images/hl_mypy_vs_grep_models.svg"
+alt="Figure 2: A bar graph showing how the Pythia models perform in mypy vs mypy++" />
+<figcaption aria-hidden="true">Figure 2: A bar graph showing how the
+Pythia models perform in mypy vs mypy++</figcaption>
+</figure>
+<p>In Fig. <a href="#fig:hl_mypy">2</a>, we can see the test result for
+the pythia models using the mypy and mypy++ type systems (Fig. <a
+href="#fig:hl_scale">1</a> uses mypy++). As we expected, the mypy
+results (red bar) are always above the mypy++ results (blue bar), as
+mypy++ is a stricter type system. There are six tests in the dataset
+involving non-annotated functions, and using the weaker mypy typesystem
+causes up to five more tests to pass than using mypy++<a href="#fn7"
+class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a></p>
+<p>Next, we want to understand the training dynamics at play here. Below
+we can see how Pythia 6.9b performs on the tests during training from
+step 2 to
+143000:<span class=aside>let's use the same axes scaling at the tigges
+paper</span></p>
 <figure id="fig:hl_time">
 <img src="images/hl_revision_results.svg"
-alt="Figure 2: A line graph showing how the performance of the Pythia 6.9 model changes during training" />
-<figcaption aria-hidden="true">Figure 2: A line graph showing how the
+alt="Figure 3: A line graph showing how the performance of the Pythia 6.9 model changes during training" />
+<figcaption aria-hidden="true">Figure 3: A line graph showing how the
 performance of the Pythia 6.9 model changes during training</figcaption>
 </figure>
 <p>Again, performance does not increase monotonically. This plot is
-quite noisy, so in the sequel, we will show smoothed<a href="#fn7"
-class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>
+quite noisy, so in the sequel, we will show smoothed<a href="#fn8"
+class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a>
 charts.</p>
-<h2 data-number="3.1" id="sec:grok"><span
-class="header-section-number">3.1</span> Local vs Non-Local Type
-Correctness</h2>
-<p>For most of our tests, writing correct code simply requires following
-the rules of Python’s mypy type system. This type system requires that
-types be internally consistent within functions, and match function type
-signatures if they exist. But six of our tests are different, because
-they involve functions that are <em>not</em> annotated with type
-signatures. Under mypy, these functions are allowed to do almost
-anything with their types. But at runtime, using values of the wrong
-type with these functions will result in a type error.</p>
-<span class="aside AT">AT: too many clauses!</span>
-<p>You could strengthen mypy’s type rules to require that these untyped
-functions have some valid type they could be assigned which would cause
-the function to typecheck. This would prevent programs that pass the
-typechecker from having runtime type errors. We can call this
-strengthened type system mypy+.</p>
-<p>Since mypy+ has strictly more typing rules than mypy, we would expect
-the model to take longer to learn how to satisfy it. And indeed this is
-the case: We find that models learn to satisfy the mypy typechecker</p>
-<p>One explanation of why the model gets worse before it gets better is
-that the model first learns the concepts need to solve the task, then
-learns the language of python — its syntax, static (under mypy), and
-dynamic semantics, and then both.
-<span class="aside AT">AT: cite something here. grokking, double descent, interp?</span>
-Let’s make this more concrete.</p>
-<p>We say a model produces an answer that is “morally” (vs technically)
-correct if the code attempts to solve the problem asked of it. Each test
-case is paired with a regex that tests if the model output produces code
-that touches all of the relevant concepts.
-<span class="aside AS">AS: put an example here?</span> Here, we say the
-solution is “technically” correct if it passes <code>mypy</code>.</p>
+<p>In the graph below, we see that each individual model also learns to
+write code which typechecks under mypy before it learns to write code
+which typechecks under mypy++ and throws no type errors at runtime.</p>
 <figure id="fig:hl_moral">
-<img src="images/hl_mypy_vs_grep.svg"
-alt="Figure 3: A graph showing how often the Pythia 6.9b produces code that typechecks on the tests, vs produces code that shows true understanding." />
-<figcaption aria-hidden="true">Figure 3: A graph showing how often the
+<img src="images/hl_mypy_vs_grep_revisions.svg"
+alt="Figure 4: A graph showing how often the Pythia 6.9b produces code that typechecks on the tests, vs produces code that shows true understanding." />
+<figcaption aria-hidden="true">Figure 4: A graph showing how often the
 Pythia 6.9b produces code that typechecks on the tests, vs produces code
 that shows true understanding.</figcaption>
 </figure>
@@ -601,10 +588,6 @@ that shows true understanding.</figcaption>
 class="header-section-number">4</span> Measuring Nullability
 Understanding Internally</h1>
 <span class=aside>write this section</span>
-<h2 data-number="4.1"
-id="designing-prompts-to-extract-nullability-activations"><span
-class="header-section-number">4.1</span> Designing Prompts to Extract
-Nullability Activations</h2>
 <span class=aside>we can probably just make this a brief part of the related work</span>
 <p>At this point, we’ve figured out how to roughly measure nullability
 understanding in the output of various language models, but we still
@@ -650,6 +633,10 @@ alt="An excerpt from Zhou et al showing the reading outputs for several concepts
 <figcaption aria-hidden="true">An excerpt from Zhou et al showing the
 reading outputs for several concepts</figcaption>
 </figure>
+<h2 data-number="4.1"
+id="designing-prompts-to-extract-nullability-activations"><span
+class="header-section-number">4.1</span> Designing Prompts to Extract
+Nullability Activations</h2>
 <p>In our setting, we were able to avoid dealing with the ambiguities of
 natural language by only prompting with code. We decided to stick to
 analyzing the nullability of individual variable occurrences, instead of
@@ -719,8 +706,8 @@ and then took the difference of the averages as our base reading vector.
 This is called “mass mean probing” in the literature, and empirically
 has been shown to generalize better in high dimensional space than
 trying to learn a linear model through logistic regression.<a
-href="#fn8" class="footnote-ref" id="fnref8"
-role="doc-noteref"><sup>8</sup></a></p>
+href="#fn9" class="footnote-ref" id="fnref9"
+role="doc-noteref"><sup>9</sup></a></p>
 <p>In this reading vector, the impact of each layer based on the
 magnitude of difference in that layer, instead of separate a notion of
 how “important” that layer is to differentiating positive and negative
@@ -752,42 +739,42 @@ method is more accurate on test data varies over both model size and
 number of training steps.</p>
 <figure id="fig:mm-vs-mmlr-sizes">
 <img src="images/mm-vs-mmlr.svg"
-alt="Figure 4: The performance of pure mass means probing vs mass means probing with linear regression for different Pythia model sizes. Binary-cross entropy is plotted, so lower is better." />
-<figcaption aria-hidden="true">Figure 4: The performance of pure mass
+alt="Figure 5: The performance of pure mass means probing vs mass means probing with linear regression for different Pythia model sizes. Binary-cross entropy is plotted, so lower is better." />
+<figcaption aria-hidden="true">Figure 5: The performance of pure mass
 means probing vs mass means probing with linear regression for different
 Pythia model sizes. Binary-cross entropy is plotted, so lower is
 better.</figcaption>
 </figure>
-<p>In Fig. <a href="#fig:mm-vs-mmlr-sizes">4</a>, we can see that pure
+<p>In Fig. <a href="#fig:mm-vs-mmlr-sizes">5</a>, we can see that pure
 mass means probing gives lower loss for smaller models (those with less
 than 410 million parameters), but that for larger models weighting
 layers using linear regression gives lower loss consistently.</p>
 <figure id="fig:mm-vs-mmlr-160m">
 <img src="images/mm-vs-mmlr-160m.svg"
-alt="Figure 5: The performance of the two probing methods on the Pythia 160m model for different numbers of pretraining steps. There are regions where pure mass means scaling is better, and regions where linear regression on layer weights is better." />
-<figcaption aria-hidden="true">Figure 5: The performance of the two
+alt="Figure 6: The performance of the two probing methods on the Pythia 160m model for different numbers of pretraining steps. There are regions where pure mass means scaling is better, and regions where linear regression on layer weights is better." />
+<figcaption aria-hidden="true">Figure 6: The performance of the two
 probing methods on the Pythia 160m model for different numbers of
 pretraining steps. There are regions where pure mass means scaling is
 better, and regions where linear regression on layer weights is
 better.</figcaption>
 </figure>
-<p>In Figs. <a href="#fig:mm-vs-mmlr-160m">5</a>, <a
-href="#fig:mm-vs-mmlr-410">6</a>, we look at how these scaling methods
+<p>In Figs. <a href="#fig:mm-vs-mmlr-160m">6</a>, <a
+href="#fig:mm-vs-mmlr-410">7</a>, we look at how these scaling methods
 perform for different amounts of pretraining, for the model sizes
 nearest the boundary. We see that relative merit of each scaling method
 can vary significantly over pretraining steps.</p>
 <figure id="fig:mm-vs-mmlr-410">
 <img src="images/mm-vs-mmlr-410m.svg"
-alt="Figure 6: The performance of the two probing methods on the Pythia 410m model for different numbers of pretraining steps. Pure mass means probing starts better, but is quickly overtaken by mass means probing with linear regression on layer weights." />
-<figcaption aria-hidden="true">Figure 6: The performance of the two
+alt="Figure 7: The performance of the two probing methods on the Pythia 410m model for different numbers of pretraining steps. Pure mass means probing starts better, but is quickly overtaken by mass means probing with linear regression on layer weights." />
+<figcaption aria-hidden="true">Figure 7: The performance of the two
 probing methods on the Pythia 410m model for different numbers of
 pretraining steps. Pure mass means probing starts better, but is quickly
 overtaken by mass means probing with linear regression on layer
 weights.</figcaption>
 </figure>
-<h1 data-number="5" id="sec:results"><span
-class="header-section-number">5</span> Nullability Prediction Accuracy
-Across Training and Scale</h1>
+<h2 data-number="4.3" id="sec:results"><span
+class="header-section-number">4.3</span> Probing Results Across Training
+and Scale</h2>
 <p>In this section, we study the performance of our nullability probes
 across time and scale <span class="citation"
 data-cites="tigges24">(Tigges et al. 2024)</span>. We use a mass-means
@@ -806,12 +793,12 @@ exclude the smallest (14m) from this plot since it would exist entirely
 above the top of the plot.</p>
 <figure id="fig:models-and-steps">
 <img src="images/accuracy_during_pretraining.svg"
-alt="Figure 7: The performance, measured in binary cross-entropy, of each Pythia model size during pretraining. Since this graph is of loss, lower is better" />
-<figcaption aria-hidden="true">Figure 7: The performance, measured in
+alt="Figure 8: The performance, measured in binary cross-entropy, of each Pythia model size during pretraining. Since this graph is of loss, lower is better" />
+<figcaption aria-hidden="true">Figure 8: The performance, measured in
 binary cross-entropy, of each Pythia model size during pretraining.
 Since this graph is of loss, lower is better</figcaption>
 </figure>
-<p>In Fig. <a href="#fig:models-and-steps">7</a>, we plot loss against
+<p>In Fig. <a href="#fig:models-and-steps">8</a>, we plot loss against
 scale and time. As expected, we see that loss tends to decreases as
 models get bigger and are trained for longer. However, models with fewer
 than 1 billion parameters reach their minimum loss well before the end
@@ -819,8 +806,8 @@ of training. This may be because the features beyond this point become
 more complex — less linear, or the represented features themselves
 represent more subtle concepts.
 <span class="aside AT">AT: speculation</span></p>
-<h1 data-number="6" id="related-work"><span
-class="header-section-number">6</span> Related Work</h1>
+<h1 data-number="5" id="related-work"><span
+class="header-section-number">5</span> Related Work</h1>
 <span class="aside AT">AT: mention the tigges paper on circuits across scale, the feng and steinhardt papers, etc</span>
 <p>As previously discussed, <a
 href="https://arxiv.org/abs/2310.01405">“Representation Engineering: A
@@ -906,7 +893,7 @@ Typing Rules</h1>
 <p>Here we define the syntax and semantics of the Python subset we work
 with:</p>
 <h2 class="unnumbered" id="sec:commonrules">B.1 Common Rules</h2>
-<span class="math display">\[\begin{aligned}
+<p><span class="math display">\[\begin{aligned}
 \left[Program\right]  =&amp; [\epsilon] {\huge|}
 \left[\begin{array}{l}Stmt\\Program\end{array}\right]\\
 [Stmt]       =&amp; [Import] | [FnDef] | [Assn] | [ForLoop] | [If] |
@@ -952,7 +939,7 @@ with:</p>
 [\texttt{&gt;=}] | [\texttt{is}] | [\texttt{is not}] | [\texttt{==}] |
 [\texttt{!=}]\\
 [ListConts]  =&amp; [Expr] | [Expr,ListConts]\\
-\end{aligned}\]</span>
+\end{aligned}\]</span></p>
 <p>We won’t worry too much about the semantics on a formal level, since
 it’s the same as Python’s semantics on this subset, and we’ll mostly be
 using it informally to justify typing rules here. But we do want to
@@ -966,9 +953,9 @@ typing in this language. There’s <span class="math inline">\(\Gamma
 class="math inline">\(\Gamma \vdash e : t\)</span>, which says that
 <span class="math inline">\(e\)</span> is well typed with type <span
 class="math inline">\(t\)</span> in environment <span
-class="math inline">\(\Gamma\)</span>. When we exclude the , we mean
-that the judgement is true under any typing environment, including the
-empty one.</p>
+class="math inline">\(\Gamma\)</span>. When we exclude the <span
+class="math inline">\(\Gamma\)</span>, we mean that the judgement is
+true under any typing environment, including the empty one.</p>
 <p><span class="math display">\[
 \tag{Const}
 \frac{Constant\neq\texttt{None}}{\vdash Constant: \text{Atom}}\\
@@ -1249,7 +1236,7 @@ None and returning a string when the input is a string. Neither of these
 cases is correct, as the main function expects this to return a Number
 that can be added to one.</p>
 <h2 class="unnumbered" id="across-time">C.2 Across Time</h2>
-<p>We say in fig. <a href="#fig:hl_time">2</a> that while the model
+<p>We say in fig. <a href="#fig:hl_time">3</a> that while the model
 generally gets better at passing these tests during training, the
 performance is not always increasing. Zooming in on a particular test,
 we can see what this looks like. When asked to complete this code:</p>
@@ -1424,10 +1411,14 @@ this might be due to under-training at that size. Qwen 32B also performs
 about as well as Pythia 6.9b, it’s not clear if this is due to model
 architecture or something else.<a href="#fnref6" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn7"><p>rolling average with a window size of 5<a href="#fnref7"
+<li id="fn7"><p>We don’t see all six non-annotated function tests
+passing under mypy, because models can still fail these tests by
+producing invalid syntax.<a href="#fnref7" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>rolling average with a window size of 5<a href="#fnref8"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn8"><p>see the appendix section “Mass Mean Probing vs Linear
-Regression” for more on this<a href="#fnref8" class="footnote-back"
+<li id="fn9"><p>see the appendix section “Mass Mean Probing vs Linear
+Regression” for more on this<a href="#fnref9" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>

@@ -12,7 +12,7 @@
 
 figure {
   width: min(max(36em, 100vw), 54em);
-  margin-left: max(-25vw, -9em)
+  margin-left: min(max(-9em, calc(18em - 50vw)),0em);
 }
 figure img {
   width: min(max(36em, 100vw), 54em)

@@ -471,6 +471,8 @@ successfully pass this test, as are smaller models like Qwen Coder
 32B, while DeepSeek V3 (671B parameters) is able to pass it. However,
 Pythia 6.9B is still able to pass this test pretty consistently.
 
+## Generating Type Annotations
+
 Finally, we can test how good the models are at writing their own type
 annotations for functions. Since most of the publicly available Python
 code is not type-annotated, you could imagine that LLM's can reason
@@ -503,6 +505,8 @@ demonstrating that writing these annotaions is indeed difficult for
 LLM's.\AT{maybe too strong. "indeed more difficult than"?} Qwen Coder 32B is
 also incapable of passing this test, but both Llama 405B and DeepSeek V3 pass
 it.
+
+## External Test Results Across Training and Scale
 
 We wrote three variations of each of these tests, resulting in 15
 tests total. Below, you can see the number of passing tests for each

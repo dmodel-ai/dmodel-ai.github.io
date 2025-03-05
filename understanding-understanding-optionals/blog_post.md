@@ -652,7 +652,7 @@ tokens up to and including the variable read occurrence.
 ## Training Reading Vectors {#sec:extraction}
 
 To start, let's look at how previous works have extracted reading
-vectors from sample activations. In the Zhou representation
+vectors from sample activations. In the Zou representation
 engineering paper, the authors extract a reading vector from the
 contrastive pairs of activations using principal component
 analysis (PCA).

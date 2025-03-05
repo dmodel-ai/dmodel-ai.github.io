@@ -577,7 +577,7 @@ understanding evals we describe in the previous section.
 <!--
 As language models predict each token in a text, they run their tuned
 circuits over all the previous text. Tokens are first embedded into a
-high-dimensional “token space”, and each layer of the transformer
+high-dimensional "token space", and each layer of the transformer
 model is made up of many parallel circuits which transform the
 previous layers output into new embeddings in a new space. Each layer
 can look not just at the output of the layer directly previous, but
@@ -589,7 +589,7 @@ model; circuit-based, and representation-based. Circuit based
 interpretability aims to pair down the network to a key set of
 circuits which are sufficient to complete a particular task; this
 allows practitioners to point to a particular part of the model and
-say “this is where \<task\> is done”, much like neuroscientists assign
+say "this is where \<task\> is done", much like neuroscientists assign
 functionality to different parts of our brain.
 
 -->
@@ -620,8 +620,8 @@ In our setting, we were able to avoid dealing with the ambiguities of
 natural language by only prompting with code. We decided to stick to
 analyzing the nullability of individual variable occurrences, instead
 of analyzing every expression. Specifically, we tried to capture the
-concept “the variable I just generated refers to an nullable
-quantity”, so our prompts looked like:
+concept "the variable I just generated refers to an nullable
+quantity", so our prompts looked like:
 
 ```python
 def program_1() -> None:

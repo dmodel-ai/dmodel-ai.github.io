@@ -131,7 +131,7 @@
               // If there's room to move it up without overlapping the previous note
               if (localTop - minTop > nextTop + noteHeight - figTop - allowedOverlapPixels) {
                   // Move it up
-                  nextTop-= nextTop + noteHeight - figTop - allowedOverlapPixels;
+                  nextTop = noteHeight - figTop - allowedOverlapPixels;
               }
           }
       });

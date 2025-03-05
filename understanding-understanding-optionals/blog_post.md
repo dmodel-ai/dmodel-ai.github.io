@@ -226,8 +226,6 @@ knowledge like so:
 ![A diagram showing a simple program, and the probes nullability
  predictions for each variable load.](images/reading_diagram.svg)
 
-\todo{READING DIAGRAMS HERE}
-
 In [@Sec:bench] we'll describe our external tests of nullability
 understanding in more detail, and in [@Sec:probing] we'll describe
 measuring the models internal states in detail. Finally, we'll go over

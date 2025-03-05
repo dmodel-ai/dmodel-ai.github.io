@@ -122,16 +122,20 @@
 
       // Force layout so we can measure note height.
       const noteHeight = note.offsetHeight;
-      figureElements.forEach((fig, idx) => {
+      figureElements.forEach((fig, fidx) => {
           figRect = fig.getBoundingClientRect();
           figTop = window.scrollY + figRect.top;
+          figBottom = window.scrollY + figRect.bottom;
           allowedOverlapPixels = 20;
           // If the note overlaps a figure
-          if (nextTop < figTop && nextTop + noteHeight > figTop - allowedOverlapPixels) {
+          if (nextTop < figBottom && nextTop + noteHeight > figTop + allowedOverlapPixels) {
               // If there's room to move it up without overlapping the previous note
-              if (localTop - minTop > nextTop + noteHeight - figTop - allowedOverlapPixels) {
+              if (localTop - minTop > nextTop + noteHeight - figTop + allowedOverlapPixels) {
                   // Move it up
-                  nextTop = noteHeight - figTop - allowedOverlapPixels;
+                  nextTop = figTop + allowedOverlapPixels - noteHeight;
+              } else {
+                  // Move it down
+                  nextTop = figBottom;
               }
           }
       });

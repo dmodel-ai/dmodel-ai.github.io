@@ -4,7 +4,6 @@ author: '[Alex Sanchez-Stern](https://www.alexsanchezstern.com) and [Anish Tondw
 date: '$d_{model}$'
 header-includes:
   - "<script src=\"sidenotes.js\"></script>"
-  - "<meta http-equiv=\"refresh\" content=\"15\" />"
 bibliography: all.bib
 linkReferences: true
 abstract:

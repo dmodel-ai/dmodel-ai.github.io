@@ -306,7 +306,6 @@ alt="A diagram showing a simple program, and the probes nullability predictions 
 <figcaption aria-hidden="true">A diagram showing a simple program, and
 the probes nullability predictions for each variable load.</figcaption>
 </figure>
-<span class=aside>READING DIAGRAMS HERE</span>
 <p>In Sec. <a href="#sec:bench">3</a> we’ll describe our external tests
 of nullability understanding in more detail, and in Sec. <a
 href="#sec:probing">4</a> we’ll describe measuring the models internal
@@ -426,7 +425,7 @@ body. Here’s a test that does that:</p>
 <div class="sourceCode" id="cb13"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> x <span class="op">&gt;</span> <span class="dv">0</span>:</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>        value <span class="op">=</span> <span class="st">&quot;&quot;</span><span class="op">*</span><span class="st">&quot;&quot;</span> <span class="op">*</span> x</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>        value <span class="op">=</span> <span class="st">&quot;*&quot;</span> <span class="op">*</span> x</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>        value <span class="op">=</span> <span class="va">None</span></span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
@@ -480,12 +479,12 @@ difficulty, in this test:</p>
 <div class="sourceCode" id="cb14"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> handle_value(value, guard):</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> guard:</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> process_value(<span class="st">&quot;&quot;</span>Foobar<span class="st">&quot;&quot;</span>) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> process_value(<span class="st">&quot;Foobar&quot;</span>) <span class="op">+</span> <span class="dv">1</span></span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> process_value(value) <span class="op">+</span> <span class="dv">1</span></span>
 <span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
 <span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> x <span class="op">&gt;</span> <span class="dv">0</span>:</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>        value <span class="op">=</span> <span class="st">&quot;&quot;</span><span class="op">*</span><span class="st">&quot;&quot;</span> <span class="op">*</span> x</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>        value <span class="op">=</span> <span class="st">&quot;*&quot;</span> <span class="op">*</span> x</span>
 <span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
 <span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        value <span class="op">=</span> <span class="va">None</span></span>
 <span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a></span>
@@ -602,7 +601,7 @@ class="header-section-number">4.1</span> Background</h2>
 <!--
 As language models predict each token in a text, they run their tuned
 circuits over all the previous text. Tokens are first embedded into a
-high-dimensional “token space”, and each layer of the transformer
+high-dimensional "token space", and each layer of the transformer
 model is made up of many parallel circuits which transform the
 previous layers output into new embeddings in a new space. Each layer
 can look not just at the output of the layer directly previous, but
@@ -614,7 +613,7 @@ model; circuit-based, and representation-based. Circuit based
 interpretability aims to pair down the network to a key set of
 circuits which are sufficient to complete a particular task; this
 allows practitioners to point to a particular part of the model and
-say “this is where \<task\> is done”, much like neuroscientists assign
+say "this is where \<task\> is done", much like neuroscientists assign
 functionality to different parts of our brain.
 
 -->
@@ -646,12 +645,11 @@ for several concepts</figcaption>
 <h2 data-number="4.2" id="sec:prompts"><span
 class="header-section-number">4.2</span> Designing Prompts to Extract
 Nullability Activations</h2>
-<p>In our setting, we were able to avoid dealing with the ambiguities of
-natural language by only prompting with code. We decided to stick to
-analyzing the nullability of individual variable occurrences, instead of
-analyzing every expression. Specifically, we tried to capture the
-concept “the variable I just generated refers to an nullable quantity”,
-so our prompts looked like:</p>
+<p>We avoid dealing with the ambiguities of natural language by working
+in a setting where the model needs only to complete code. analyze the
+nullability of individual variable occurrences. Specifically, we probe
+for “the variable I just generated refers to an nullable quantity”, so
+our prompts looked like:</p>
 <div class="sourceCode" id="cb16"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_1() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> find_value(data: List[<span class="bu">int</span>], target: <span class="bu">int</span>) <span class="op">-&gt;</span> Optional[<span class="bu">int</span>]:</span>
@@ -664,9 +662,8 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb16-1"><a h
 <span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  target <span class="op">=</span> <span class="dv">3</span></span>
 <span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  result <span class="op">=</span> find_value(data, target)</span>
 <span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> result</span></code></pre></div>
-<p>To generate these kinds of prompts, we started by asking a few
-different chat models to generate for us programs that made use of
-nullability . We prompted each model with:</p>
+<p>We queried o1, o1-mini, deepseek-coder, and claude-3.5-sonnet with
+the following prompt:</p>
 <blockquote>
 <p>Generate me 100 typed python programs that use the Optional type,
 along with type annotations for any undefined functions that they use.
@@ -676,14 +673,10 @@ programs in a single file, with a main function that tests each. Don’t
 include any text before or after the code, just the code. I will be
 using mypy with the –strict option to check the code.</p>
 </blockquote>
-<p>We queried o1, o1-mini, deepseek-coder, and claude-sonnet using this
-prompt, and then combined programs from the output of all of them into a
-single file. Then, we took every function and class in the resulting
-code file, and created a file with it and any recursive dependencies and
-imports from the file. Finally, we took each variable read occurrence in
-each function, and generated a prompt with the tokens up to and
-including that variable read, and labeled it with whether or not the
-mypy-inferred type is an Optional.</p>
+<p>We label each variable read occurrence with nullability information
+derived from mypy, and prompt the “model under test” with a prompt
+consisting of the tokens up to and including the variable read
+occurrence.</p>
 <h2 data-number="4.3" id="sec:extraction"><span
 class="header-section-number">4.3</span> Training Reading Vectors</h2>
 <p>To start, let’s look at how previous works have extracted reading

@@ -616,12 +616,10 @@ this gives us a lie-detector).
 
 ## Designing Prompts to Extract Nullability Activations {#sec:prompts}
 
-In our setting, we were able to avoid dealing with the ambiguities of
-natural language by only prompting with code. We decided to stick to
-analyzing the nullability of individual variable occurrences, instead
-of analyzing every expression. Specifically, we tried to capture the
-concept "the variable I just generated refers to an nullable
-quantity", so our prompts looked like:
+We avoid dealing with the ambiguities of natural language by working in
+a setting where the model needs only to complete code. analyze the nullability
+of individual variable occurrences. Specifically, we probe for "the variable
+I just generated refers to an nullable quantity", so our prompts looked like:
 
 ```python
 def program_1() -> None:
@@ -637,9 +635,7 @@ def program_1() -> None:
   if result
 ```
 
-To generate these kinds of prompts, we started by asking a few
-different chat models to generate for us programs that made use of
-nullability . We prompted each model with:
+We queried o1, o1-mini, deepseek-coder, and claude-3.5-sonnet with the following prompt:
 
 > Generate me 100 typed python programs that use the Optional type,
 > along with type annotations for any undefined functions that they
@@ -649,14 +645,9 @@ nullability . We prompted each model with:
 > each. Don't include any text before or after the code, just the
 > code. I will be using mypy with the --strict option to check the code.
 
-We queried o1, o1-mini, deepseek-coder, and claude-sonnet using this
-prompt, and then combined programs from the output of all of them into
-a single file. Then, we took every function and class in the resulting
-code file, and created a file with it and any recursive dependencies
-and imports from the file. Finally, we took each variable read
-occurrence in each function, and generated a prompt with the tokens up
-to and including that variable read, and labeled it with whether or
-not the mypy-inferred type is an Optional.
+We label each variable read occurrence with nullability information derived
+from mypy, and prompt the "model under test" with a prompt consisting of the
+tokens up to and including the variable read occurrence.
 
 ## Training Reading Vectors {#sec:extraction}
 

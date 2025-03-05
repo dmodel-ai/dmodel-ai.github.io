@@ -110,6 +110,7 @@
   <link rel="stylesheet" href="pandoc.css" />
   <link rel="stylesheet" href="sidenote.css" />
   <script src="sidenotes.js"></script>
+  <meta http-equiv="refresh" content="15" />
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script
   src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
@@ -797,19 +798,24 @@ represent more subtle concepts.
 <span class="aside AT">AT: speculation</span></p>
 <h1 data-number="5" id="sec:related"><span
 class="header-section-number">5</span> Related Work</h1>
-<span class="aside AT">AT: mention the tigges paper on circuits across scale, the feng and steinhardt papers, etc</span>
-<p>As previously discussed, <a
-href="https://arxiv.org/abs/2310.01405">“Representation Engineering: A
-Top-Down Approach to AI Transparency”</a> by Zhou et al is the most
-closely related work, consolidating some research on representation
-interpretability with linear probes. We apply similar techniques, but to
-program semantics and dataflow instead of natural language.</p>
-<p>Several techniques exist for constructing linear probes, but after
-experimental measurement we followed the mass means probing from <a
-href="https://openreview.net/forum?id=CeJEfNKstt">The Geometry of Truth:
-Emergent Linear Structure in Large Language Model Representations of
-True/False Datasets</a> by Marks and Tegmark. The paper discusses
-several reasons why mass mean probing might outperform linear
+<p>Our decision to use Pythia to study feature evolution across time and
+scale is inspired by <span class="citation" data-cites="tigges24">Tigges
+et al. (2024)</span></p>
+<p><span class="citation" data-cites="feng24predicate">Feng, Russell,
+and Steinhardt (2024)</span> also study LLM’s ability to reason about
+propositions, but in a natural language setting, rather than a formal
+one.</p>
+<p><span class="citation" data-cites="zou25">Zou et al. (2025)</span>
+consolidating some research on representation interpretability with
+linear probes. We apply similar techniques, but to program semantics and
+dataflow instead of natural language.</p>
+<p><span class="aside AT">AT: Acutally, IIUC we don't use theirs --- Tegmark's version has a $\Sigma$ in
+the middle of it. I think the kind of mass means differences (I think this is
+what it's called? it has a subtly different but very similar name</span>
+that we use is from a Kenneth Li paper} Several techniques exist for
+constructing linear probes, but after experimental measurement we
+followed the mass means probing from [zhong23] Tegmark. The paper
+discusses several reasons why mass mean probing might outperform linear
 regression.</p>
 <h1 class="unnumbered" id="references">References</h1>
 <div id="refs" class="references csl-bib-body hanging-indent"
@@ -821,6 +827,12 @@ Kyle O’Brien, Eric Hallahan, Mohammad Aflah Khan, et al. 2023.
 Models Across Training</span> and <span>Scaling</span>.”</span> arXiv.
 <a
 href="https://doi.org/10.48550/arXiv.2304.01373">https://doi.org/10.48550/arXiv.2304.01373</a>.
+</div>
+<div id="ref-feng24predicate" class="csl-entry" role="listitem">
+Feng, Jiahai, Stuart Russell, and Jacob Steinhardt. 2024.
+<span>“Monitoring <span>Latent World States</span> in <span>Language
+Models</span> with <span>Propositional Probes</span>.”</span> arXiv. <a
+href="https://doi.org/10.48550/arXiv.2406.19501">https://doi.org/10.48550/arXiv.2406.19501</a>.
 </div>
 <div id="ref-li24" class="csl-entry" role="listitem">
 Li, Kenneth, Oam Patel, Fernanda Viégas, Hanspeter Pfister, and Martin
@@ -841,6 +853,13 @@ Basu, Yi Luan, Denny Zhou, and Le Hou. 2023.
 <span>“Instruction-<span>Following Evaluation</span> for <span>Large
 Language Models</span>.”</span> arXiv. <a
 href="https://doi.org/10.48550/arXiv.2311.07911">https://doi.org/10.48550/arXiv.2311.07911</a>.
+</div>
+<div id="ref-zou25" class="csl-entry" role="listitem">
+Zou, Andy, Long Phan, Sarah Chen, James Campbell, Phillip Guo, Richard
+Ren, Alexander Pan, et al. 2025. <span>“Representation
+<span>Engineering</span>: <span>A Top-Down Approach</span> to <span>AI
+Transparency</span>.”</span> arXiv. <a
+href="https://doi.org/10.48550/arXiv.2310.01405">https://doi.org/10.48550/arXiv.2310.01405</a>.
 </div>
 </div>
 <h1 class="unnumbered" id="appendicies">Appendicies</h1>

@@ -2,7 +2,9 @@
 title: Understanding Models Understanding Nullability
 author: '[Alex Sanchez-Stern](https://www.alexsanchezstern.com) and [Anish Tondwalkar](https://ani.sh)'
 date: '$d_{model}$'
-header-includes: "<script src=\"sidenotes.js\"></script>"
+header-includes:
+  - "<script src=\"sidenotes.js\"></script>"
+  - "<meta http-equiv=\"refresh\" content=\"15\" />"
 bibliography: all.bib
 linkReferences: true
 abstract:
@@ -767,20 +769,23 @@ features themselves represent more subtle concepts. \AT{speculation}
 
 # Related Work {#sec:related}
 
-\AT{mention the tigges paper on circuits across scale, the feng and steinhardt papers, etc}
+Our decision to use Pythia to study feature evolution across time and scale is
+inspired by @tigges24
 
-As previously discussed, [“Representation Engineering: A Top-Down
-Approach to AI Transparency”](https://arxiv.org/abs/2310.01405) by
-Zhou et al is the most closely related work, consolidating some
+@feng24predicate also study LLM's ability to reason about propositions, but in
+a natural language setting, rather than a formal one.
+
+@zou25 consolidating some
 research on representation interpretability with linear probes. We
 apply similar techniques, but to program semantics and dataflow
 instead of natural language.
 
+\AT{Acutally, IIUC we don't use theirs --- Tegmark's version has a $\Sigma$ in
+the middle of it. I think the kind of mass means differences (I think this is
+what it's called? it has a subtly different but very similar name} that we use
+is from a Kenneth Li paper}
 Several techniques exist for constructing linear probes, but after
-experimental measurement we followed the mass means probing from [The
-Geometry of Truth: Emergent Linear Structure in Large Language Model
-Representations of True/False
-Datasets](https://openreview.net/forum?id=CeJEfNKstt) by Marks and
+experimental measurement we followed the mass means probing from [zhong23]
 Tegmark. The paper discusses several reasons why mass mean probing
 might outperform linear regression.
 

@@ -685,58 +685,36 @@ derived from mypy, and prompt the “model under test” with a prompt
 consisting of the tokens up to and including the variable read
 occurrence.</p>
 <h2 data-number="4.3" id="sec:extraction"><span
-class="header-section-number">4.3</span> Training Reading Vectors</h2>
-<p>To start, let’s look at how previous works have extracted reading
-vectors from sample activations. In the Zou representation engineering
-paper, the authors extract a reading vector from the contrastive pairs
-of activations using principal component analysis (PCA).</p>
-<p>First, they take each pair of honest and dishonest promptings for the
-same stimulus, and get the difference between them, creating a set of
-contrast vectors. They randomly flip some of these contrast vectors, so
-that overall the set will vary a lot along the direction of the
-contrast. Since PCA assumes that the data is centered around the origin,
-they then took the mean of all these vectors, and translated all the
-vectors backwards along the mean vector, to create a set with the same
-variances but centered around the origin.</p>
-<p>Next, they use the PCA analysis from the sklearn library to get a set
-of “component” vectors, where the vectors are orthogonal to each other
-and explain the maximum variance of the samples in each prefix of the
-list. Components in PCA are bidirectional (they can come out of the
-analysis in either reflection, and both are equally correct), so next
-they flip any component vectors that are pointing more towards the
-negative samples than the positive samples. Then, they take the first
-component, the most important one, and use it as their reading
-vector.</p>
-<p>Our method for prompt generation didn’t admit contrastive pairs like
-in the previous methods, but instead just a bunch of unconnected
-positive and negative examples. So instead of doing PCA on contrast
-vectors, we averaged the positive examples and the negative examples,
-and then took the difference of the averages as our base reading vector.
-This is called “mass mean probing” in the literature, and empirically
-has been shown to generalize better in high dimensional space than
-trying to learn a linear model through logistic regression.<a
+class="header-section-number">4.3</span> Extracting Reading Vectors</h2>
+<span class="aside AT">AT: Overall, I'm not really sure what our takeaway is for this section. I think we want the reader to understand that we did some experiements with mass mean probing and the various normalization mehtods, but I'm not sure we're making any compelling point here beyond "we ran the experiment". I think we can appendicize the latter two plots --- they look pretty noisy, and I'm not sure they're acutally something to draw conclusions from</span>
+<p>We use Mass Mean Shift probing which has been shown empirically <span
+class="citation" data-cites="li24">(Li et al. 2024)</span> to generalize
+better in high dimensional spaces than logistic regression.<a
 href="#fn10" class="footnote-ref" id="fnref10"
 role="doc-noteref"><sup>10</sup></a></p>
-<p>In this reading vector, the impact of each layer based on the
-magnitude of difference in that layer, instead of separate a notion of
-how “important” that layer is to differentiating positive and negative
-examples. So we decided to try a few different methods of normalizing
-these layers to improve their overall accuracy as a linear model:</p>
+<p>In the reading vector, the impact of each layer is based on the
+magnitude of mean difference in that layer. w we decided to try a few
+different methods of normalizing these layers to improve their overall
+accuracy as a linear model:</p>
+<p>The reading vectors from each layer are the mean difference in
+activations between when the feature (nullability) is present or not.
+This leaves open the question of how to weight the reading vectors from
+different layers. We evaluate the follow cross-layer normalization
+schemes:</p>
 <ul>
-<li>No normalization; just the projection across the average
-difference.</li>
+<li>No normalization; just summing over the average differences</li>
 <li>Normalizing each layers vector to a uniform length</li>
 <li>Dividing by the average amount that each layer activates on the
-positives samples</li>
+positive samples</li>
 <li>Dividing by the average absolute amount that each layer activates on
 the positive samples</li>
 <li>Dividing by the square root of the average of squares of layer
-activations</li>
+activations <span class="aside AT">AT:  add some theory for this</span>
+<span class="aside AT">AT:  include a results table </span>
+<span class="aside AT">AT:  add equations. these words are so hard to read.</span></li>
 </ul>
-<p>And we found that no normalization actually did the best of all three
-scaling methods. In domains like this one where we have a lot less
-training data points then dimensions, what techniques will generalize
-well to the test data can be hard to predict.</p>
+<p>We find that “no normalization” performs the best.</p>
+<span class=aside> this is ... sort of... a contribution?</span>
 <p>Prior work focused their probing on a single layer, often handpicked
 based on prior papers. In our experiments, we decided to probe
 <em>all</em> layers using a mass means probe, and learn which ones were
@@ -757,7 +735,8 @@ better.</figcaption>
 <p>In Fig. <a href="#fig:mm-vs-mmlr-sizes">5</a>, we can see that pure
 mass means probing gives lower loss for smaller models (those with less
 than 410 million parameters), but that for larger models weighting
-layers using linear regression gives lower loss consistently.</p>
+layers using linear regression gives lower loss consistently.
+<span class="aside AT">AT: not really sure these plots are saying what we're saying they're saying</span></p>
 <figure id="fig:mm-vs-mmlr-160m">
 <img src="images/mm-vs-mmlr-160m.svg"
 alt="Figure 6: The performance of the two probing methods on the Pythia 160m model for different numbers of pretraining steps. There are regions where pure mass means scaling is better, and regions where linear regression on layer weights is better." />
@@ -786,20 +765,12 @@ class="header-section-number">4.4</span> Probing Results Across Training
 and Scale</h2>
 <p>In this section, we study the performance of our nullability probes
 across time and scale <span class="citation"
-data-cites="tigges24">(Tigges et al. 2024)</span>. We use a mass-means
-probe <span class="citation" data-cites="li24">(Li et al. 2024)</span>
-on all layers, with a linear regression determining the weights of each
-layer. <span class="citation" data-cites="li24">Li et al. (2024)</span>
-and <span class="citation" data-cites="zhou23">Zhou et al. (2023)</span>
-suggest that mass means probes are best for reading, while the direction
-perpendicular to the separating hyperplane is best for intervention.
-However, previous work leaves open the question of cross-layer weights.
-We use LR on the cross-layer weights because that is the probing method
-that we found works best overall.
-<span class="aside AT">AT: see section/appendix for further discussion</span>
-While we measured accuracy for every available Pythia model size, we
-exclude the smallest (14m) from this plot since it would exist entirely
-above the top of the plot.</p>
+data-cites="tigges24">(Tigges et al. 2024)</span>. We use mass-means
+shift probing <span class="citation" data-cites="li24">(Li et al.
+2024)</span> on all layers, and a linear regression to determine the
+weights of each layer.<a href="#fn11" class="footnote-ref" id="fnref11"
+role="doc-noteref"><sup>11</sup></a>
+<span class="aside AT">AT: see appendix D for mm vs LR</span></p>
 <figure id="fig:models-and-steps">
 <img src="images/accuracy_during_pretraining.svg"
 alt="Figure 8: The performance, measured in binary cross-entropy, of each Pythia model size during pretraining. Since this graph is of loss, lower is better" />
@@ -808,13 +779,12 @@ binary cross-entropy, of each Pythia model size during pretraining.
 Since this graph is of loss, lower is better</figcaption>
 </figure>
 <p>In Fig. <a href="#fig:models-and-steps">8</a>, we plot loss against
-scale and time. As expected, we see that loss tends to decreases as
-models get bigger and are trained for longer. However, models with fewer
-than 1 billion parameters reach their minimum loss well before the end
-of training. This may be because the features beyond this point become
-more complex — less linear, or the represented features themselves
-represent more subtle concepts.
-<span class="aside AT">AT: speculation</span></p>
+scale and time. While we measured accuracy for every available Pythia
+model size, we exclude the smallest (14m) from this plot since it would
+exist entirely above the top of the plot. We notice turning points in
+the models’ understanding of nullability at 1b parameters and
+<span class=aside>number of tokens</span>. We explore the texture of
+these in <span class=aside>future work</span>.</p>
 <h2 data-number="4.5" id="visualizing-probe-outputs"><span
 class="header-section-number">4.5</span> Visualizing Probe Outputs</h2>
 <p>Now that we’ve shown how to train these probes with increasing
@@ -823,13 +793,13 @@ and go a bit more into depth with it.</p>
 <p>We adapted this style of reading diagram from <span class="citation"
 data-cites="zou25">Zou et al. (2025)</span>, but only show the
 activations on tokens that represent variable loads, since that is where
-we trained our probe<a href="#fn11" class="footnote-ref" id="fnref11"
-role="doc-noteref"><sup>11</sup></a>. For each measured token, we’re
+we trained our probe<a href="#fn12" class="footnote-ref" id="fnref12"
+role="doc-noteref"><sup>12</sup></a>. For each measured token, we’re
 running the model until just after that token, then extracting it’s
 hidden state and measuring probe activation. We then color the box above
 that token depending on the activations, and the scoring threshold
-inferred at train-time<a href="#fn12" class="footnote-ref" id="fnref12"
-role="doc-noteref"><sup>12</sup></a>.</p>
+inferred at train-time<a href="#fn13" class="footnote-ref" id="fnref13"
+role="doc-noteref"><sup>13</sup></a>.</p>
 <figure>
 <img src="images/reading_diagram.svg"
 alt="A diagram showing a simple program, and the probes nullability predictions for each variable load." />
@@ -871,6 +841,9 @@ class="citation" data-cites="li24">Li et al. (2024)</span>. <span
 class="citation" data-cites="li24">Li et al. (2024)</span> and <span
 class="citation" data-cites="zhong23">Zhong et al. (2023)</span> discuss
 why mass mean probing might outperform linear regression.</p>
+<h1 data-number="6" id="future-work"><span
+class="header-section-number">6</span> Future Work</h1>
+<span class="aside AT">AT: Typing rules staircase plot</span>
 <h1 class="unnumbered" id="references">References</h1>
 <div id="refs" class="references csl-bib-body hanging-indent"
 data-entry-spacing="0" role="list">
@@ -907,13 +880,6 @@ Zhong, Ziqian, Ziming Liu, Max Tegmark, and Jacob Andreas. 2023.
 Stories</span> in <span>Mechanistic Explanation</span> of <span>Neural
 Networks</span>.”</span> arXiv. <a
 href="https://doi.org/10.48550/arXiv.2306.17844">https://doi.org/10.48550/arXiv.2306.17844</a>.
-</div>
-<div id="ref-zhou23" class="csl-entry" role="listitem">
-Zhou, Jeffrey, Tianjian Lu, Swaroop Mishra, Siddhartha Brahma, Sujoy
-Basu, Yi Luan, Denny Zhou, and Le Hou. 2023.
-<span>“Instruction-<span>Following Evaluation</span> for <span>Large
-Language Models</span>.”</span> arXiv. <a
-href="https://doi.org/10.48550/arXiv.2311.07911">https://doi.org/10.48550/arXiv.2311.07911</a>.
 </div>
 <div id="ref-zou25" class="csl-entry" role="listitem">
 Zou, Andy, Long Phan, Sarah Chen, James Campbell, Phillip Guo, Richard
@@ -1510,18 +1476,26 @@ producing invalid syntax.<a href="#fnref8" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
 <li id="fn9"><p>rolling average with a window size of 5<a href="#fnref9"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn10"><p>see the appendix section “Mass Mean Probing vs Linear
-Regression” for more on this<a href="#fnref10" class="footnote-back"
+<li id="fn10"><p>see “Mass Mean Probing vs Linear Regression” in the
+appendix<a href="#fnref10" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn11"><p>There is also a much more practical reason: right after
+<li id="fn11"><p> <span class="citation" data-cites="li24">Li et al.
+(2024)</span> and <span class="citation" data-cites="zou25">Zou et al.
+(2025)</span> suggest that mass means probes are best for reading, while
+the direction perpendicular to the separating hyperplane is best for
+intervention. However, previous work leaves open the question of
+cross-layer weights. We use LR on the cross-layer weights, thanks to our
+investigations above.<a href="#fnref11" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn12"><p>There is also a much more practical reason: right after
 the model has generated a variable that will be written to, it often
 does not have access to the assigning expression or type annotation,
 giving it no way to determine if the value will be optional or now.<a
-href="#fnref11" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn12"><p>Red tokens are significantly below the threshold, and
+href="#fnref12" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn13"><p>Red tokens are significantly below the threshold, and
 green tokens are significantly above it; tokens that scored near the
 threshold would have a near-white color, but no such tokens appear in
-this example.<a href="#fnref12" class="footnote-back"
+this example.<a href="#fnref13" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>

@@ -387,7 +387,7 @@ function body. Here's a test that does that:
 ```python
 def main(x: int) -> None:
     if x > 0:
-        value = ""*"" * x
+        value = "*" * x
     else:
         value = None
 
@@ -450,12 +450,12 @@ more difficulty, in this test:
 ```python
 def handle_value(value, guard):
     if guard:
-        return process_value(""Foobar"") + 1
+        return process_value("Foobar") + 1
     else:
         return process_value(value) + 1
 def main(x: int) -> None:
     if x > 0:
-        value = ""*"" * x
+        value = "*" * x
     else:
         value = None
 

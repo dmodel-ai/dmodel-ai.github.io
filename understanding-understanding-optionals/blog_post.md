@@ -62,7 +62,7 @@ In this work, we contribute:
 * A microbenchmark of 15 programs that test basic model understanding
   of the flow of nullability through a program ([@sec:bench]).
 
-* We find show that models develop an internal concept of
+* We find that models develop an internal concept of
   nullability as they scale up and are trained for longer. ([@sec:probing])
 
 * We find that models begin to understand nullability in a local
@@ -236,35 +236,6 @@ composed of three functions or less, where the largest function is
 seven lines long.
 
 
-But before we try to measure nullability understanding, we'll want to
-be more precise about exactly what we're measuring. To that end, we'll
-take the notion of different "rules" for nullability that we discuseed
-informally in the overview, and bring it into a formal typing
-system. We're not going to try to describe all the typing rules of
-python, so we'll restrict ourselves in a couple of ways.
-
-First, we'll reduce the number of python features that we handle by
-actually working in a subset of python. This means we can skip
-worrying about the semantics of complicated features, and just focus
-on the features neccesary for understanding optionality in a
-semi-realistic setting.
-
-Second, we'll define all non-None values as converting to the boolean
-value True, instead of numbers converting to False when they are zero
-and strings converting to False when they are empty. This is a
-necessary practicality, because otherwise, the model could circumvent
-our type tests by doing bare ifs which work on both optional and
-non-optional types. But to prevent bare ifs from ever being the
-correct completion for a non-optional type, we'll design our tests so
-that there are never any values that would convert to False, namely
-the number zero and the empty string.
-
-The full syntax and typing rules of our subset of Python are described
-in Appendix [B.1](#sec:commonrules).
-
-With these basic rules, we can construct basic program prefixes that
-test the models understanding of nullability.
-
 We measure the difficulty of these tests by measuring how
 models of different sizes perform. We pay particular focus to
 the Pythia model suite[@biderman23], as they have checkpoints available across
@@ -316,13 +287,23 @@ with Pythia 12b able to complete the test 20% of the way into training
 and Pythia 2.8b able to complete it 28% of the way into
 training.
 
-So, does this mean that Pythia models 1.4b and up understand all the
-typing rules necessary for this test? Actually, no. LLM's pick up on a
-lot of information relationships in their training data that have
-statistical correlation, without it necessarily being causal. What
-this means in practice is that the models use things like variable
-names, whitespace, statement orderings, and constant values to guess
-at certain programming concepts. So, while many of the Pythia models
+## Understanding Typing Rules
+
+How deep is this understanding of nullability? We give a syntax and
+semantics of a minimalist subset of python that captures nullability,
+and study how well our models perform on each rule.
+The full syntax and typing rules of our subset of Python are described
+in Appendix [B.1](#sec:commonrules).
+
+With these basic rules, we can construct basic program prefixes that
+test the models understanding of nullability.
+
+So, do Pythia models 1.4b and up understand the semantics of all of the
+typing rules necessary for this\AT{which} test, or are the confounded by
+semiotic information like variable names, whitespace, statement orderings, and
+constant values?
+
+For example, while many of the Pythia models
 can complete:
 
 ```python
@@ -340,16 +321,17 @@ bar: list[int] = []
 for corejoice in foo:
 ```
 
-causes all the Pythia models to fail the test. Fortunately, it turns
-out that many simpler typing rules do not exhibit such a strong
+causes all the Pythia models to fail the test. Fortunately,\AT{ideally this is made more concrete, for example by referencing concrete rules or having a plot or table or something}
+many simpler typing rules do not exhibit such a strong
 reliance on variable naming and constants; in this case, it's the for
 loop that causes the model to be confused with certain variable
-names. Stay tuned in the future for a more in-depth exploration of how
+names. ^[Stay tuned in the future for a more in-depth exploration of how
 the models behave on individual typing rules with different contexts
-and variable names.
+and variable names.]
 
-Besides for the variable name and constant value dependency, this test
-is on the simpler side. But we can challenge the model more, adding
+## Interprocedural Analysis
+
+We can challenge the model more, adding
 layers of indirection between the source and sink of nullable values,
 and testing the model's _interprocedural_ understanding. Here's one
 such test:
@@ -367,20 +349,20 @@ def positive_numbers(numbers: list[Optional[int]]) -> list[int]:
     for num in numbers:
 ```
 
-In this test we've taken the same logic, and spread it across `main`
-and another function, `positive_numbers`. Ideally the model would have
+In this test, we've taken the same logic and spread it across `main`
+and another function, `positive_numbers`. Ideally, the model would have
 to think a little harder to understand that the `some_numbers` is
-flowing through the function call into the body of positive_numbers,
-causing the for loop body to need a None check. In practice though, we
-find this test is actually easier for the model to pass, with models
+flowing through the function call into the body of `positive_numbers`,
+causing the for loop body to need a `None` check. In practice though, we
+find this test is actually *easier* for the model to pass, with models
 as small as Pythia 1b passing it, and Pythia 12b learning to pass it
 13% of the way into training.
 
-It turns out that because of the type annotations on the
+Because of the type annotations on the
 `positive_numbers` function, the model doesn't need to pay attention
 to `main` at all. It can just look at `positive_numbers`, and use the
 type annotation to know that result contains `Optional[int]`s, so that
-`num` is Nullable must be checked for None before proceeding. Looking
+since `num` is Nullable, it must be checked for None before proceeding. Looking
 at the type annotation turns out to be easier for the model than
 scanning through a list to determine if there are None and non-None
 values, resulting in an easier test overall.
@@ -416,11 +398,11 @@ type, and arguments without a type annotation have the type Any. In
 fact, normal mypy will not check unannotated functions at *all*, even
 for internal consistency; the `--check-untyped-defs` option will add
 some checking back, but the types of arguments and return type will
-still be Any. In Python a value of any type can be converted to an
+still be Any. In Python, a value of any type can be converted to an
 Any, and an Any can be converted to any value type.
 
 This means that it would be technically type safe to do anything in
-the body of `process_value` including just returning the argument,
+the body of `process_value`, including just returning the argument,
 without a static type error. But at runtime, code that exploits this
 fact would still fail.
 
@@ -431,7 +413,7 @@ in the function body. We still won't be requiring that this type is
 actually written down anywhere, but we will be requiring that it
 exist. This is called "type inference", when we let the checker pick a
 type for us, as long as there is one that works. We'll call this
-augmented type system mypy++.
+augmented type system mypy++.\AT{audience should know what type inference is}
 
 In Appendix [B.2](#sec:unannotatedfuncs), we formalize the unannotated
 function rules for mypy vs mypy++.
@@ -444,12 +426,14 @@ have points in training where they can pass the test, but only
 intermittently. Even 6.9b, the best performing size on this test,
 fails the test in its second-to-last available revision^[Despite this,
 it does pass the test 40% of the available revisions, about triple
-what the other closest sizes can accomplish].
+what the other closest sizes can accomplish]. \AT{should we say something about
+12b not solving it?}
 
-What the models *can* do well however, is learn to pass these tests in
+What the models *can* do well, however, is learn to pass these tests in
 the mypy type system (as opposed to mypy++). In that system, where
 they don't need to reason globally about the functions but only
 locally, this test is one of the easiest for the models to complete.
+\AT{perhaps somewhere we should discuss implications for RL}
 
 Since this test suite is meant to be informative beyond the sizes of
 the Pythia models, we also add another layer of indirection to add
@@ -509,8 +493,9 @@ def get_square(number:
 
 None of the Pythia models are able to succesfully pass this test,
 demonstrating that writing these annotaions is indeed difficult for
-LLM's. Qwen Coder 32B is also incapable of passing this test, but both
-Llama 405B and DeepSeek V3 pass it.
+LLM's.\AT{maybe too strong. "indeed more difficult than"?} Qwen Coder 32B is
+also incapable of passing this test, but both Llama 405B and DeepSeek V3 pass
+it.
 
 We wrote three variations of each of these tests, resulting in 15
 tests total. Below, you can see the number of passing tests for each

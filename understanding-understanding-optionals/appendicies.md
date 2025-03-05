@@ -42,6 +42,29 @@ with:
 
 ## Common Rules {#sec:commonrules}
 
+But before we try to measure nullability understanding, we'll want to
+be more precise about exactly what we're measuring. To that end, we'll
+take the notion of different "rules" for nullability that we discuseed
+informally in the overview, and bring it into a formal typing
+system. We're not going to try to describe all the typing rules of
+python, so we'll restrict ourselves in a couple of ways.
+
+First, we'll reduce the number of python features that we handle by
+actually working in a subset of python. This means we can skip
+worrying about the semantics of complicated features, and just focus
+on the features necessary for understanding optionality in a
+semi-realistic setting.
+
+Second, we'll define all non-None values as converting to the boolean
+value True, instead of numbers converting to False when they are zero
+and strings converting to False when they are empty. This is a
+necessary practicality, because otherwise, the model could circumvent
+our type tests by doing bare ifs which work on both optional and
+non-optional types. But to prevent bare ifs from ever being the
+correct completion for a non-optional type, we'll design our tests so
+that there are never any values that would convert to False, namely
+the number zero and the empty string.
+
 $$\begin{aligned}
 \left[Program\right]  =& [\epsilon] {\huge|} \left[\begin{array}{l}Stmt\\Program\end{array}\right]\\
 [Stmt]       =& [Import] | [FnDef] | [Assn] | [ForLoop] | [If] | [Expr] \\

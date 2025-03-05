@@ -808,6 +808,38 @@ of training. This may be because the features beyond this point become
 more complex — less linear, or the represented features themselves
 represent more subtle concepts.
 <span class="aside AT">AT: speculation</span></p>
+<h2 data-number="4.5" id="visualizing-probe-outputs"><span
+class="header-section-number">4.5</span> Visualizing Probe Outputs</h2>
+<p>Now that we’ve shown how to train these probes with increasing
+accuracy, lets bring back the reading diagram we showed in the intro,
+and go a bit more into depth with it.</p>
+<p>We adapted this style of reading diagram from <span class="citation"
+data-cites="zou25">Zou et al. (2025)</span>, but only show the
+activations on tokens that represent variable loads, since that is where
+we trained our probe<a href="#fn11" class="footnote-ref" id="fnref11"
+role="doc-noteref"><sup>11</sup></a>. For each measured token, we’re
+running the model until just after that token, then extracting it’s
+hidden state and measuring probe activation. We then color the box above
+that token depending on the activations, and the scoring threshold
+inferred at train-time<a href="#fn12" class="footnote-ref" id="fnref12"
+role="doc-noteref"><sup>12</sup></a>.</p>
+<figure>
+<img src="images/reading_diagram.svg"
+alt="A diagram showing a simple program, and the probes nullability predictions for each variable load." />
+<figcaption aria-hidden="true">A diagram showing a simple program, and
+the probes nullability predictions for each variable load.</figcaption>
+</figure>
+<p>We can see here sixteen tokens that correspond to variable reads in
+the program, and all but one are probed as non-optional (correctly). The
+only nullable variable in this program is <code>result</code>, since it
+comes from <code>find_value</code> which returns
+<code>Optional[int]</code>. So when this variable appears for the first
+time in the <code>if</code> statement checking if it’s none, the model
+knows it is nullable, and the results of the probe reflect that
+understanding. But when it appears a second time on the next line, in
+the format string of <code>print</code>, the model no longer thinks it
+is optional, since the body of this if statement only runs if it is
+<em>not</em> <code>None</code>; the probe accurately reflects this.</p>
 <h1 data-number="5" id="sec:related"><span
 class="header-section-number">5</span> Related Work</h1>
 <p>Our decision to use Pythia to study feature evolution across time and
@@ -1473,6 +1505,16 @@ role="doc-backlink">↩︎</a></p></li>
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn10"><p>see the appendix section “Mass Mean Probing vs Linear
 Regression” for more on this<a href="#fnref10" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn11"><p>There is also a much more practical reason: right after
+the model has generated a variable that will be written to, it often
+does not have access to the assigning expression or type annotation,
+giving it no way to determine if the value will be optional or now.<a
+href="#fnref11" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn12"><p>Red tokens are significantly below the threshold, and
+green tokens are significantly above it; tokens that scored near the
+threshold would have a near-white color, but no such tokens appear in
+this example.<a href="#fnref12" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>

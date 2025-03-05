@@ -561,16 +561,20 @@ typechecks on the tests, vs produces code that shows true
 understanding.](images/hl_mypy_vs_grep_revisions.svg){#fig:hl_moral}
 
 # Measuring Nullability Understanding Internally {#sec:probing}
-\todo{write this section}
 
-\todo{we can probably just make this a brief part of the related work}
 At this point, we’ve figured out how to roughly measure nullability
 understanding in the output of various language models, but we still
 don’t know what their internal representations might look like or when
-they emerge. To do this, we’re going to bring in some ideas described
-in Zhou et al’s paper [“Representation Engineering: A Top-Down Approach
-to AI Transparency”](https://arxiv.org/abs/2310.01405).
+they emerge. In this section, we detail how we train reading vectors
+[@sec:extraction], using prompts designed to make the model think about
+the phenomena of interest [@sec:prompts]. Finally [@sec:results], we validate that
+these probes improve their understanding of nullability over the course
+of pretraining to the level that we expect from the external, or token-level
+understanding evals we describe in the previous section.
 
+## Background
+
+<!--
 As language models predict each token in a text, they run their tuned
 circuits over all the previous text. Tokens are first embedded into a
 high-dimensional “token space”, and each layer of the transformer
@@ -588,29 +592,29 @@ allows practitioners to point to a particular part of the model and
 say “this is where \<task\> is done”, much like neuroscientists assign
 functionality to different parts of our brain.
 
-On the other hand, representation-based interpretability looks at the
-activation values across the network, and how they vary based on
-different inputs, to extract “representations” of particular
-concepts. The paper shows how representations can be extracted for
-concepts like “happiness”, “honesty”, and “fairness”. First, they
+-->
+
+In this section, we review representation engineering [@zou25] techniques that
+we will use to look for linear representations of nullability inside the model.
+
+@zou25 shows how representations can be extracted for
+concepts like "happiness", "honesty", and "fairness". First, they
 construct many prompts which cause the model to act in a way aligned
 with the concept, and many which cause the model to act in a way
 aligned against the concept. For instance, they might prompt the model
-with “Pretend you’re a dishonest person. The Eiffel Tower is” and
-“Pretend you’re an honest person. The Eiffel Tower isr”. Then, they
+with "Pretend you’re a dishonest person. The Eiffel Tower is" and
+"Pretend you’re an honest person. The Eiffel Tower is". Then, they
 take the internal activations which correspond to each, and try to
 extract a high-dimensional vector which points towards the states
 which are aligned, and away from the states that are not aligned. This
 vector can then be used as a linear model to measure how much of the
-concept is present in the model at any given time (for honesty, this
-can be a lie-detector). They can also use it, and similar techniques,
-to control the amount of the concept in a response, making it more or
-less honest, or more or less fair.
+concept is activated in the model during any given forward pass (e.g. for honesty,
+this gives us a lie-detector).
 
-![An excerpt from Zhou et al showing the reading outputs for several
+![Figure from @zou25  showing the reading outputs for several
  concepts](images/zhou.png)
 
-## Designing Prompts to Extract Nullability Activations
+## Designing Prompts to Extract Nullability Activations {#sec:prompts}
 
 In our setting, we were able to avoid dealing with the ambiguities of
 natural language by only prompting with code. We decided to stick to
@@ -654,7 +658,7 @@ occurrence in each function, and generated a prompt with the tokens up
 to and including that variable read, and labeled it with whether or
 not the mypy-inferred type is an Optional.
 
-## Reading Vector Extraction
+## Training Reading Vectors {#sec:extraction}
 
 To start, let's look at how previous works have extracted reading
 vectors from sample activations. In the Zhou representation
@@ -775,24 +779,21 @@ features themselves represent more subtle concepts. \AT{speculation}
 # Related Work {#sec:related}
 
 Our decision to use Pythia to study feature evolution across time and scale is
-inspired by @tigges24
+inspired by @tigges24 . They focus on classic circuits-centered
+interpretability tasks such as IOI, Gendered-Pronoun, Greater-Than, and SVA \AT{cite}.
+
+In our setting, we are more interested in representation-centered
+interpretability looks at how activations vary across inputs, to extract
+representations of particular concepts. @zou25 surveys techniques for
+representation engineering with linear probes. We apply similar techniques, but
+to program semantics and dataflow instead of natural language.
 
 @feng24predicate also study LLM's ability to reason about propositions, but in
 a natural language setting, rather than a formal one.
 
-@zou25 consolidating some
-research on representation interpretability with linear probes. We
-apply similar techniques, but to program semantics and dataflow
-instead of natural language.
-
-\AT{Acutally, IIUC we don't use theirs --- Tegmark's version has a $\Sigma$ in
-the middle of it. I think the kind of mass means differences (I think this is
-what it's called? it has a subtly different but very similar name} that we use
-is from a Kenneth Li paper}
 Several techniques exist for constructing linear probes, but after
-experimental measurement we followed the mass means probing from [zhong23]
-Tegmark. The paper discusses several reasons why mass mean probing
-might outperform linear regression.
+experimental measurement we followed the mass means shift from @li24. @li24
+and @zhong23 discuss why mass mean probing might outperform linear regression.
 
 
 # References {.unnumbered}

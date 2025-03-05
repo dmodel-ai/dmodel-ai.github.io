@@ -182,7 +182,7 @@ href="#sec:probing">4</a>)</p></li>
 scope, satisfying many requirements of the python typechecker, before
 they start to understand how nullability flows across the program.
 (sec. <a href="#sec:bench">3</a>, sec. <a
-href="#sec:results">4.3</a>)</p></li>
+href="#sec:results">4.4</a>)</p></li>
 </ul>
 <h1 data-number="2" id="overview"><span
 class="header-section-number">2</span> Overview</h1>
@@ -586,55 +586,65 @@ that shows true understanding.</figcaption>
 <h1 data-number="4" id="sec:probing"><span
 class="header-section-number">4</span> Measuring Nullability
 Understanding Internally</h1>
-<span class=aside>write this section</span>
-<span class=aside>we can probably just make this a brief part of the related work</span>
 <p>At this point, we’ve figured out how to roughly measure nullability
 understanding in the output of various language models, but we still
 don’t know what their internal representations might look like or when
-they emerge. To do this, we’re going to bring in some ideas described in
-Zhou et al’s paper <a
-href="https://arxiv.org/abs/2310.01405">“Representation Engineering: A
-Top-Down Approach to AI Transparency”</a>.</p>
-<p>As language models predict each token in a text, they run their tuned
+they emerge. In this section, we detail how we train reading vectors
+sec. <a href="#sec:extraction">4.3</a>, using prompts designed to make
+the model think about the phenomena of interest sec. <a
+href="#sec:prompts">4.2</a>. Finally sec. <a
+href="#sec:results">4.4</a>, we validate that these probes improve their
+understanding of nullability over the course of pretraining to the level
+that we expect from the external, or token-level understanding evals we
+describe in the previous section.</p>
+<h2 data-number="4.1" id="background"><span
+class="header-section-number">4.1</span> Background</h2>
+<!--
+As language models predict each token in a text, they run their tuned
 circuits over all the previous text. Tokens are first embedded into a
-high-dimensional “token space”, and each layer of the transformer model
-is made up of many parallel circuits which transform the previous layers
-output into new embeddings in a new space. Each layer can look not just
-at the output of the layer directly previous, but actually all previous
-layers, through a channel called a residual stream.</p>
-<p>The paper presents two main approaches to interpreting a language
+high-dimensional “token space”, and each layer of the transformer
+model is made up of many parallel circuits which transform the
+previous layers output into new embeddings in a new space. Each layer
+can look not just at the output of the layer directly previous, but
+actually all previous layers, through a channel called a residual
+stream.
+
+The paper presents two main approaches to interpreting a language
 model; circuit-based, and representation-based. Circuit based
-interpretability aims to pair down the network to a key set of circuits
-which are sufficient to complete a particular task; this allows
-practitioners to point to a particular part of the model and say “this
-is where &lt;task&gt; is done”, much like neuroscientists assign
-functionality to different parts of our brain.</p>
-<p>On the other hand, representation-based interpretability looks at the
-activation values across the network, and how they vary based on
-different inputs, to extract “representations” of particular concepts.
-The paper shows how representations can be extracted for concepts like
+interpretability aims to pair down the network to a key set of
+circuits which are sufficient to complete a particular task; this
+allows practitioners to point to a particular part of the model and
+say “this is where \<task\> is done”, much like neuroscientists assign
+functionality to different parts of our brain.
+
+-->
+<p>In this section, we review representation engineering <span
+class="citation" data-cites="zou25">(Zou et al. 2025)</span> techniques
+that we will use to look for linear representations of nullability
+inside the model.</p>
+<p><span class="citation" data-cites="zou25">Zou et al. (2025)</span>
+shows how representations can be extracted for concepts like
 “happiness”, “honesty”, and “fairness”. First, they construct many
 prompts which cause the model to act in a way aligned with the concept,
 and many which cause the model to act in a way aligned against the
 concept. For instance, they might prompt the model with “Pretend you’re
 a dishonest person. The Eiffel Tower is” and “Pretend you’re an honest
-person. The Eiffel Tower isr”. Then, they take the internal activations
+person. The Eiffel Tower is”. Then, they take the internal activations
 which correspond to each, and try to extract a high-dimensional vector
 which points towards the states which are aligned, and away from the
 states that are not aligned. This vector can then be used as a linear
-model to measure how much of the concept is present in the model at any
-given time (for honesty, this can be a lie-detector). They can also use
-it, and similar techniques, to control the amount of the concept in a
-response, making it more or less honest, or more or less fair.</p>
+model to measure how much of the concept is activated in the model
+during any given forward pass (e.g. for honesty, this gives us a
+lie-detector).</p>
 <figure>
 <img src="images/zhou.png"
-alt="An excerpt from Zhou et al showing the reading outputs for several concepts" />
-<figcaption aria-hidden="true">An excerpt from Zhou et al showing the
-reading outputs for several concepts</figcaption>
+alt="Figure from Zou et al. (2025) showing the reading outputs for several concepts" />
+<figcaption aria-hidden="true">Figure from <span class="citation"
+data-cites="zou25">Zou et al. (2025)</span> showing the reading outputs
+for several concepts</figcaption>
 </figure>
-<h2 data-number="4.1"
-id="designing-prompts-to-extract-nullability-activations"><span
-class="header-section-number">4.1</span> Designing Prompts to Extract
+<h2 data-number="4.2" id="sec:prompts"><span
+class="header-section-number">4.2</span> Designing Prompts to Extract
 Nullability Activations</h2>
 <p>In our setting, we were able to avoid dealing with the ambiguities of
 natural language by only prompting with code. We decided to stick to
@@ -674,8 +684,8 @@ imports from the file. Finally, we took each variable read occurrence in
 each function, and generated a prompt with the tokens up to and
 including that variable read, and labeled it with whether or not the
 mypy-inferred type is an Optional.</p>
-<h2 data-number="4.2" id="reading-vector-extraction"><span
-class="header-section-number">4.2</span> Reading Vector Extraction</h2>
+<h2 data-number="4.3" id="sec:extraction"><span
+class="header-section-number">4.3</span> Training Reading Vectors</h2>
 <p>To start, let’s look at how previous works have extracted reading
 vectors from sample activations. In the Zhou representation engineering
 paper, the authors extract a reading vector from the contrastive pairs
@@ -771,8 +781,8 @@ pretraining steps. Pure mass means probing starts better, but is quickly
 overtaken by mass means probing with linear regression on layer
 weights.</figcaption>
 </figure>
-<h2 data-number="4.3" id="sec:results"><span
-class="header-section-number">4.3</span> Probing Results Across Training
+<h2 data-number="4.4" id="sec:results"><span
+class="header-section-number">4.4</span> Probing Results Across Training
 and Scale</h2>
 <p>In this section, we study the performance of our nullability probes
 across time and scale <span class="citation"
@@ -809,23 +819,26 @@ represent more subtle concepts.
 class="header-section-number">5</span> Related Work</h1>
 <p>Our decision to use Pythia to study feature evolution across time and
 scale is inspired by <span class="citation" data-cites="tigges24">Tigges
-et al. (2024)</span></p>
+et al. (2024)</span> . They focus on classic circuits-centered
+interpretability tasks such as IOI, Gendered-Pronoun, Greater-Than, and
+SVA <span class="aside AT">AT: cite</span>.</p>
+<p>In our setting, we are more interested in representation-centered
+interpretability looks at how activations vary across inputs, to extract
+representations of particular concepts. <span class="citation"
+data-cites="zou25">Zou et al. (2025)</span> surveys techniques for
+representation engineering with linear probes. We apply similar
+techniques, but to program semantics and dataflow instead of natural
+language.</p>
 <p><span class="citation" data-cites="feng24predicate">Feng, Russell,
 and Steinhardt (2024)</span> also study LLM’s ability to reason about
 propositions, but in a natural language setting, rather than a formal
 one.</p>
-<p><span class="citation" data-cites="zou25">Zou et al. (2025)</span>
-consolidating some research on representation interpretability with
-linear probes. We apply similar techniques, but to program semantics and
-dataflow instead of natural language.</p>
-<p><span class="aside AT">AT: Acutally, IIUC we don't use theirs --- Tegmark's version has a $\Sigma$ in
-the middle of it. I think the kind of mass means differences (I think this is
-what it's called? it has a subtly different but very similar name</span>
-that we use is from a Kenneth Li paper} Several techniques exist for
-constructing linear probes, but after experimental measurement we
-followed the mass means probing from [zhong23] Tegmark. The paper
-discusses several reasons why mass mean probing might outperform linear
-regression.</p>
+<p>Several techniques exist for constructing linear probes, but after
+experimental measurement we followed the mass means shift from <span
+class="citation" data-cites="li24">Li et al. (2024)</span>. <span
+class="citation" data-cites="li24">Li et al. (2024)</span> and <span
+class="citation" data-cites="zhong23">Zhong et al. (2023)</span> discuss
+why mass mean probing might outperform linear regression.</p>
 <h1 class="unnumbered" id="references">References</h1>
 <div id="refs" class="references csl-bib-body hanging-indent"
 data-entry-spacing="0" role="list">
@@ -855,6 +868,13 @@ Tigges, Curt, Michael Hanna, Qinan Yu, and Stella Biderman. 2024.
 <span>“<span>LLM Circuit Analyses Are Consistent Across Training</span>
 and <span>Scale</span>.”</span> arXiv. <a
 href="https://doi.org/10.48550/arXiv.2407.10827">https://doi.org/10.48550/arXiv.2407.10827</a>.
+</div>
+<div id="ref-zhong23" class="csl-entry" role="listitem">
+Zhong, Ziqian, Ziming Liu, Max Tegmark, and Jacob Andreas. 2023.
+<span>“The <span>Clock</span> and the <span>Pizza</span>: <span>Two
+Stories</span> in <span>Mechanistic Explanation</span> of <span>Neural
+Networks</span>.”</span> arXiv. <a
+href="https://doi.org/10.48550/arXiv.2306.17844">https://doi.org/10.48550/arXiv.2306.17844</a>.
 </div>
 <div id="ref-zhou23" class="csl-entry" role="listitem">
 Zhou, Jeffrey, Tianjian Lu, Swaroop Mishra, Siddhartha Brahma, Sujoy

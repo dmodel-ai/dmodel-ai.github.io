@@ -218,6 +218,14 @@ token. With the right tests, we can tell if the model is "thinking"
 that the current token is an optional variable, or a non-optional
 variable.
 
+By the end of this post, we'll be able to build a probe that uses the
+models activations to determine whether the model thinks a variable
+read corresponds to a nullable variable, and show that internal
+knowledge like so:
+
+![A diagram showing a simple program, and the probes nullability
+ predictions for each variable load.](images/reading_diagram.svg)
+
 \todo{READING DIAGRAMS HERE}
 
 In [@Sec:bench] we'll describe our external tests of nullability

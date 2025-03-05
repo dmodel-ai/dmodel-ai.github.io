@@ -110,7 +110,6 @@
   <link rel="stylesheet" href="pandoc.css" />
   <link rel="stylesheet" href="sidenote.css" />
   <script src="sidenotes.js"></script>
-  <meta http-equiv="refresh" content="15" />
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script
   src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
@@ -297,6 +296,16 @@ give the entire internal state of the model at each token, and they can
 tell us what the model is “thinking” when processing that token. With
 the right tests, we can tell if the model is “thinking” that the current
 token is an optional variable, or a non-optional variable.</p>
+<p>By the end of this post, we’ll be able to build a probe that uses the
+models activations to determine whether the model thinks a variable read
+corresponds to a nullable variable, and show that internal knowledge
+like so:</p>
+<figure>
+<img src="images/reading_diagram.svg"
+alt="A diagram showing a simple program, and the probes nullability predictions for each variable load." />
+<figcaption aria-hidden="true">A diagram showing a simple program, and
+the probes nullability predictions for each variable load.</figcaption>
+</figure>
 <span class=aside>READING DIAGRAMS HERE</span>
 <p>In Sec. <a href="#sec:bench">3</a> we’ll describe our external tests
 of nullability understanding in more detail, and in Sec. <a

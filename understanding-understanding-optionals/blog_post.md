@@ -219,10 +219,10 @@ variable.
 
 \todo{READING DIAGRAMS HERE}
 
-In Section [SECTION] we'll describe our external tests of nullability
-understanding in more detail, and in Section [SECTION] we'll describe
+In [@Sec:bench] we'll describe our external tests of nullability
+understanding in more detail, and in [@Sec:probing] we'll describe
 measuring the models internal states in detail. Finally, we'll go over
-some related work, and present final experiments.
+some related work in [@Sec:related].
 
 # Measuring Nullability Understanding Externally\AT{Externally = token-level?} {#sec:bench}
 
@@ -765,7 +765,7 @@ their minimum loss well before the end of training. This may be because the
 features beyond this point become more complex --- less linear, or the represented
 features themselves represent more subtle concepts. \AT{speculation}
 
-# Related Work
+# Related Work {#sec:related}
 
 \AT{mention the tigges paper on circuits across scale, the feng and steinhardt papers, etc}
 

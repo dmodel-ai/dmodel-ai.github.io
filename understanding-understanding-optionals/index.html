@@ -175,8 +175,8 @@ the model. Until now.<span class=aside>big claim!</span></p>
 <li><p>A microbenchmark of 15 programs that test basic model
 understanding of the flow of nullability through a program (sec. <a
 href="#sec:bench">3</a>).</p></li>
-<li><p>We find show that models develop an internal concept of
-nullability as they scale up and are trained for longer. (sec. <a
+<li><p>We find that models develop an internal concept of nullability as
+they scale up and are trained for longer. (sec. <a
 href="#sec:probing">4</a>)</p></li>
 <li><p>We find that models begin to understand nullability in a local
 scope, satisfying many requirements of the python typechecker, before
@@ -297,10 +297,11 @@ tell us what the model is “thinking” when processing that token. With
 the right tests, we can tell if the model is “thinking” that the current
 token is an optional variable, or a non-optional variable.</p>
 <span class=aside>READING DIAGRAMS HERE</span>
-<p>In Section [SECTION] we’ll describe our external tests of nullability
-understanding in more detail, and in Section [SECTION] we’ll describe
-measuring the models internal states in detail. Finally, we’ll go over
-some related work, and present final experiments.</p>
+<p>In Sec. <a href="#sec:bench">3</a> we’ll describe our external tests
+of nullability understanding in more detail, and in Sec. <a
+href="#sec:probing">4</a> we’ll describe measuring the models internal
+states in detail. Finally, we’ll go over some related work in Sec. <a
+href="#sec:related">5</a>.</p>
 <h1 data-number="3" id="sec:bench"><span
 class="header-section-number">3</span> Measuring Nullability
 Understanding
@@ -313,30 +314,6 @@ nullability. We refer to this suite of programs as
 <code>NullabilityEval</code>. All of the tests in this benchmark suite
 are composed of three functions or less, where the largest function is
 seven lines long.</p>
-<p>But before we try to measure nullability understanding, we’ll want to
-be more precise about exactly what we’re measuring. To that end, we’ll
-take the notion of different “rules” for nullability that we discuseed
-informally in the overview, and bring it into a formal typing system.
-We’re not going to try to describe all the typing rules of python, so
-we’ll restrict ourselves in a couple of ways.</p>
-<p>First, we’ll reduce the number of python features that we handle by
-actually working in a subset of python. This means we can skip worrying
-about the semantics of complicated features, and just focus on the
-features neccesary for understanding optionality in a semi-realistic
-setting.</p>
-<p>Second, we’ll define all non-None values as converting to the boolean
-value True, instead of numbers converting to False when they are zero
-and strings converting to False when they are empty. This is a necessary
-practicality, because otherwise, the model could circumvent our type
-tests by doing bare ifs which work on both optional and non-optional
-types. But to prevent bare ifs from ever being the correct completion
-for a non-optional type, we’ll design our tests so that there are never
-any values that would convert to False, namely the number zero and the
-empty string.</p>
-<p>The full syntax and typing rules of our subset of Python are
-described in Appendix <a href="#sec:commonrules">B.1</a>.</p>
-<p>With these basic rules, we can construct basic program prefixes that
-test the models understanding of nullability.</p>
 <p>We measure the difficulty of these tests by measuring how models of
 different sizes perform. We pay particular focus to the Pythia model
 suite<span class="citation" data-cites="biderman23">(Biderman et al.
@@ -362,14 +339,21 @@ this test, and that they learn to complete the test in the first third
 of training. Larger Pythia models learn to complete this test earlier,
 with Pythia 12b able to complete the test 20% of the way into training
 and Pythia 2.8b able to complete it 28% of the way into training.</p>
-<p>So, does this mean that Pythia models 1.4b and up understand all the
-typing rules necessary for this test? Actually, no. LLM’s pick up on a
-lot of information relationships in their training data that have
-statistical correlation, without it necessarily being causal. What this
-means in practice is that the models use things like variable names,
-whitespace, statement orderings, and constant values to guess at certain
-programming concepts. So, while many of the Pythia models can
-complete:</p>
+<h2 data-number="3.1" id="understanding-typing-rules"><span
+class="header-section-number">3.1</span> Understanding Typing Rules</h2>
+<p>How deep is this understanding of nullability? We give a syntax and
+semantics of a minimalist subset of python that captures nullability,
+and study how well our models perform on each rule. The full syntax and
+typing rules of our subset of Python are described in Appendix <a
+href="#sec:commonrules">B.1</a>.</p>
+<p>With these basic rules, we can construct basic program prefixes that
+test the models understanding of nullability.</p>
+<p>So, do Pythia models 1.4b and up understand the semantics of all of
+the typing rules necessary for
+this<span class="aside AT">AT: which</span> test, or are the confounded
+by semiotic information like variable names, whitespace, statement
+orderings, and constant values?</p>
+<p>For example, while many of the Pythia models can complete:</p>
 <div class="sourceCode" id="cb10"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>some_numbers <span class="op">=</span> [<span class="dv">1</span>, <span class="op">-</span><span class="dv">4</span>, <span class="va">None</span>, <span class="op">-</span><span class="dv">3</span>, <span class="dv">10</span>, <span class="op">-</span><span class="dv">1</span>, <span class="va">None</span>, <span class="va">None</span>, <span class="dv">8</span>]</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>result: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
@@ -380,18 +364,18 @@ constants into:</p>
 class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>foo <span class="op">=</span> [<span class="dv">60</span>, <span class="va">None</span>, <span class="op">-</span><span class="dv">33</span>]</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>bar: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> corejoice <span class="kw">in</span> foo:</span></code></pre></div>
-<p>causes all the Pythia models to fail the test. Fortunately, it turns
-out that many simpler typing rules do not exhibit such a strong reliance
-on variable naming and constants; in this case, it’s the for loop that
-causes the model to be confused with certain variable names. Stay tuned
-in the future for a more in-depth exploration of how the models behave
-on individual typing rules with different contexts and variable
-names.</p>
-<p>Besides for the variable name and constant value dependency, this
-test is on the simpler side. But we can challenge the model more, adding
-layers of indirection between the source and sink of nullable values,
-and testing the model’s <em>interprocedural</em> understanding. Here’s
-one such test:</p>
+<p>causes all the Pythia models to fail the test.
+Fortunately,<span class="aside AT">AT: ideally this is made more concrete, for example by referencing concrete rules or having a plot or table or something</span>
+many simpler typing rules do not exhibit such a strong reliance on
+variable naming and constants; in this case, it’s the for loop that
+causes the model to be confused with certain variable names. <a
+href="#fn3" class="footnote-ref" id="fnref3"
+role="doc-noteref"><sup>3</sup></a></p>
+<h2 data-number="3.2" id="interprocedural-analysis"><span
+class="header-section-number">3.2</span> Interprocedural Analysis</h2>
+<p>We can challenge the model more, adding layers of indirection between
+the source and sink of nullable values, and testing the model’s
+<em>interprocedural</em> understanding. Here’s one such test:</p>
 <p><em>Test 2</em></p>
 <div class="sourceCode" id="cb12"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Optional</span>
@@ -403,27 +387,28 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a h
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> positive_numbers(numbers: <span class="bu">list</span>[Optional[<span class="bu">int</span>]]) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">int</span>]:</span>
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    result: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
 <span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> num <span class="kw">in</span> numbers:</span></code></pre></div>
-<p>In this test we’ve taken the same logic, and spread it across
+<p>In this test, we’ve taken the same logic and spread it across
 <code>main</code> and another function, <code>positive_numbers</code>.
-Ideally the model would have to think a little harder to understand that
-the <code>some_numbers</code> is flowing through the function call into
-the body of positive_numbers, causing the for loop body to need a None
-check. In practice though, we find this test is actually easier for the
-model to pass, with models as small as Pythia 1b passing it, and Pythia
-12b learning to pass it 13% of the way into training.</p>
-<p>It turns out that because of the type annotations on the
-<code>positive_numbers</code> function, the model doesn’t need to pay
-attention to <code>main</code> at all. It can just look at
-<code>positive_numbers</code>, and use the type annotation to know that
-result contains <code>Optional[int]</code>s, so that <code>num</code> is
-Nullable must be checked for None before proceeding. Looking at the type
+Ideally, the model would have to think a little harder to understand
+that the <code>some_numbers</code> is flowing through the function call
+into the body of <code>positive_numbers</code>, causing the for loop
+body to need a <code>None</code> check. In practice though, we find this
+test is actually <em>easier</em> for the model to pass, with models as
+small as Pythia 1b passing it, and Pythia 12b learning to pass it 13% of
+the way into training.</p>
+<p>Because of the type annotations on the <code>positive_numbers</code>
+function, the model doesn’t need to pay attention to <code>main</code>
+at all. It can just look at <code>positive_numbers</code>, and use the
+type annotation to know that result contains
+<code>Optional[int]</code>s, so that since <code>num</code> is Nullable,
+it must be checked for None before proceeding. Looking at the type
 annotation turns out to be easier for the model than scanning through a
 list to determine if there are None and non-None values, resulting in an
 easier test overall.</p>
 <p>So how would we <em>actually</em> test for interprocedural
 nullability understanding in the model? Well, the type annotations on
-Python functions aren’t required<a href="#fn3" class="footnote-ref"
-id="fnref3" role="doc-noteref"><sup>3</sup></a>, so we can instead
+Python functions aren’t required<a href="#fn4" class="footnote-ref"
+id="fnref4" role="doc-noteref"><sup>4</sup></a>, so we can instead
 provide the model with an unannotated function, and see if it still
 understands the flow of values from the call site into the function
 body. Here’s a test that does that:</p>
@@ -447,10 +432,10 @@ and arguments without a type annotation have the type Any. In fact,
 normal mypy will not check unannotated functions at <em>all</em>, even
 for internal consistency; the <code>--check-untyped-defs</code> option
 will add some checking back, but the types of arguments and return type
-will still be Any. In Python a value of any type can be converted to an
+will still be Any. In Python, a value of any type can be converted to an
 Any, and an Any can be converted to any value type.</p>
 <p>This means that it would be technically type safe to do anything in
-the body of <code>process_value</code> including just returning the
+the body of <code>process_value</code>, including just returning the
 argument, without a static type error. But at runtime, code that
 exploits this fact would still fail.</p>
 <p>If we want code that actually makes sense at runtime, we can
@@ -460,7 +445,7 @@ function body. We still won’t be requiring that this type is actually
 written down anywhere, but we will be requiring that it exist. This is
 called “type inference”, when we let the checker pick a type for us, as
 long as there is one that works. We’ll call this augmented type system
-mypy++.</p>
+mypy++.<span class="aside AT">AT: audience should know what type inference is</span></p>
 <p>In Appendix <a href="#sec:unannotatedfuncs">B.2</a>, we formalize the
 unannotated function rules for mypy vs mypy++.</p>
 <p>This test is a bit trickier than our previous ones, and we find that
@@ -469,12 +454,15 @@ it. Pythia 1b, 2.8b, and 6.9b pass the test in their final revisions,
 but Pythia 410m, 1.4b, and 12b don’t. The bigger models all have points
 in training where they can pass the test, but only intermittently. Even
 6.9b, the best performing size on this test, fails the test in its
-second-to-last available revision<a href="#fn4" class="footnote-ref"
-id="fnref4" role="doc-noteref"><sup>4</sup></a>.</p>
-<p>What the models <em>can</em> do well however, is learn to pass these
+second-to-last available revision<a href="#fn5" class="footnote-ref"
+id="fnref5" role="doc-noteref"><sup>5</sup></a>.
+<span class="aside AT">AT: should we say something about
+12b not solving it?</span></p>
+<p>What the models <em>can</em> do well, however, is learn to pass these
 tests in the mypy type system (as opposed to mypy++). In that system,
 where they don’t need to reason globally about the functions but only
-locally, this test is one of the easiest for the models to complete.</p>
+locally, this test is one of the easiest for the models to complete.
+<span class="aside AT">AT: perhaps somewhere we should discuss implications for RL</span></p>
 <p>Since this test suite is meant to be informative beyond the sizes of
 the Pythia models, we also add another layer of indirection to add more
 difficulty, in this test:</p>
@@ -506,8 +494,8 @@ Python code is not type-annotated, you could imagine that LLM’s can
 reason about dataflow correctness without annotations better than they
 can write their own typing annotations. The next program tests the
 models ability to write its own type annotations; the trailling colon
-makes the type expression the only valid completion<a href="#fn5"
-class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a></p>
+makes the type expression the only valid completion<a href="#fn6"
+class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a></p>
 <p><em>Test 5</em>:</p>
 <div class="sourceCode" id="cb15"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_48() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
@@ -521,8 +509,9 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb15-1"><a h
 <span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_square(number:</span></code></pre></div>
 <p>None of the Pythia models are able to succesfully pass this test,
 demonstrating that writing these annotaions is indeed difficult for
-LLM’s. Qwen Coder 32B is also incapable of passing this test, but both
-Llama 405B and DeepSeek V3 pass it.</p>
+LLM’s.<span class="aside AT">AT: maybe too strong. "indeed more difficult than"?</span>
+Qwen Coder 32B is also incapable of passing this test, but both Llama
+405B and DeepSeek V3 pass it.</p>
 <p>We wrote three variations of each of these tests, resulting in 15
 tests total. Below, you can see the number of passing tests for each
 model.</p>
@@ -537,8 +526,8 @@ sizes of model perform on the high-level nullability tests</figcaption>
 passing tests for each model. We can see that generally models get
 better with scale.
 <span class=aside>I don't think this footnote is clear enough to add anything</span>
-<a href="#fn6" class="footnote-ref" id="fnref6"
-role="doc-noteref"><sup>6</sup></a> Model performance on these tests is
+<a href="#fn7" class="footnote-ref" id="fnref7"
+role="doc-noteref"><sup>7</sup></a> Model performance on these tests is
 approximately logarithmic in model size: models of 2.8 billion
 parameters can pass about half the tests, but it takes more than 405
 billion parameters to pass all of the tests. This matches previous post-
@@ -557,8 +546,8 @@ href="#fig:hl_scale">1</a> uses mypy++). As we expected, the mypy
 results (red bar) are always above the mypy++ results (blue bar), as
 mypy++ is a stricter type system. There are six tests in the dataset
 involving non-annotated functions, and using the weaker mypy typesystem
-causes up to five more tests to pass than using mypy++<a href="#fn7"
-class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a></p>
+causes up to five more tests to pass than using mypy++<a href="#fn8"
+class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a></p>
 <p>Next, we want to understand the training dynamics at play here. Below
 we can see how Pythia 6.9b performs on the tests during training from
 step 2 to
@@ -571,8 +560,8 @@ alt="Figure 3: A line graph showing how the performance of the Pythia 6.9 model 
 performance of the Pythia 6.9 model changes during training</figcaption>
 </figure>
 <p>Again, performance does not increase monotonically. This plot is
-quite noisy, so in the sequel, we will show smoothed<a href="#fn8"
-class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a>
+quite noisy, so in the sequel, we will show smoothed<a href="#fn9"
+class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a>
 charts.</p>
 <p>In the graph below, we see that each individual model also learns to
 write code which typechecks under mypy before it learns to write code
@@ -706,8 +695,8 @@ and then took the difference of the averages as our base reading vector.
 This is called “mass mean probing” in the literature, and empirically
 has been shown to generalize better in high dimensional space than
 trying to learn a linear model through logistic regression.<a
-href="#fn9" class="footnote-ref" id="fnref9"
-role="doc-noteref"><sup>9</sup></a></p>
+href="#fn10" class="footnote-ref" id="fnref10"
+role="doc-noteref"><sup>10</sup></a></p>
 <p>In this reading vector, the impact of each layer based on the
 magnitude of difference in that layer, instead of separate a notion of
 how “important” that layer is to differentiating positive and negative
@@ -806,7 +795,7 @@ of training. This may be because the features beyond this point become
 more complex — less linear, or the represented features themselves
 represent more subtle concepts.
 <span class="aside AT">AT: speculation</span></p>
-<h1 data-number="5" id="related-work"><span
+<h1 data-number="5" id="sec:related"><span
 class="header-section-number">5</span> Related Work</h1>
 <span class="aside AT">AT: mention the tigges paper on circuits across scale, the feng and steinhardt papers, etc</span>
 <p>As previously discussed, <a
@@ -893,6 +882,26 @@ Typing Rules</h1>
 <p>Here we define the syntax and semantics of the Python subset we work
 with:</p>
 <h2 class="unnumbered" id="sec:commonrules">B.1 Common Rules</h2>
+<p>But before we try to measure nullability understanding, we’ll want to
+be more precise about exactly what we’re measuring. To that end, we’ll
+take the notion of different “rules” for nullability that we discuseed
+informally in the overview, and bring it into a formal typing system.
+We’re not going to try to describe all the typing rules of python, so
+we’ll restrict ourselves in a couple of ways.</p>
+<p>First, we’ll reduce the number of python features that we handle by
+actually working in a subset of python. This means we can skip worrying
+about the semantics of complicated features, and just focus on the
+features necessary for understanding optionality in a semi-realistic
+setting.</p>
+<p>Second, we’ll define all non-None values as converting to the boolean
+value True, instead of numbers converting to False when they are zero
+and strings converting to False when they are empty. This is a necessary
+practicality, because otherwise, the model could circumvent our type
+tests by doing bare ifs which work on both optional and non-optional
+types. But to prevent bare ifs from ever being the correct completion
+for a non-optional type, we’ll design our tests so that there are never
+any values that would convert to False, namely the number zero and the
+empty string.</p>
 <p><span class="math display">\[\begin{aligned}
 \left[Program\right]  =&amp; [\epsilon] {\huge|}
 \left[\begin{array}{l}Stmt\\Program\end{array}\right]\\
@@ -1391,34 +1400,38 @@ asking them to complete the program another lines, then see if they
 produce something that matches these valid lines with the regular
 expression <code>num\s*(is\s*(not)?|==)\s*None|isinstance\(num</code>.<a
 href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>Technically this is known as “Optional typing”, but
+<li id="fn3"><p>Stay tuned in the future for a more in-depth exploration
+of how the models behave on individual typing rules with different
+contexts and variable names.<a href="#fnref3" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Technically this is known as “Optional typing”, but
 that’s confusing in the context of this post. Not to be confused with
-Gradual Typing, as introduced by Siek et al.<a href="#fnref3"
+Gradual Typing, as introduced by Siek et al.<a href="#fnref4"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn4"><p>Despite this, it does pass the test 40% of the available
+<li id="fn5"><p>Despite this, it does pass the test 40% of the available
 revisions, about triple what the other closest sizes can accomplish<a
-href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn5"><p>This is because function declarations with a colon and
+href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>This is because function declarations with a colon and
 no type, like <code>def fn(x:)</code> are not valid python. Since we’ve
 already seen a usage of <code>get_square</code> that is passed a None
 value, it wouldn’t be type-valid to complete the program with just
 <code>int</code>. So a model can be tested on its understanding of
 <code>Optional</code> annotations by seeing if its completion of the
-partial program includes <code>Optional[int]</code>.<a href="#fnref5"
+partial program includes <code>Optional[int]</code>.<a href="#fnref6"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn6"><p>Pythia 12b performs worse than its 6.9b variant, though
+<li id="fn7"><p>Pythia 12b performs worse than its 6.9b variant, though
 this might be due to under-training at that size. Qwen 32B also performs
 about as well as Pythia 6.9b, it’s not clear if this is due to model
-architecture or something else.<a href="#fnref6" class="footnote-back"
+architecture or something else.<a href="#fnref7" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn7"><p>We don’t see all six non-annotated function tests
+<li id="fn8"><p>We don’t see all six non-annotated function tests
 passing under mypy, because models can still fail these tests by
-producing invalid syntax.<a href="#fnref7" class="footnote-back"
+producing invalid syntax.<a href="#fnref8" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn8"><p>rolling average with a window size of 5<a href="#fnref8"
+<li id="fn9"><p>rolling average with a window size of 5<a href="#fnref9"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn9"><p>see the appendix section “Mass Mean Probing vs Linear
-Regression” for more on this<a href="#fnref9" class="footnote-back"
+<li id="fn10"><p>see the appendix section “Mass Mean Probing vs Linear
+Regression” for more on this<a href="#fnref10" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>

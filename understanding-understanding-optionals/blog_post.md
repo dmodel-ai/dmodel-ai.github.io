@@ -184,10 +184,10 @@ typing rules with different contexts and variable names.]
 
 ## Interprocedural Analysis
 
-We can challenge the model more, adding
-layers of indirection between the source and sink of nullable values,
-and testing the model's _interprocedural_ understanding. Here's one
-such test:
+Even without obfuscating variable names, we can challenge the model by
+adding layers of procedural indirection between the source and sink of
+nullable values, thereby testing the model's _interprocedural_
+understanding. Here's one such test:
 
 *Test 2*
 ```python
@@ -203,31 +203,32 @@ def positive_numbers(numbers: list[Optional[int]]) -> list[int]:
 ```
 
 In this test, we've taken the same logic and spread it across `main`
-and another function, `positive_numbers`. Ideally, the model would have
-to think a little harder to understand that the `some_numbers` is
-flowing through the function call into the body of `positive_numbers`,
-causing the for loop body to need a `None` check. In practice though, we
-find this test is actually *easier* for the model to pass, with models
-as small as Pythia 1b passing it, and Pythia 12b learning to pass it
-13% of the way into training.
+and another function, `positive_numbers`. Ideally, the model would
+have to think a little harder to understand that `some_numbers` is
+flowing from `main` through the function call into the body of
+`positive_numbers`, causing the for loop body to need a `None`
+check. In practice though, we find this test is actually *easier* for
+the model to pass than Test 1, with models as small as Pythia 1b
+passing it, and Pythia 12b learning to pass it 13% of the way into
+training.
 
-Because of the type annotations on the
-`positive_numbers` function, the model doesn't need to pay attention
-to `main` at all. It can just look at `positive_numbers`, and use the
-type annotation to know that result contains `Optional[int]`s, so that
-since `num` is Nullable, it must be checked for None before proceeding. Looking
-at the type annotation turns out to be easier for the model than
-scanning through a list to determine if there are None and non-None
-values, resulting in an easier test overall.
+Because of the type annotations on the `positive_numbers` function,
+the model doesn't need to pay attention to `main` at all. It can just
+look at `positive_numbers`, and use the type annotation to know that
+`numbers` contains `Optional[int]`s. Then, using the For rule it can
+reason that `num` is nullable, so it must be checked for None before
+proceeding. Looking at the type annotation turns out to be easier for
+the model than scanning through a list to determine if there are None
+and non-None values, resulting in an easier test overall.
 
 So how would we *actually* test for interprocedural nullability
-understanding in the model? Well, the type annotations on Python
-functions aren't required^[Technically this is known as "Optional
-typing", but that's confusing in the context of this post. Not to be
-confused with Gradual Typing, as introduced by Siek et al.], so we can
-instead provide the model with an unannotated function, and see if it
-still understands the flow of values from the call site into the
-function body. Here's a test that does that:
+understanding in the model? Well, type annotations on Python functions
+aren't required^[Technically this is known as "Optional typing", but
+that's confusing in the context of this post. Not to be confused with
+Gradual Typing, as introduced by Siek et al.], so we can instead
+provide the model with an **unannotated** function, and see if it
+still understands the flow of nullability. Here's a test that does
+that:
 
 *Test 3*
 ```python
@@ -260,18 +261,16 @@ without a static type error. But at runtime, code that exploits this
 fact would still fail.
 
 If we want code that actually makes sense at runtime, we can
-strengthen our type checker a bit, by requiring that there be some
-valid (non-Any) type for the function that works at the call site and
-in the function body. We still won't be requiring that this type is
-actually written down anywhere, but we will be requiring that it
-exist. This is called "type inference", when we let the checker pick a
-type for us, as long as there is one that works. We'll call this
-augmented type system mypy++.\AT{audience should know what type inference is}
+strengthen our type checker a bit by requiring that there be some
+valid (non-Any) type for the function that works both at the call site
+and in the function body. We still won't be requiring that this type
+is actually written down anywhere, but we will be requiring that it
+exist. We'll call this augmented type system mypy++.
 
 In Appendix [B.2](#sec:unannotatedfuncs), we formalize the unannotated
 function rules for mypy vs mypy++.
 
-This test is a bit trickier than our previous ones, and we find that
+Test 3 is a bit trickier than our previous ones, and we find that
 there's no consistent threshold of size at which Pythia models can
 pass it. Pythia 1b, 2.8b, and 6.9b pass the test in their final
 revisions, but Pythia 410m, 1.4b, and 12b don't. The bigger models all
@@ -279,14 +278,16 @@ have points in training where they can pass the test, but only
 intermittently. Even 6.9b, the best performing size on this test,
 fails the test in its second-to-last available revision^[Despite this,
 it does pass the test 40% of the available revisions, about triple
-what the other closest sizes can accomplish]. \AT{should we say something about
-12b not solving it?}
+what the other closest sizes can accomplish]. \AT{should we say
+something about 12b not solving it?}
 
-What the models *can* do well, however, is learn to pass these tests in
-the mypy type system (as opposed to mypy++). In that system, where
+What the models *can* do well, however, is learn to pass these tests
+in the mypy type system (as opposed to mypy++). In that system, where
 they don't need to reason globally about the functions but only
-locally, this test is one of the easiest for the models to complete.
-\AT{perhaps somewhere we should discuss implications for RL}
+locally, this test is one of the easiest for the models to
+complete.^[This indicates that if you were to train a model using
+typechecking as reinforcement feedback, you would want to use mypy++
+and not mypy.]
 
 Since this test suite is meant to be informative beyond the sizes of
 the Pythia models, we also add another layer of indirection to add
@@ -347,10 +348,10 @@ def get_square(number:
 ```
 
 None of the Pythia models are able to succesfully pass this test,
-demonstrating that writing these annotaions is indeed difficult for
-LLM's.\AT{maybe too strong. "indeed more difficult than"?} Qwen Coder 32B is
-also incapable of passing this test, but both Llama 405B and DeepSeek V3 pass
-it.
+demonstrating that writing these annotations is indeed more difficult
+for LLM's than implicitly reasoning about the types. Qwen Coder 32B is
+also incapable of passing this test, but both Llama 405B and DeepSeek
+V3 pass it.
 
 ## External Test Results Across Training and Scale
 

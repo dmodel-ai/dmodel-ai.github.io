@@ -315,9 +315,10 @@ indirection between the source and sink of nullable values, thereby
 testing the model’s <em>interprocedural</em> understanding. First, we
 demonstrate how to write such tests, and the difficulties of writing
 tests that may be too easy (sec. <a href="#sec:inter_test">2.3.1</a>).
-Then, we present a harder problem (sec. <a href="#sec:annot">2.3.2</a>)
-and introduce a stronger type system <code>mypy++</code> to formalized
-the needed reasoning (sec. <a href="#sec:mypypp">2.3.3</a>).</p>
+Then, we present a harder problem (sec. <a
+href="#sec:unannot">2.3.2</a>) and introduce a stronger type system
+<code>mypy++</code> to formalized the needed reasoning (sec. <a
+href="#sec:mypypp">2.3.3</a>).</p>
 <h3 data-number="2.3.1" id="sec:inter_test"><span
 class="header-section-number">2.3.1</span> A simple test</h3>
 <p>Here’s a simple test for interprocedural analyses:</p>
@@ -350,8 +351,8 @@ type annotation to know that <code>numbers</code> contains
 proceeding. Looking at the type annotation turns out to be easier for
 the model than scanning through a list to determine if there are None
 and non-None values, resulting in an easier test overall.</p>
-<h3 data-number="2.3.2" id="sec:annot"><span
-class="header-section-number">2.3.2</span> Annotating types</h3>
+<h3 data-number="2.3.2" id="sec:unannot"><span
+class="header-section-number">2.3.2</span> Unannotated Functions</h3>
 <p>So how would we <em>actually</em> test for interprocedural
 nullability understanding in the model? Well, type annotations on Python
 functions aren’t required<a href="#fn4" class="footnote-ref" id="fnref4"
@@ -919,9 +920,9 @@ class="math inline">\Gamma</span>, we mean that the judgement is true
 under any typing environment, including the empty one.</p>
 <p><span class="math display">
 \tag{Const}
-\frac{Constant\neq\texttt{None}}{\vdash Constant: \text{Atom}}\\
+\frac{Constant\neq\texttt{None}}{\vdash Constant: \text{Atom}}
 \hspace{1.0cm}
-\frac{}{\forall t, \vdash \texttt{None}: \texttt{Optional[$t$]}}\\
+\frac{}{\forall t, \vdash \texttt{None}: \texttt{Optional[$t$]}}
 </span></p>
 <p><span class="math display">
 \tag{List}
@@ -943,7 +944,8 @@ under any typing environment, including the empty one.</p>
 p\end{array}\right] \vartriangleright \text{ok}
 </span></p>
 <p><span class="math display">\begin{gather}
-\Gamma, x_1: t_1, x_2: t_2, ... \vdash [b] \vartriangleright \text{ok}\\
+\Gamma, x_1: t_1, x_2: t_2, ... \vdash [b] \vartriangleright
+\text{ok}\nonumber\\
 \tag{Def}
 \Gamma, f : t_1 \rightarrow t_2 ... \rightarrow t_r \vdash [p]
 \vartriangleright \text{ok} \hspace{1cm} \Gamma \vdash
@@ -1079,9 +1081,9 @@ $e$:}\\ \quad p\end{array}\right],t\text{)}}
 </span></p>
 <p><span class="math display">\begin{gather}
 \Gamma \vdash \left(\text{Returns($p_1$, $t$)} \land
-\text{Returns($p_2$, $t$)}\right)\lor \\
+\text{Returns($p_2$, $t$)}\right)\lor \nonumber\\
 \Gamma \vdash \left(\text{Returns($p_1$, $t$)} \land
-\text{NoReturns($p_2$)}\right) \lor\\
+\text{NoReturns($p_2$)}\right) \lor\nonumber\\
 \tag{ReturnIfElse}
 \Gamma \vdash \left(\text{NoReturns($p_1$)} \land \text{Returns($p_2$,
 $t$)}\right)

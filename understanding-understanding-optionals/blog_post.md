@@ -787,9 +787,8 @@ Our decision to use Pythia to study feature evolution across time and scale is
 inspired by @tigges24 . They focus on classic circuits-centered
 interpretability tasks such as IOI, Gendered-Pronoun, Greater-Than, and SVA \AT{cite}.
 
-In our setting, we are more interested in representation-centered
-interpretability looks at how activations vary across inputs, to extract
-representations of particular concepts. @zou25 surveys techniques for
+In our setting, we are more interested in how activations vary across inputs, to extract
+representations of nullability. @zou25 surveys techniques for
 representation engineering with linear probes. We apply similar techniques, but
 to program semantics and dataflow instead of natural language.
 

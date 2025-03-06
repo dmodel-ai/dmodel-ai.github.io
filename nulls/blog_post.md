@@ -513,6 +513,36 @@ gives lower loss for smaller models (those with less than 410 million
 parameters), but that for larger models weighting layers using linear
 regression gives lower loss consistently.
 
+## Visualizing Probe Outputs
+
+Let us return to the reading diagram from the introduction.
+
+This diagram is adapted from the style of reading diagram from @zou25, but only
+show the activations on tokens that represent variable loads^[This is, of course, where we trained our probes, but there is also a practical
+reason: right after the model has generated a variable that will be
+written to, it often does not have access to the assigning expression
+or type annotation, giving it no way to determine if the value will be
+optional or now.]. For each position of interest, we prompt the model with the
+partial program that consists of all tokens up to (preceeding) and including
+that position. We then probe the model at the following token. We color the box above that position
+based on the output of the probe, and a scoring threshold inferred at
+train-time^[Red tokens are significantly below the threshold, and
+green tokens are significantly above it; tokens that scored near the
+threshold would have a near-white color, but no such tokens appear in
+this example.].
+
+![A diagram showing a simple program, and the probes nullability
+ predictions for each variable load.](images/reading_diagram.svg){#fig:reading2 .inlinefig}
+
+In this program, there are sixteen tokens that correspond to variable loads,
+and (correctly) all but one are marked as non-optional.
+The only nullable variable in this program is `result`,
+since it comes from `find_value` which returns `Optional[int]`.^[When this variable appears for the first time, it is in the `if` statement
+that checks if it's `None`. Then, the model knows it is nullable, and the results
+of the probe reflect that understanding. But when it appears a second
+time on the next line, in the format string of `print`, the body of this if statement only
+runs if it is *not* `None`. The model understand this as well, and the probe accurately reflects this.]
+
 ## Probing Results Across Training and Scale {#sec:results}
 
 In this section, we study the performance of our nullability probes across time
@@ -570,35 +600,6 @@ experimental measurement we followed the mass means shift from @li24. @li24
 and @zhong23 discuss why mass mean probing might outperform linear regression.
 
 
-# Visualizing Probe Outputs
-
-Let us return to the reading diagram from the introduction.
-
-This diagram is adapted from the style of reading diagram from @zou25, but only
-show the activations on tokens that represent variable loads^[This is, of course, where we trained our probes, but there is also a practical
-reason: right after the model has generated a variable that will be
-written to, it often does not have access to the assigning expression
-or type annotation, giving it no way to determine if the value will be
-optional or now.]. For each position of interest, we prompt the model with the
-partial program that consists of all tokens up to (preceeding) and including
-that position. We then probe the model at the following token. We color the box above that position
-based on the output of the probe, and a scoring threshold inferred at
-train-time^[Red tokens are significantly below the threshold, and
-green tokens are significantly above it; tokens that scored near the
-threshold would have a near-white color, but no such tokens appear in
-this example.].
-
-![A diagram showing a simple program, and the probes nullability
- predictions for each variable load.](images/reading_diagram.svg){#fig:reading2 .inlinefig}
-
-In this program, there are sixteen tokens that correspond to variable loads,
-and (correctly) all but one are marked as non-optional.
-The only nullable variable in this program is `result`,
-since it comes from `find_value` which returns `Optional[int]`.^[When this variable appears for the first time, it is in the `if` statement
-that checks if it's `None`. Then, the model knows it is nullable, and the results
-of the probe reflect that understanding. But when it appears a second
-time on the next line, in the format string of `print`, the body of this if statement only
-runs if it is *not* `None`. The model understand this as well, and the probe accurately reflects this.]
 
 # References {.unnumbered}
 ::: {#refs}

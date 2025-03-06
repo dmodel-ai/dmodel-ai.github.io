@@ -117,8 +117,8 @@ seven lines long.
 In our experiments we focus on the Pythia model suite [@biderman23],
 as they have checkpoints available across training runs and various
 scales. For measuring performance at larger sizes, we also include
-Qwen2.5-Coder-32B\AT{cite}, Llama 3.1 405B Instruct\AT{cite}, and
-DeepSeek-V3 (671B)\AT{cite}.
+Qwen2.5-Coder-32b\AT{cite}, Llama 3.1 405b Instruct\AT{cite}, and
+DeepSeek-V3 (671b)\AT{cite}.
 
 Each partial program is constructed such that there are a very limited
 number of valid next lines in the program, and all of them demonstrate
@@ -355,10 +355,10 @@ def process_value(value):
 ```
 
 With two layers of indirection, we start to hit the limits of the
-capabilities of even frontier models. Llama 405B is unable to
+capabilities of even frontier models. Llama 405b is unable to
 successfully pass this test, as are smaller models like Qwen Coder
-32B, while DeepSeek V3 (671B parameters) is able to pass it. However,
-Pythia 6.9B is still able to pass this test pretty consistently.
+32b, while DeepSeek V3 (671b parameters) is able to pass it. However,
+Pythia 6.9b is still able to pass this test pretty consistently.
 
 ## Generating Type Annotations
 
@@ -379,8 +379,8 @@ def program_48() -> None:
 def get_square(number:
 ```
 
-None of the Pythia models pass this test. Qwen Coder 32B is
-also incapable of passing this test, but both Llama 405B and DeepSeek
+None of the Pythia models pass this test. Qwen Coder 32b is
+also incapable of passing this test, but both Llama 405b and DeepSeek
 V3 pass it.
 
 We would indeed expect that writing type annotations is more difficult than merely

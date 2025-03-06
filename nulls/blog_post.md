@@ -192,10 +192,9 @@ causes all the Pythia models to fail the test. Our results show that
 the Pythia models rely heavily on features like variable naming when
 reasoning about for loops.  Fortunately, many other typing rules, like
 $(App)$ (function application) and $(IfOut)$, do not exhibit such a strong
-reliance on variable naming and constants.^[Stay tuned in the future
+reliance on variable naming and constants.^[Stay tuned in the future ([@sec:future])
 for a more in-depth exploration of how the models behave on individual
 typing rules with different contexts and variable names.]
-\AT{reference Future Work section}
 
 ## Interprocedural Analysis {#sec:inter}
 
@@ -302,8 +301,8 @@ have points in training where they can pass the test, but only
 intermittently. Even 6.9b, the best performing size on this test,
 fails the test in its second-to-last available revision^[Despite this,
 it does pass the test 40% of the available revisions, about triple
-what the other closest sizes can accomplish]. \AT{should we say
-something about 12b not solving it?}
+what the other closest sizes can accomplish]. You can see how this evolves over time in @fig:hl_mypy.
+See @sec:results for further discussion of performance over time.
 
 What the models *can* do well, however, is learn to pass these tests
 in the mypy type system (as opposed to mypy++). In that system, where
@@ -382,24 +381,21 @@ V3 pass it.
 We wrote three variations of each of these tests, resulting in 15
 tests total. Below, you can see the number of passing tests for each
 model.
+\AT{should we be plotting lpr? instead of raw pass rate? but log 15 is pretty small...}
 
 ![A bar graph showing how several sizes of model perform on the
  high-level nullability tests](images/hl_model_results.svg){#fig:hl_scale}
 
 In [@Fig:hl_scale], we can see the number of passing tests for each
-model. We can see that, generally speaking, models get better with scale.
+model. \todo{want to say: "We can see that, generally speaking, models get better with scale.
 Model performance on these tests is
 approximately logarithmic in model size: models of 2.8 billion
 parameters can pass about half the tests, but it takes more than 405
-\todo{can't say it like this. can't directly compare parameter counts between generations/architectures}
 billion parameters to pass all of the tests. This matches previous
 post- and pre-training evaluations of the capabilities of large
-language models\AS{cite, Kaplan et al, Chincilla
-AT:those cites are for loss, not evals!}, indicating that
-\AT{should we be plotting lpr? instead of raw pass rate? but log 15 is pretty small...}
-these tests are well distributed.
+language models, indicating that these tests are well distributed." but can't compare pythia params to llama 3 params }
 
-![A bar graph showing how the Pythia models perform in mypy vs
+![A bar plot showing how the Pythia models perform in mypy vs
  mypy++](images/hl_mypy_vs_grep_models.svg){#fig:hl_mypy}
 
 \todo{let's merge these figures}
@@ -417,9 +413,8 @@ Next, we want to understand the training dynamics at play here. Below,
 we can see how Pythia 6.9b performs on the tests during training from
 step 2 to 143000: ^[smoothed with a rolling average with a window size of 5]
 
-![A graph showing how often the Pythia 6.9b produces code that
-typechecks on the tests, vs produces code that shows true
-understanding.](images/hl_mypy_vs_grep_revisions.svg){#fig:hl_moral}
+![A plot showing how often the Pythia 6.9b produces code that
+typechecks on the tests, vs produces code that does not go wrong.](images/hl_mypy_vs_grep_revisions.svg){#fig:hl_moral}
 
 We see that each individual model learns to
 write code which typechecks under mypy before it learns to write code
@@ -457,8 +452,9 @@ which are aligned, and away from the states that are not aligned. This
 vector can then be used as a linear model to measure how much of the
 concept is activated in the model during any given forward pass (e.g. for honesty,
 this gives us a lie-detector).
+\AT{ formatting citekey in figcap}
 
-![Figure from @zou25  showing the reading outputs for several
+![Figure from  @zou25 showing the reading outputs for several
  concepts](images/zhou.png)
 
 ## Designing Prompts to Extract Nullability Activations {#sec:prompts}
@@ -515,12 +511,12 @@ regression. We found that which method is more accurate on test data
 varies over both model size and number of training steps.
 \AT{should we mention this in the intro/contributions/or a "key results" section like tlide?}
 
-![The performance of pure mass means probing vs mass means probing
- with linear regression for different Pythia model sizes. Binary-cross
- entropy is plotted, so lower is
+![The performance of pure mass means shift vs mass means shift
+ with linear regression for different Pythia model sizes. Lower is
  better.](images/mm-vs-mmlr.svg){#fig:mm-vs-mmlr-sizes}
 
 In [@Fig:mm-vs-mmlr-sizes], we can see that pure mass means probing
+\AT{add a y axis label for BCE. This should probably be a line plot.}
 gives lower loss for smaller models (those with less than 410 million
 parameters), but that for larger models weighting layers using linear
 regression gives lower loss consistently.
@@ -538,9 +534,9 @@ However, previous work leaves open the question of cross-layer weights. We use
 LR on the cross-layer weights, thanks to our investigations above.]
 \AT{see appendix D for mm vs LR}
 
-![The performance, measured in binary cross-entropy, of each Pythia
- model size during pretraining. Since this graph is of loss, lower is
- better](images/accuracy_during_pretraining.svg){#fig:models-and-steps}
+![The performance (probe test loss) of each Pythia
+ model size during pretraining. Lower is
+ better.](images/accuracy_during_pretraining.svg){#fig:models-and-steps}
 
 In [@fig:models-and-steps], we plot loss against scale and time.
 While we measured accuracy for every available Pythia model size, we exclude
@@ -548,17 +544,41 @@ the smallest (14m) from this plot since it would
 exist entirely above the top of the plot.
 
 One thing that is interesting to note is that models up to 1b reach
-a minimum loss before loss for this task climbing again. This may be because the
+a minimum loss before loss for this task climbing again. Charitably, this may be because the
 features beyond this point become more complex --- less linear, or the represented
-features themselves represent more subtle concepts. Our suspicion is that this
+features themselves represent more subtle concepts. Cynically, this reflects
+that models---small models in particular---do not uniformly improve at this task over training, as we observed in @sec:mypypp.
+
+Our suspicion is that this
 pattern would continue even for the larger models if we continued to overtrain them for longer.
 \todo{position the min loss stuff in terms of scaling laws or something?}
 
+# Future Work {#sec:future}
+
 We hope to get a better understanding of this phenomenon by studying the
 decomposed nullability reasoning as described in @sec:intra and Appendix [B.1](#sec:commonrules).
-\todo{future work}.
 
-## Visualizing Probe Outputs
+# Related Work {#sec:related}
+
+Our decision to use Pythia to study feature evolution across time and scale is
+inspired by @tigges24 . They focus on classic circuits-centered
+interpretability tasks such as IOI [@wang22], Gendered-Pronoun [@mathwin],
+Greater-Than [@hanna23] , and SVA [@linzen16].
+
+In our setting, we are more interested in how activations vary across inputs, to extract
+representations of nullability. @zou25 surveys techniques for
+representation engineering with linear probes. We apply similar techniques, but
+to program semantics and dataflow instead of natural language.
+
+@feng24predicate also study LLM's ability to reason about propositions, but in
+a natural language setting, rather than a formal one.
+
+Several techniques exist for constructing linear probes, but after
+experimental measurement we followed the mass means shift from @li24. @li24
+and @zhong23 discuss why mass mean probing might outperform linear regression.
+
+
+# Visualizing Probe Outputs
 
 Let us return to the reading diagram from the introduction.
 
@@ -587,29 +607,6 @@ that checks if it's `None`. Then, the model knows it is nullable, and the result
 of the probe reflect that understanding. But when it appears a second
 time on the next line, in the format string of `print`, the body of this if statement only
 runs if it is *not* `None`. The model understand this as well, and the probe accurately reflects this.]
-
-# Related Work {#sec:related}
-
-Our decision to use Pythia to study feature evolution across time and scale is
-inspired by @tigges24 . They focus on classic circuits-centered
-interpretability tasks such as IOI [@wang22], Gendered-Pronoun [@mathwin],
-Greater-Than [@hanna23] , and SVA [@linzen16].
-
-In our setting, we are more interested in how activations vary across inputs, to extract
-representations of nullability. @zou25 surveys techniques for
-representation engineering with linear probes. We apply similar techniques, but
-to program semantics and dataflow instead of natural language.
-
-@feng24predicate also study LLM's ability to reason about propositions, but in
-a natural language setting, rather than a formal one.
-
-Several techniques exist for constructing linear probes, but after
-experimental measurement we followed the mass means shift from @li24. @li24
-and @zhong23 discuss why mass mean probing might outperform linear regression.
-
-# Future Work
-
-\AT{Typing rules staircase plot}
 
 # References {.unnumbered}
 ::: {#refs}

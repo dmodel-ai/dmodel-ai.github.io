@@ -306,8 +306,7 @@ reasoning about for loops. Fortunately, many other typing rules, like
 <span class="math inline">(App)</span> (function application) and <span
 class="math inline">(IfOut)</span>, do not exhibit such a strong
 reliance on variable naming and constants.<a href="#fn3"
-class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>
-<span class="aside AT">AT: reference Future Work section</span></p>
+class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
 <h2 data-number="2.3" id="sec:inter"><span
 class="header-section-number">2.3</span> Interprocedural Analysis</h2>
 <p>We can further challenge the model by adding layers of procedural
@@ -402,9 +401,10 @@ but Pythia 410m, 1.4b, and 12b don’t. The bigger models all have points
 in training where they can pass the test, but only intermittently. Even
 6.9b, the best performing size on this test, fails the test in its
 second-to-last available revision<a href="#fn5" class="footnote-ref"
-id="fnref5" role="doc-noteref"><sup>5</sup></a>.
-<span class="aside AT">AT: should we say
-something about 12b not solving it?</span></p>
+id="fnref5" role="doc-noteref"><sup>5</sup></a>. You can see how this
+evolves over time in fig. <a href="#fig:hl_mypy">3</a>. See sec. <a
+href="#sec:results">3.4</a> for further discussion of performance over
+time.</p>
 <p>What the models <em>can</em> do well, however, is learn to pass these
 tests in the mypy type system (as opposed to mypy++). In that system,
 where they don’t need to reason globally about the functions but only
@@ -468,7 +468,8 @@ class="header-section-number">2.5</span> External Test Results Across
 Training and Scale</h2>
 <p>We wrote three variations of each of these tests, resulting in 15
 tests total. Below, you can see the number of passing tests for each
-model.</p>
+model.
+<span class="aside AT">AT: should we be plotting lpr? instead of raw pass rate? but log 15 is pretty small...</span></p>
 <figure id="fig:hl_scale">
 <img src="images/hl_model_results.svg"
 alt="Figure 2: A bar graph showing how several sizes of model perform on the high-level nullability tests" />
@@ -476,21 +477,18 @@ alt="Figure 2: A bar graph showing how several sizes of model perform on the hig
 sizes of model perform on the high-level nullability tests</figcaption>
 </figure>
 <p>In Fig. <a href="#fig:hl_scale">2</a>, we can see the number of
-passing tests for each model. We can see that, generally speaking,
-models get better with scale. Model performance on these tests is
+passing tests for each model.
+<span class=aside>want to say: "We can see that, generally speaking, models get better with scale.
+Model performance on these tests is
 approximately logarithmic in model size: models of 2.8 billion
 parameters can pass about half the tests, but it takes more than 405
-<span class=aside>can't say it like this. can't directly compare parameter counts between generations/architectures</span>
-billion parameters to pass all of the tests. This matches previous post-
-and pre-training evaluations of the capabilities of large language
-models<span class="aside AS">AS: cite, Kaplan et al, Chincilla
-AT:those cites are for loss, not evals!</span>, indicating that
-<span class="aside AT">AT: should we be plotting lpr? instead of raw pass rate? but log 15 is pretty small...</span>
-these tests are well distributed.</p>
+billion parameters to pass all of the tests. This matches previous
+post- and pre-training evaluations of the capabilities of large
+language models, indicating that these tests are well distributed." but can't compare pythia params to llama 3 params </span></p>
 <figure id="fig:hl_mypy">
 <img src="images/hl_mypy_vs_grep_models.svg"
-alt="Figure 3: A bar graph showing how the Pythia models perform in mypy vs mypy++" />
-<figcaption aria-hidden="true">Figure 3: A bar graph showing how the
+alt="Figure 3: A bar plot showing how the Pythia models perform in mypy vs mypy++" />
+<figcaption aria-hidden="true">Figure 3: A bar plot showing how the
 Pythia models perform in mypy vs mypy++</figcaption>
 </figure>
 <span class=aside>let's merge these figures</span>
@@ -508,10 +506,10 @@ from step 2 to 143000: <a href="#fn9" class="footnote-ref" id="fnref9"
 role="doc-noteref"><sup>9</sup></a></p>
 <figure id="fig:hl_moral">
 <img src="images/hl_mypy_vs_grep_revisions.svg"
-alt="Figure 4: A graph showing how often the Pythia 6.9b produces code that typechecks on the tests, vs produces code that shows true understanding." />
-<figcaption aria-hidden="true">Figure 4: A graph showing how often the
+alt="Figure 4: A plot showing how often the Pythia 6.9b produces code that typechecks on the tests, vs produces code that does not go wrong." />
+<figcaption aria-hidden="true">Figure 4: A plot showing how often the
 Pythia 6.9b produces code that typechecks on the tests, vs produces code
-that shows true understanding.</figcaption>
+that does not go wrong.</figcaption>
 </figure>
 <p>We see that each individual model learns to write code which
 typechecks under mypy before it learns to write code which typechecks
@@ -549,7 +547,8 @@ which points towards the states which are aligned, and away from the
 states that are not aligned. This vector can then be used as a linear
 model to measure how much of the concept is activated in the model
 during any given forward pass (e.g. for honesty, this gives us a
-lie-detector).</p>
+lie-detector).
+<span class="aside AT">AT:  formatting citekey in figcap</span></p>
 <figure>
 <img src="images/zhou.png"
 alt="Figure from Zou et al. (2025) showing the reading outputs for several concepts" />
@@ -610,16 +609,17 @@ both model size and number of training steps.
 <span class="aside AT">AT: should we mention this in the intro/contributions/or a "key results" section like tlide?</span></p>
 <figure id="fig:mm-vs-mmlr-sizes">
 <img src="images/mm-vs-mmlr.svg"
-alt="Figure 5: The performance of pure mass means probing vs mass means probing with linear regression for different Pythia model sizes. Binary-cross entropy is plotted, so lower is better." />
+alt="Figure 5: The performance of pure mass means shift vs mass means shift with linear regression for different Pythia model sizes. Lower is better." />
 <figcaption aria-hidden="true">Figure 5: The performance of pure mass
-means probing vs mass means probing with linear regression for different
-Pythia model sizes. Binary-cross entropy is plotted, so lower is
-better.</figcaption>
+means shift vs mass means shift with linear regression for different
+Pythia model sizes. Lower is better.</figcaption>
 </figure>
 <p>In Fig. <a href="#fig:mm-vs-mmlr-sizes">5</a>, we can see that pure
-mass means probing gives lower loss for smaller models (those with less
-than 410 million parameters), but that for larger models weighting
-layers using linear regression gives lower loss consistently.</p>
+mass means probing
+<span class="aside AT">AT: add a y axis label for BCE. This should probably be a line plot.</span>
+gives lower loss for smaller models (those with less than 410 million
+parameters), but that for larger models weighting layers using linear
+regression gives lower loss consistently.</p>
 <h2 data-number="3.4" id="sec:results"><span
 class="header-section-number">3.4</span> Probing Results Across Training
 and Scale</h2>
@@ -633,56 +633,33 @@ role="doc-noteref"><sup>11</sup></a>
 <span class="aside AT">AT: see appendix D for mm vs LR</span></p>
 <figure id="fig:models-and-steps">
 <img src="images/accuracy_during_pretraining.svg"
-alt="Figure 6: The performance, measured in binary cross-entropy, of each Pythia model size during pretraining. Since this graph is of loss, lower is better" />
-<figcaption aria-hidden="true">Figure 6: The performance, measured in
-binary cross-entropy, of each Pythia model size during pretraining.
-Since this graph is of loss, lower is better</figcaption>
+alt="Figure 6: The performance (probe test loss) of each Pythia model size during pretraining. Lower is better." />
+<figcaption aria-hidden="true">Figure 6: The performance (probe test
+loss) of each Pythia model size during pretraining. Lower is
+better.</figcaption>
 </figure>
 <p>In fig. <a href="#fig:models-and-steps">6</a>, we plot loss against
 scale and time. While we measured accuracy for every available Pythia
 model size, we exclude the smallest (14m) from this plot since it would
 exist entirely above the top of the plot.</p>
 <p>One thing that is interesting to note is that models up to 1b reach a
-minimum loss before loss for this task climbing again. This may be
-because the features beyond this point become more complex — less
+minimum loss before loss for this task climbing again. Charitably, this
+may be because the features beyond this point become more complex — less
 linear, or the represented features themselves represent more subtle
-concepts. Our suspicion is that this pattern would continue even for the
-larger models if we continued to overtrain them for longer.
+concepts. Cynically, this reflects that models—small models in
+particular—do not uniformly improve at this task over training, as we
+observed in sec. <a href="#sec:mypypp">2.3.3</a>.</p>
+<p>Our suspicion is that this pattern would continue even for the larger
+models if we continued to overtrain them for longer.
 <span class=aside>position the min loss stuff in terms of scaling laws or something?</span></p>
+<h1 data-number="4" id="sec:future"><span
+class="header-section-number">4</span> Future Work</h1>
 <p>We hope to get a better understanding of this phenomenon by studying
 the decomposed nullability reasoning as described in sec. <a
 href="#sec:intra">2.2</a> and Appendix <a
-href="#sec:commonrules">B.1</a>.
-<span class=aside>future work</span>.</p>
-<h2 data-number="3.5" id="visualizing-probe-outputs"><span
-class="header-section-number">3.5</span> Visualizing Probe Outputs</h2>
-<p>Let us return to the reading diagram from the introduction.</p>
-<p>This diagram is adapted from the style of reading diagram from <span
-class="citation" data-cites="zou25">Zou et al. (2025)</span>, but only
-show the activations on tokens that represent variable loads<a
-href="#fn12" class="footnote-ref" id="fnref12"
-role="doc-noteref"><sup>12</sup></a>. For each position of interest, we
-prompt the model with the partial program that consists of all tokens up
-to (preceeding) and including that position. We then probe the model at
-the following token. We color the box above that position based on the
-output of the probe, and a scoring threshold inferred at train-time<a
-href="#fn13" class="footnote-ref" id="fnref13"
-role="doc-noteref"><sup>13</sup></a>.</p>
-<figure id="fig:reading2">
-<img src="images/reading_diagram.svg" class="inlinefig"
-alt="Figure 7: A diagram showing a simple program, and the probes nullability predictions for each variable load." />
-<figcaption aria-hidden="true">Figure 7: A diagram showing a simple
-program, and the probes nullability predictions for each variable
-load.</figcaption>
-</figure>
-<p>In this program, there are sixteen tokens that correspond to variable
-loads, and (correctly) all but one are marked as non-optional. The only
-nullable variable in this program is <code>result</code>, since it comes
-from <code>find_value</code> which returns <code>Optional[int]</code>.<a
-href="#fn14" class="footnote-ref" id="fnref14"
-role="doc-noteref"><sup>14</sup></a></p>
-<h1 data-number="4" id="sec:related"><span
-class="header-section-number">4</span> Related Work</h1>
+href="#sec:commonrules">B.1</a>.</p>
+<h1 data-number="5" id="sec:related"><span
+class="header-section-number">5</span> Related Work</h1>
 <p>Our decision to use Pythia to study feature evolution across time and
 scale is inspired by <span class="citation" data-cites="tigges24">Tigges
 et al. (2024)</span> . They focus on classic circuits-centered
@@ -708,9 +685,33 @@ class="citation" data-cites="li24">Li et al. (2024)</span>. <span
 class="citation" data-cites="li24">Li et al. (2024)</span> and <span
 class="citation" data-cites="zhong23">Zhong et al. (2023)</span> discuss
 why mass mean probing might outperform linear regression.</p>
-<h1 data-number="5" id="future-work"><span
-class="header-section-number">5</span> Future Work</h1>
-<span class="aside AT">AT: Typing rules staircase plot</span>
+<h1 data-number="6" id="visualizing-probe-outputs"><span
+class="header-section-number">6</span> Visualizing Probe Outputs</h1>
+<p>Let us return to the reading diagram from the introduction.</p>
+<p>This diagram is adapted from the style of reading diagram from <span
+class="citation" data-cites="zou25">Zou et al. (2025)</span>, but only
+show the activations on tokens that represent variable loads<a
+href="#fn12" class="footnote-ref" id="fnref12"
+role="doc-noteref"><sup>12</sup></a>. For each position of interest, we
+prompt the model with the partial program that consists of all tokens up
+to (preceeding) and including that position. We then probe the model at
+the following token. We color the box above that position based on the
+output of the probe, and a scoring threshold inferred at train-time<a
+href="#fn13" class="footnote-ref" id="fnref13"
+role="doc-noteref"><sup>13</sup></a>.</p>
+<figure id="fig:reading2">
+<img src="images/reading_diagram.svg" class="inlinefig"
+alt="Figure 7: A diagram showing a simple program, and the probes nullability predictions for each variable load." />
+<figcaption aria-hidden="true">Figure 7: A diagram showing a simple
+program, and the probes nullability predictions for each variable
+load.</figcaption>
+</figure>
+<p>In this program, there are sixteen tokens that correspond to variable
+loads, and (correctly) all but one are marked as non-optional. The only
+nullable variable in this program is <code>result</code>, since it comes
+from <code>find_value</code> which returns <code>Optional[int]</code>.<a
+href="#fn14" class="footnote-ref" id="fnref14"
+role="doc-noteref"><sup>14</sup></a></p>
 <h1 class="unnumbered" id="references">References</h1>
 <div id="refs" class="references csl-bib-body hanging-indent"
 data-entry-spacing="0" role="list">
@@ -1345,9 +1346,10 @@ for nullability understanding by asking them to complete the program’s
 next lines, then see if those lines matches the regular expression
 <code>num\s*(is\s*(not)?|==)\s*None|isinstance\(num</code>.<a
 href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>Stay tuned in the future for a more in-depth exploration
-of how the models behave on individual typing rules with different
-contexts and variable names.<a href="#fnref3" class="footnote-back"
+<li id="fn3"><p>Stay tuned in the future (sec. <a
+href="#sec:future">4</a>) for a more in-depth exploration of how the
+models behave on individual typing rules with different contexts and
+variable names.<a href="#fnref3" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
 <li id="fn4"><p>Technically this is known as “Optional typing”, but
 that’s confusing in the context of this post. Not to be confused with

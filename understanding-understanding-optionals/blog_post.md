@@ -83,44 +83,29 @@ knowledge like so:
 # Measuring Nullability Understanding Externally\AT{Externally = token-level?} {#sec:testing}
 
 We begin by measuring model nullability understanding externally,
-because it provides a "skyline" or upper-bound estimate on our ability
-to extract internal concepts of nullability.
+because it provides a "skyline," or upper-bound, on our ability to
+extract internal concepts of nullability.
 
-We have the
-model complete simple partial programs that require an understanding
-of nullability. We refer to this suite of programs as
+To measure nullability understanding externally, we ask the model to
+complete simple partial programs that each require an understanding of
+nullability. We refer to this suite of programs as
 `NullabilityEval`. All of the tests in this benchmark suite are
 composed of three functions or less, where the largest function is
 seven lines long.
 
-
-We measure the difficulty of these tests by measuring how
-models of different sizes perform. We pay particular focus to
-the Pythia model suite [@biderman23], as they have checkpoints available across
-training runs and various scales. For measuring performance at larger sizes,
-we've included Qwen2.5-Coder-32B\AT{cite}, Llama 3.1 405B Instruct\AT{cite}, and
+In our experiments we focus on the Pythia model suite [@biderman23],
+as they have checkpoints available across training runs and various
+scales. For measuring performance at larger sizes, we also include
+Qwen2.5-Coder-32B\AT{cite}, Llama 3.1 405B Instruct\AT{cite}, and
 DeepSeek-V3 (671B)\AT{cite}.
 
-Our first test is:
+Each partial program is constructed such that there are a very limited
+number of valid next lines in the program, and all of them demonstrate
+some knowledge of the concept of nullability.
 
-*Test 1*:
-```python
-def main() -> None:
-  some_numbers = [1, -4, None, -3, 10, -1, None, None, 8]
-  result: list[int] = []
-  for num in some_numbers:
-```
+For example, our first test is:
 
-
-The program^[
-This partial program is only four lines, with type annotations. A
-`some_numbers` array is created that includes positive numbers, negative
-numbers, and None values, giving it type `Optional[int]`. A list `result`
-is constructed to give the model a sense of dataflow,
-and then a loop loops over `some_numbers`.]
-is constructed such that there are a very limited number
-of valid next lines in the program, and all of them demonstrate some
-knowledge of the concept of nullability.^[The loop indicates that the
+*Test 1*^[The loop indicates that the
 next few lines need to process `num` in some way, and the fact that it
 comes from `some_numbers` means it has the type `Optional[int]`. `num`
 can’t be directly appended to `result`, because `result` is declared
@@ -136,7 +121,13 @@ of valid next lines, and all of them imply some understanding that
 nullability understanding by asking them to complete the program
 another lines, then see if they produce something that matches these
 valid lines with the regular expression
-`num\s*(is\s*(not)?|==)\s*None|isinstance\(num`.]
+`num\s*(is\s*(not)?|==)\s*None|isinstance\(num`.]:
+```python
+def main() -> None:
+  some_numbers = [1, -4, None, -3, 10, -1, None, None, 8]
+  result: list[int] = []
+  for num in some_numbers:
+```
 
 We find that Pythia models as small as 2.8b can successfully complete
 this test, and that they learn to complete the test in the first third

@@ -316,7 +316,7 @@ type. So, for normaly mypy typechecking, we add the following typing
 rules:
 
 \begin{gather}
-\Gamma, x_1 : Any, x_2 : Any, ... \vdash [b] \vartriangleright \text{ok}\\
+\Gamma, x_1 : Any, x_2 : Any, ... \vdash [b] \vartriangleright \text{ok}\nonumber\\
 \tag{DynDef}
 \Gamma, f : Any \rightarrow ... \rightarrow Any \vdash [p] \vartriangleright \text{ok}
 \over
@@ -347,7 +347,7 @@ one that would prevent runtime type errors. We'll call this stronger
 type system mypy++. Instead of the Dyn- rules, it has this one:
 
 \begin{gather}
-\Gamma, x_1 : t_1, x_2 : t_2, ... \vdash [b] \vartriangleright \text{ok}\\
+\Gamma, x_1 : t_1, x_2 : t_2, ... \vdash [b] \vartriangleright \text{ok}\nonumber\\
 \tag{InferDef}
 \Gamma, f : t_1 \rightarrow t_2 \rightarrow ... \rightarrow t_r \vdash [p] \vartriangleright \text{ok}
 \over

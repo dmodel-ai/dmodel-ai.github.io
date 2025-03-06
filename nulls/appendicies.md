@@ -163,11 +163,10 @@ $$
      {\Gamma \vdash f(x_1, x_2, ...) : t_r}
 $$
 
-$$
-\hspace{-1cm}{
-\tag{IfIn}
+\begin{gather}
 \Gamma \vdash x : \texttt{Optional[$t$]} \hspace{1cm}
-\Gamma, x : t \vdash [p] \vartriangleright \text{ok} \hspace{1cm}
+\Gamma, x : t \vdash [p] \vartriangleright \text{ok} \nonumber\\
+\tag{IfIn}
 \bigotimes \text{in} [\texttt{is not, !=}]
 \over
 \Gamma \vdash
@@ -183,8 +182,7 @@ $$
 \quad p
 \end{array}\right]
 \vartriangleright \text{ok}
-}
-$$
+\end{gather}
 
 $$
 \tag{IfOut}

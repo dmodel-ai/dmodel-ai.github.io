@@ -657,13 +657,24 @@ tokens up to and including the variable read occurrence.
 
 \AT{Overall, I'm not really sure what our takeaway is for this section. I think we want the reader to understand that we did some experiements with mass mean probing and the various normalization mehtods, but I'm not sure we're making any compelling point here beyond "we ran the experiment". I think we can appendicize the latter two plots --- they look pretty noisy, and I'm not sure they're acutally something to draw conclusions from}
 
-We use Mass Mean Shift probing which
-has been shown empirically [@li24] to generalize better in high dimensional
-spaces than logistic
-regression.^[see "Mass Mean Probing vs Linear
-Regression" in the appendix]
+We use Mass Mean Shift probing which has been shown empirically
+[@li24] to generalize better in high dimensional spaces than logistic
+regression^[Since we don't have contrasting pairs, just labeled points,
+it's not possible to use the PCA from contrasting pairs method used in
+@marks24 and @zou25. See "Mass Mean Probing vs Linear Regression" in the
+appendix].
 
-In the reading vector, the impact of each layer is based on the
+Prior work focused their probing on a single layer, often handpicked
+based on prior papers. In our experiments, we decided to probe *all*
+layers using a mass means probe, and learn which ones were most
+important from the data. We tested two methods for doing so - either
+allowing the magnitude of the difference of means vector to determine
+the importance of the layer in the final probe, or to learn
+coefficients for each layer using linear regression. We found that
+which method is more accurate on test data varies over both model size
+and number of training steps.
+
+<!-- In the reading vector, the impact of each layer is based on the
 magnitude of mean difference in that layer.
 w we decided to try a few different methods of normalizing
 these layers to improve their overall accuracy as a linear model:
@@ -681,20 +692,11 @@ We evaluate the follow cross-layer normalization schemes:
 \AT{ add some theory for this}
 \AT{ include a results table }
 \AT{ add equations. these words are so hard to read.}
-
 We find that "no normalization" performs the best.
 
 \todo{ this is ... sort of... a contribution?}
-Prior work focused their probing on a single layer, often handpicked
-based on prior papers. In our experiments, we decided to probe *all*
-layers using a mass means probe, and learn which ones were most
-important from the data. We tested two methods for doing so - either
-allowing the magnitude of the difference of means vector to determine
-the importance of the layer in the final probe, or to learn
-coefficients for each layer using linear regression. We found that
-which method is more accurate on test data varies over both model size
-and number of training steps.
 
+-->
 ![The performance of pure mass means probing vs mass means probing
  with linear regression for different Pythia model sizes. Binary-cross
  entropy is plotted, so lower is
@@ -706,7 +708,7 @@ parameters), but that for larger models weighting layers using linear
 regression gives lower loss consistently.
 \AT{not really sure these plots are saying what we're saying they're saying}
 
-![The performance of the two probing methods on the Pythia 160m model
+<!--![The performance of the two probing methods on the Pythia 160m model
  for different numbers of pretraining steps. There are regions where
  pure mass means scaling is better, and regions where linear
  regression on layer weights is better.](images/mm-vs-mmlr-160m.svg){#fig:mm-vs-mmlr-160m}
@@ -719,7 +721,7 @@ scaling method can vary significantly over pretraining steps.
 ![The performance of the two probing methods on the Pythia 410m model
 for different numbers of pretraining steps. Pure mass means probing
 starts better, but is quickly overtaken by mass means probing with
-linear regression on layer weights.](images/mm-vs-mmlr-410m.svg){#fig:mm-vs-mmlr-410}
+linear regression on layer weights.](images/mm-vs-mmlr-410m.svg){#fig:mm-vs-mmlr-410}-->
 
 ## Probing Results Across Training and Scale {#sec:results}
 

@@ -689,32 +689,9 @@ class="header-section-number">4.3</span> Extracting Reading Vectors</h2>
 <span class="aside AT">AT: Overall, I'm not really sure what our takeaway is for this section. I think we want the reader to understand that we did some experiements with mass mean probing and the various normalization mehtods, but I'm not sure we're making any compelling point here beyond "we ran the experiment". I think we can appendicize the latter two plots --- they look pretty noisy, and I'm not sure they're acutally something to draw conclusions from</span>
 <p>We use Mass Mean Shift probing which has been shown empirically <span
 class="citation" data-cites="li24">(Li et al. 2024)</span> to generalize
-better in high dimensional spaces than logistic regression.<a
+better in high dimensional spaces than logistic regression<a
 href="#fn10" class="footnote-ref" id="fnref10"
-role="doc-noteref"><sup>10</sup></a></p>
-<p>In the reading vector, the impact of each layer is based on the
-magnitude of mean difference in that layer. w we decided to try a few
-different methods of normalizing these layers to improve their overall
-accuracy as a linear model:</p>
-<p>The reading vectors from each layer are the mean difference in
-activations between when the feature (nullability) is present or not.
-This leaves open the question of how to weight the reading vectors from
-different layers. We evaluate the follow cross-layer normalization
-schemes:</p>
-<ul>
-<li>No normalization; just summing over the average differences</li>
-<li>Normalizing each layers vector to a uniform length</li>
-<li>Dividing by the average amount that each layer activates on the
-positive samples</li>
-<li>Dividing by the average absolute amount that each layer activates on
-the positive samples</li>
-<li>Dividing by the square root of the average of squares of layer
-activations <span class="aside AT">AT:  add some theory for this</span>
-<span class="aside AT">AT:  include a results table </span>
-<span class="aside AT">AT:  add equations. these words are so hard to read.</span></li>
-</ul>
-<p>We find that “no normalization” performs the best.</p>
-<span class=aside> this is ... sort of... a contribution?</span>
+role="doc-noteref"><sup>10</sup></a>.</p>
 <p>Prior work focused their probing on a single layer, often handpicked
 based on prior papers. In our experiments, we decided to probe
 <em>all</em> layers using a mass means probe, and learn which ones were
@@ -724,6 +701,29 @@ determine the importance of the layer in the final probe, or to learn
 coefficients for each layer using linear regression. We found that which
 method is more accurate on test data varies over both model size and
 number of training steps.</p>
+<!-- In the reading vector, the impact of each layer is based on the
+magnitude of mean difference in that layer.
+w we decided to try a few different methods of normalizing
+these layers to improve their overall accuracy as a linear model:
+
+The reading vectors from each layer are the mean difference in activations
+between when the feature (nullability) is present or not. This leaves open
+the question of how to weight the reading vectors from different layers.
+We evaluate the follow cross-layer normalization schemes:
+
+* No normalization; just summing over the average differences
+* Normalizing each layers vector to a uniform length
+* Dividing by the average amount that each layer activates on the positive samples
+* Dividing by the average absolute amount that each layer activates on the positive samples
+* Dividing by the square root of the average of squares of layer activations
+\AT{ add some theory for this}
+\AT{ include a results table }
+\AT{ add equations. these words are so hard to read.}
+We find that "no normalization" performs the best.
+
+\todo{ this is ... sort of... a contribution?}
+
+-->
 <figure id="fig:mm-vs-mmlr-sizes">
 <img src="images/mm-vs-mmlr.svg"
 alt="Figure 5: The performance of pure mass means probing vs mass means probing with linear regression for different Pythia model sizes. Binary-cross entropy is plotted, so lower is better." />
@@ -737,29 +737,20 @@ mass means probing gives lower loss for smaller models (those with less
 than 410 million parameters), but that for larger models weighting
 layers using linear regression gives lower loss consistently.
 <span class="aside AT">AT: not really sure these plots are saying what we're saying they're saying</span></p>
-<figure id="fig:mm-vs-mmlr-160m">
-<img src="images/mm-vs-mmlr-160m.svg"
-alt="Figure 6: The performance of the two probing methods on the Pythia 160m model for different numbers of pretraining steps. There are regions where pure mass means scaling is better, and regions where linear regression on layer weights is better." />
-<figcaption aria-hidden="true">Figure 6: The performance of the two
-probing methods on the Pythia 160m model for different numbers of
-pretraining steps. There are regions where pure mass means scaling is
-better, and regions where linear regression on layer weights is
-better.</figcaption>
-</figure>
-<p>In Figs. <a href="#fig:mm-vs-mmlr-160m">6</a>, <a
-href="#fig:mm-vs-mmlr-410">7</a>, we look at how these scaling methods
-perform for different amounts of pretraining, for the model sizes
-nearest the boundary. We see that relative merit of each scaling method
-can vary significantly over pretraining steps.</p>
-<figure id="fig:mm-vs-mmlr-410">
-<img src="images/mm-vs-mmlr-410m.svg"
-alt="Figure 7: The performance of the two probing methods on the Pythia 410m model for different numbers of pretraining steps. Pure mass means probing starts better, but is quickly overtaken by mass means probing with linear regression on layer weights." />
-<figcaption aria-hidden="true">Figure 7: The performance of the two
-probing methods on the Pythia 410m model for different numbers of
-pretraining steps. Pure mass means probing starts better, but is quickly
-overtaken by mass means probing with linear regression on layer
-weights.</figcaption>
-</figure>
+<!--![The performance of the two probing methods on the Pythia 160m model
+ for different numbers of pretraining steps. There are regions where
+ pure mass means scaling is better, and regions where linear
+ regression on layer weights is better.](images/mm-vs-mmlr-160m.svg){#fig:mm-vs-mmlr-160m}
+
+In [@Fig:mm-vs-mmlr-160m;@Fig:mm-vs-mmlr-410], we look at how these
+scaling methods perform for different amounts of pretraining, for the
+model sizes nearest the boundary. We see that relative merit of each
+scaling method can vary significantly over pretraining steps.
+
+![The performance of the two probing methods on the Pythia 410m model
+for different numbers of pretraining steps. Pure mass means probing
+starts better, but is quickly overtaken by mass means probing with
+linear regression on layer weights.](images/mm-vs-mmlr-410m.svg){#fig:mm-vs-mmlr-410}-->
 <h2 data-number="4.4" id="sec:results"><span
 class="header-section-number">4.4</span> Probing Results Across Training
 and Scale</h2>
@@ -773,12 +764,12 @@ role="doc-noteref"><sup>11</sup></a>
 <span class="aside AT">AT: see appendix D for mm vs LR</span></p>
 <figure id="fig:models-and-steps">
 <img src="images/accuracy_during_pretraining.svg"
-alt="Figure 8: The performance, measured in binary cross-entropy, of each Pythia model size during pretraining. Since this graph is of loss, lower is better" />
-<figcaption aria-hidden="true">Figure 8: The performance, measured in
+alt="Figure 6: The performance, measured in binary cross-entropy, of each Pythia model size during pretraining. Since this graph is of loss, lower is better" />
+<figcaption aria-hidden="true">Figure 6: The performance, measured in
 binary cross-entropy, of each Pythia model size during pretraining.
 Since this graph is of loss, lower is better</figcaption>
 </figure>
-<p>In Fig. <a href="#fig:models-and-steps">8</a>, we plot loss against
+<p>In Fig. <a href="#fig:models-and-steps">6</a>, we plot loss against
 scale and time. While we measured accuracy for every available Pythia
 model size, we exclude the smallest (14m) from this plot since it would
 exist entirely above the top of the plot. We notice turning points in
@@ -883,6 +874,12 @@ Linzen, Tal, Emmanuel Dupoux, and Yoav Goldberg. 2016. <span>“Assessing
 the <span>Ability</span> of <span>LSTMs</span> to <span>Learn
 Syntax-Sensitive Dependencies</span>.”</span> arXiv. <a
 href="https://doi.org/10.48550/arXiv.1611.01368">https://doi.org/10.48550/arXiv.1611.01368</a>.
+</div>
+<div id="ref-marks24" class="csl-entry" role="listitem">
+Marks, Samuel, and Max Tegmark. 2024. <span>“The Geometry of Truth:
+Emergent Linear Structure in Large Language Model Representations of
+True/False Datasets.”</span> <a
+href="https://arxiv.org/abs/2310.06824">https://arxiv.org/abs/2310.06824</a>.
 </div>
 <div id="ref-mathwin" class="csl-entry" role="listitem">
 Mathwin, Chris, Guillaume Corlouer, Esben Kran, Fazl Barez, and Neel
@@ -1505,7 +1502,11 @@ producing invalid syntax.<a href="#fnref8" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
 <li id="fn9"><p>rolling average with a window size of 5<a href="#fnref9"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn10"><p>see “Mass Mean Probing vs Linear Regression” in the
+<li id="fn10"><p>Since we don’t have contrasting pairs, just labeled
+points, it’s not possible to use the PCA from contrasting pairs method
+used in <span class="citation" data-cites="marks24">Marks and Tegmark
+(2024)</span> and <span class="citation" data-cites="zou25">Zou et al.
+(2025)</span>. See “Mass Mean Probing vs Linear Regression” in the
 appendix<a href="#fnref10" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
 <li id="fn11"><p> <span class="citation" data-cites="li24">Li et al.

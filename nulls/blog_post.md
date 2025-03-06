@@ -128,7 +128,7 @@ def main() -> None:
   for num in some_numbers:
 ```
 
-We would like the mode to generate code that performs some operation on the elements of `some_numbers`.
+We would like the model to generate code that performs some operation on the elements of `some_numbers`.
 The simplest way to do that is to introduce a branch `if num is None`,
 but several variants are also valid: `if num is not None`, `if num ==
 None`, `if isinstance(num, int)`. That is, this example is constructed such
@@ -365,7 +365,7 @@ Pythia 6.9b is still able to pass this test pretty consistently.
 ## Generating Type Annotations
 
 Finally, we can test how well the models write write type
-annotations for functions. Here, the trailling colon makes
+annotations for functions. Here, the trailing colon makes
 the type expression the only valid completion.
 
 *Test 5*:
@@ -433,7 +433,7 @@ which typechecks under mypy++ and throws no type errors at runtime.
 
 # Measuring Nullability Understanding Internally {#sec:probing}
 
-At this point, we’ve figured out how to roughly measure nullability
+At this point, we've figured out how to roughly measure nullability
 understanding in the output of various language models, but we still
 don’t know what their internal representations might look like or when
 they emerge. Next, we detail how we train reading vectors
@@ -521,7 +521,7 @@ the final probe (MM), or to learn coefficients for each layer using
 linear regression (MM-LR). We found that which method is more accurate
 on test data varies over both model size and number of training steps.
 \AT{should we mention this in the intro/contributions/or a "key
-results" section like tlide?}
+results" section like tilde?}
 
 ![The performance of pure mass means shift vs mass means shift
  with linear regression for different Pythia model sizes. Lower is
@@ -544,7 +544,7 @@ reason: right after the model has generated a variable that will be
 written to, it often does not have access to the assigning expression
 or type annotation, giving it no way to determine if the value will be
 optional or now.]. For each position of interest, we prompt the model with the
-partial program that consists of all tokens up to (preceeding) and including
+partial program that consists of all tokens up to (preceding) and including
 that position. We then probe the model at the following token. We color the box above that position
 based on the output of the probe, and a scoring threshold inferred at
 train-time^[Red tokens are significantly below the threshold, and

@@ -248,7 +248,7 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a hr
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  some_numbers <span class="op">=</span> [<span class="dv">1</span>, <span class="op">-</span><span class="dv">4</span>, <span class="va">None</span>, <span class="op">-</span><span class="dv">3</span>, <span class="dv">10</span>, <span class="op">-</span><span class="dv">1</span>, <span class="va">None</span>, <span class="va">None</span>, <span class="dv">8</span>]</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  result: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> num <span class="kw">in</span> some_numbers:</span></code></pre></div>
-<p>We would like the mode to generate code that performs some operation
+<p>We would like the model to generate code that performs some operation
 on the elements of <code>some_numbers</code>. The simplest way to do
 that is to introduce a branch <code>if num is None</code>, but several
 variants are also valid: <code>if num is not None</code>,
@@ -455,7 +455,7 @@ pass this test pretty consistently.</p>
 class="header-section-number">2.4</span> Generating Type
 Annotations</h2>
 <p>Finally, we can test how well the models write write type annotations
-for functions. Here, the trailling colon makes the type expression the
+for functions. Here, the trailing colon makes the type expression the
 only valid completion.</p>
 <p><em>Test 5</em>:</p>
 <div class="sourceCode" id="cb7"><pre
@@ -620,7 +620,7 @@ probe (MM), or to learn coefficients for each layer using linear
 regression (MM-LR). We found that which method is more accurate on test
 data varies over both model size and number of training steps.
 <span class="aside AT">AT: should we mention this in the intro/contributions/or a "key
-results" section like tlide?</span></p>
+results" section like tilde?</span></p>
 <figure id="fig:mm-vs-mmlr-sizes">
 <img src="images/mm-vs-mmlr.svg"
 alt="Figure 5: The performance of pure mass means shift vs mass means shift with linear regression for different Pythia model sizes. Lower is better." />
@@ -644,7 +644,7 @@ show the activations on tokens that represent variable loads<a
 href="#fn11" class="footnote-ref" id="fnref11"
 role="doc-noteref"><sup>11</sup></a>. For each position of interest, we
 prompt the model with the partial program that consists of all tokens up
-to (preceeding) and including that position. We then probe the model at
+to (preceding) and including that position. We then probe the model at
 the following token. We color the box above that position based on the
 output of the probe, and a scoring threshold inferred at train-time<a
 href="#fn12" class="footnote-ref" id="fnref12"
@@ -832,7 +832,7 @@ nullable string. The first thing the function does is check if the input
 o1-mini, so we can already see that the model understands that the user
 object is nullable, and that it needs to be checked for None-ness before
 anything else can be done.</p>
-<p>We can say that there are five variable “occurances” in the program,
+<p>We can say that there are five variable “occurrences” in the program,
 each of which can be either nullable or not. There’s the first
 <code>user</code> in the if statement, the second <code>user</code> to
 the right of the <code>and</code> in <code>user.email</code>, there’s
@@ -850,7 +850,7 @@ with:</p>
 <h2 class="unnumbered" id="sec:commonrules">B.1 Common Rules</h2>
 <p>But before we try to measure nullability understanding, we’ll want to
 be more precise about exactly what we’re measuring. To that end, we’ll
-take the notion of different “rules” for nullability that we discuseed
+take the notion of different “rules” for nullability that we discussed
 informally in the overview, and bring it into a formal typing system.
 We’re not going to try to describe all the typing rules of python, so
 we’ll restrict ourselves in a couple of ways.</p>
@@ -1121,8 +1121,8 @@ fully type annotated programs. But what about programs with functions
 that aren’t type annotated, or are only partially annotated? The mypy
 type system that Python uses treats unannotated functions as dynamically
 typed, allowing them to typecheck as any type. Similarly, function
-parameters without a type annotation are implicitly convertable to any
-type. So, for normaly mypy typechecking, we add the following typing
+parameters without a type annotation are implicitly convertible to any
+type. So, for normally mypy typechecking, we add the following typing
 rules:</p>
 <p><span class="math display">\begin{gather}
 \Gamma, x_1 : Any, x_2 : Any, ... \vdash [b] \vartriangleright
@@ -1204,11 +1204,11 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a h
 class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_value(value):</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> value</span></code></pre></div>
 <p>The code generated by Pythia 6.9b properly handles values of both
-NoneType and str and always returns an int, whereas the code generated
-by Pythia 12b is the identify function, returning None when the input is
-None and returning a string when the input is a string. Neither of these
-cases is correct, as the main function expects this to return a Number
-that can be added to one.</p>
+NoneType and <code>str</code> and always returns an int, whereas the
+code generated by Pythia 12b is the identify function, returning None
+when the input is None and returning a string when the input is a
+string. Neither of these cases is correct, as the main function expects
+this to return a Number that can be added to one.</p>
 <h2 class="unnumbered" id="across-time">C.2 Across Time</h2>
 <figure id="fig:hl_time">
 <img src="images/hl_revision_results.svg"

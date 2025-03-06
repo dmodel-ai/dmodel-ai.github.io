@@ -277,8 +277,8 @@ Any, and an Any can be converted to any value type.
 
 This means that it would be technically type safe to do anything in
 the body of `process_value`, including just returning the argument,
-without a static type error. But at runtime, code that exploits this
-fact would still fail.
+without a static type error\AS{add data for this}. But at runtime,
+code that exploits this fact would still fail.
 
 ### A stricter type system for Python: mypy++ {#sec:mypypp}
 

@@ -506,13 +506,12 @@ tokens up to and including the variable read occurrence.
 
 Prior work focused their probing on a single layer, often handpicked
 based on prior papers. We probe all layers instead. We use Mass Mean
-Shift probing for each layer, because it's been shown empirically
+Shift probing^[That is, we set the reading vector to the
+difference between the mean activation for positive class and the mean
+activation for the negative class.]
+for each layer, because it's been shown empirically
 [@li24] to generalize better in high dimensional spaces than logistic
-regression^[Since we don't have contrasting pairs, just labeled
-points, it's not possible to use the PCA from contrasting pairs method
-used in @marks24 and @zou25. See "Mass Mean Probing vs Linear
-Regression" in the appendix]. This technique involves taking the means
-of each class, and using their difference as the reading vector.
+regression. 
 
 We then tested two methods for determining the relative importance of
 the different layers --- either allowing the magnitude of the

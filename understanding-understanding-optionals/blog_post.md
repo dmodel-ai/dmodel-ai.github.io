@@ -139,19 +139,22 @@ training.
 
 ## Understanding Typing Rules
 
-How deep is this understanding of nullability? We give a syntax and
-semantics of a minimalist subset of python that captures nullability,
-and study how well our models perform on each rule.
-The full syntax and typing rules of our subset of Python are described
-in Appendix [B.1](#sec:commonrules).
+We see from the results of our first test that these models understand
+nullability to some extent, but how deep is this understanding? To
+start to quantify this, we give a syntax and semantics of a minimalist
+subset of python that captures nullability in Appendix
+[B.1](#sec:commonrules). We can then classify each partial program by
+which program constructs and rules determine the nullability of the
+target variable. For instance, Test 1 uses the List, Var, and For
+rules.
 
-With these basic rules, we can construct basic program prefixes that
-test the models understanding of nullability.
-
-So, do Pythia models 1.4b and up understand the semantics of all of the
-typing rules necessary for this\AT{which} test, or are the confounded by
-semiotic information like variable names, whitespace, statement orderings, and
-constant values?
+So, do Pythia models 2.8b and up understand the semantics of these
+three rules? As it turns out, not exactly. LLM's pick up on a lot of
+information relationships in their training data that have statistical
+correlation, without it necessarily being causal. What this means in
+practice is that the models use things like variable names,
+whitespace, statement orderings, and constant values to guess at
+certain programming concepts.
 
 For example, while many of the Pythia models
 can complete:
@@ -171,13 +174,13 @@ bar: list[int] = []
 for corejoice in foo:
 ```
 
-causes all the Pythia models to fail the test. Fortunately,\AT{ideally this is made more concrete, for example by referencing concrete rules or having a plot or table or something}
-many simpler typing rules do not exhibit such a strong
-reliance on variable naming and constants; in this case, it's the for
-loop that causes the model to be confused with certain variable
-names. ^[Stay tuned in the future for a more in-depth exploration of how
-the models behave on individual typing rules with different contexts
-and variable names.]
+causes all the Pythia models to fail the test. Our results show that
+the Pythia models rely heavily on features like variable naming when
+reasoning about for loops.  Fortunately, many other typing rules, like
+App (function application) and If_Out, do not exhibit such a strong
+reliance on variable naming and constants.^[Stay tuned in the future
+for a more in-depth exploration of how the models behave on individual
+typing rules with different contexts and variable names.]
 
 ## Interprocedural Analysis
 

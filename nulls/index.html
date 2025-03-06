@@ -406,7 +406,7 @@ second-to-last available revision<a href="#fn6" class="footnote-ref"
 id="fnref6" role="doc-noteref"><sup>6</sup></a>. You can see how this
 evolves over scale in fig. <a href="#fig:hl_mypy">3</a> and time in
 fig. <a href="#fig:hl_moral">4</a>. See sec. <a
-href="#sec:results">3.4</a> for further discussion of performance over
+href="#sec:results">3.5</a> for further discussion of performance over
 time.
 <span class="aside AT">AT: add a table of what we're actually claiming here (probably in the appendix) rather than referencing the performance on the overall test suite</span></p>
 <p>What the models <em>can</em> do well, however, is learn to pass these
@@ -525,7 +525,7 @@ they emerge. Next, we detail how we train reading vectors (Sec. <a
 href="#sec:extraction">3.3</a>), using prompts designed to make the
 model think about the phenomena of interest (Sec. <a
 href="#sec:prompts">3.2</a>). Finally, in Sec. <a
-href="#sec:results">3.4</a>, we validate that these probes improve their
+href="#sec:results">3.5</a>, we validate that these probes improve their
 understanding of nullability over the course of pretraining to the level
 that we expect from the external, or token-level understanding evals we
 describe in the previous section.</p>
@@ -621,25 +621,52 @@ mass means probing
 gives lower loss for smaller models (those with less than 410 million
 parameters), but that for larger models weighting layers using linear
 regression gives lower loss consistently.</p>
-<h2 data-number="3.4" id="sec:results"><span
-class="header-section-number">3.4</span> Probing Results Across Training
+<h2 data-number="3.4" id="visualizing-probe-outputs"><span
+class="header-section-number">3.4</span> Visualizing Probe Outputs</h2>
+<p>Let us return to the reading diagram from the introduction.</p>
+<p>This diagram is adapted from the style of reading diagram from <span
+class="citation" data-cites="zou25">Zou et al. (2025)</span>, but only
+show the activations on tokens that represent variable loads<a
+href="#fn11" class="footnote-ref" id="fnref11"
+role="doc-noteref"><sup>11</sup></a>. For each position of interest, we
+prompt the model with the partial program that consists of all tokens up
+to (preceeding) and including that position. We then probe the model at
+the following token. We color the box above that position based on the
+output of the probe, and a scoring threshold inferred at train-time<a
+href="#fn12" class="footnote-ref" id="fnref12"
+role="doc-noteref"><sup>12</sup></a>.</p>
+<figure id="fig:reading2">
+<img src="images/reading_diagram.svg" class="inlinefig"
+alt="Figure 6: A diagram showing a simple program, and the probes nullability predictions for each variable load." />
+<figcaption aria-hidden="true">Figure 6: A diagram showing a simple
+program, and the probes nullability predictions for each variable
+load.</figcaption>
+</figure>
+<p>In this program, there are sixteen tokens that correspond to variable
+loads, and (correctly) all but one are marked as non-optional. The only
+nullable variable in this program is <code>result</code>, since it comes
+from <code>find_value</code> which returns <code>Optional[int]</code>.<a
+href="#fn13" class="footnote-ref" id="fnref13"
+role="doc-noteref"><sup>13</sup></a></p>
+<h2 data-number="3.5" id="sec:results"><span
+class="header-section-number">3.5</span> Probing Results Across Training
 and Scale</h2>
 <p>In this section, we study the performance of our nullability probes
 across time and scale <span class="citation"
 data-cites="tigges24">(Tigges et al. 2024)</span>. We use mass-means
 shift probing <span class="citation" data-cites="li24">(Li et al.
 2024)</span> on all layers, and a linear regression to determine the
-weights of each layer.<a href="#fn11" class="footnote-ref" id="fnref11"
-role="doc-noteref"><sup>11</sup></a>
+weights of each layer.<a href="#fn14" class="footnote-ref" id="fnref14"
+role="doc-noteref"><sup>14</sup></a>
 <span class="aside AT">AT: see appendix D for mm vs LR</span></p>
 <figure id="fig:models-and-steps">
 <img src="images/accuracy_during_pretraining.svg"
-alt="Figure 6: The performance (probe test loss) of each Pythia model size during pretraining. Lower is better." />
-<figcaption aria-hidden="true">Figure 6: The performance (probe test
+alt="Figure 7: The performance (probe test loss) of each Pythia model size during pretraining. Lower is better." />
+<figcaption aria-hidden="true">Figure 7: The performance (probe test
 loss) of each Pythia model size during pretraining. Lower is
 better.</figcaption>
 </figure>
-<p>In fig. <a href="#fig:models-and-steps">6</a>, we plot loss against
+<p>In fig. <a href="#fig:models-and-steps">7</a>, we plot loss against
 scale and time. While we measured accuracy for every available Pythia
 model size, we exclude the smallest (14m) from this plot since it would
 exist entirely above the top of the plot.</p>
@@ -686,33 +713,6 @@ class="citation" data-cites="li24">Li et al. (2024)</span>. <span
 class="citation" data-cites="li24">Li et al. (2024)</span> and <span
 class="citation" data-cites="zhong23">Zhong et al. (2023)</span> discuss
 why mass mean probing might outperform linear regression.</p>
-<h1 data-number="6" id="visualizing-probe-outputs"><span
-class="header-section-number">6</span> Visualizing Probe Outputs</h1>
-<p>Let us return to the reading diagram from the introduction.</p>
-<p>This diagram is adapted from the style of reading diagram from <span
-class="citation" data-cites="zou25">Zou et al. (2025)</span>, but only
-show the activations on tokens that represent variable loads<a
-href="#fn12" class="footnote-ref" id="fnref12"
-role="doc-noteref"><sup>12</sup></a>. For each position of interest, we
-prompt the model with the partial program that consists of all tokens up
-to (preceeding) and including that position. We then probe the model at
-the following token. We color the box above that position based on the
-output of the probe, and a scoring threshold inferred at train-time<a
-href="#fn13" class="footnote-ref" id="fnref13"
-role="doc-noteref"><sup>13</sup></a>.</p>
-<figure id="fig:reading2">
-<img src="images/reading_diagram.svg" class="inlinefig"
-alt="Figure 7: A diagram showing a simple program, and the probes nullability predictions for each variable load." />
-<figcaption aria-hidden="true">Figure 7: A diagram showing a simple
-program, and the probes nullability predictions for each variable
-load.</figcaption>
-</figure>
-<p>In this program, there are sixteen tokens that correspond to variable
-loads, and (correctly) all but one are marked as non-optional. The only
-nullable variable in this program is <code>result</code>, since it comes
-from <code>find_value</code> which returns <code>Optional[int]</code>.<a
-href="#fn14" class="footnote-ref" id="fnref14"
-role="doc-noteref"><sup>14</sup></a></p>
 <h1 class="unnumbered" id="references">References</h1>
 <div id="refs" class="references csl-bib-body hanging-indent"
 data-entry-spacing="0" role="list">
@@ -1381,33 +1381,33 @@ used in <span class="citation" data-cites="marks24">Marks and Tegmark
 (2025)</span>. See “Mass Mean Probing vs Linear Regression” in the
 appendix<a href="#fnref10" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn11"><p> <span class="citation" data-cites="li24">Li et al.
-(2024)</span> and <span class="citation" data-cites="zou25">Zou et al.
-(2025)</span> suggest that mass means probes are best for reading, while
-the direction perpendicular to the separating hyperplane is best for
-intervention. However, previous work leaves open the question of
-cross-layer weights. We use LR on the cross-layer weights, thanks to our
-investigations above.<a href="#fnref11" class="footnote-back"
-role="doc-backlink">↩︎</a></p></li>
-<li id="fn12"><p>This is, of course, where we trained our probes, but
+<li id="fn11"><p>This is, of course, where we trained our probes, but
 there is also a practical reason: right after the model has generated a
 variable that will be written to, it often does not have access to the
 assigning expression or type annotation, giving it no way to determine
-if the value will be optional or now.<a href="#fnref12"
+if the value will be optional or now.<a href="#fnref11"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn13"><p>Red tokens are significantly below the threshold, and
+<li id="fn12"><p>Red tokens are significantly below the threshold, and
 green tokens are significantly above it; tokens that scored near the
 threshold would have a near-white color, but no such tokens appear in
-this example.<a href="#fnref13" class="footnote-back"
+this example.<a href="#fnref12" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn14"><p>When this variable appears for the first time, it is in
+<li id="fn13"><p>When this variable appears for the first time, it is in
 the <code>if</code> statement that checks if it’s <code>None</code>.
 Then, the model knows it is nullable, and the results of the probe
 reflect that understanding. But when it appears a second time on the
 next line, in the format string of <code>print</code>, the body of this
 if statement only runs if it is <em>not</em> <code>None</code>. The
 model understand this as well, and the probe accurately reflects this.<a
-href="#fnref14" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+href="#fnref13" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn14"><p> <span class="citation" data-cites="li24">Li et al.
+(2024)</span> and <span class="citation" data-cites="zou25">Zou et al.
+(2025)</span> suggest that mass means probes are best for reading, while
+the direction perpendicular to the separating hyperplane is best for
+intervention. However, previous work leaves open the question of
+cross-layer weights. We use LR on the cross-layer weights, thanks to our
+investigations above.<a href="#fnref14" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>
 </body>

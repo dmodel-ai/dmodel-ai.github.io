@@ -300,11 +300,12 @@ token is an optional variable, or a non-optional variable.</p>
 models activations to determine whether the model thinks a variable read
 corresponds to a nullable variable, and show that internal knowledge
 like so:</p>
-<figure>
-<img src="images/reading_diagram.svg"
-alt="A diagram showing a simple program, and the probes nullability predictions for each variable load." />
-<figcaption aria-hidden="true">A diagram showing a simple program, and
-the probes nullability predictions for each variable load.</figcaption>
+<figure id="fig:reading1">
+<img src="images/reading_diagram.svg" class="inlinefig"
+alt="Figure 1: A diagram showing a simple program, and the probes nullability predictions for each variable load." />
+<figcaption aria-hidden="true">Figure 1: A diagram showing a simple
+program, and the probes nullability predictions for each variable
+load.</figcaption>
 </figure>
 <p>In Sec. <a href="#sec:bench">3</a> we’ll describe our external tests
 of nullability understanding in more detail, and in Sec. <a
@@ -537,11 +538,11 @@ model.</p>
 <span class=aside>more through exploration of why?</span>
 <figure id="fig:hl_scale">
 <img src="images/hl_model_results.svg"
-alt="Figure 1: A bar graph showing how several sizes of model perform on the high-level nullability tests" />
-<figcaption aria-hidden="true">Figure 1: A bar graph showing how several
+alt="Figure 2: A bar graph showing how several sizes of model perform on the high-level nullability tests" />
+<figcaption aria-hidden="true">Figure 2: A bar graph showing how several
 sizes of model perform on the high-level nullability tests</figcaption>
 </figure>
-<p>In Fig. <a href="#fig:hl_scale">1</a>, we can see the number of
+<p>In Fig. <a href="#fig:hl_scale">2</a>, we can see the number of
 passing tests for each model. We can see that generally models get
 better with scale.
 <span class=aside>I don't think this footnote is clear enough to add anything</span>
@@ -555,13 +556,13 @@ models<span class=aside>cite, Kaplan et al, Chincilla</span>, indicating
 that these tests are well distributed.</p>
 <figure id="fig:hl_mypy">
 <img src="images/hl_mypy_vs_grep_models.svg"
-alt="Figure 2: A bar graph showing how the Pythia models perform in mypy vs mypy++" />
-<figcaption aria-hidden="true">Figure 2: A bar graph showing how the
+alt="Figure 3: A bar graph showing how the Pythia models perform in mypy vs mypy++" />
+<figcaption aria-hidden="true">Figure 3: A bar graph showing how the
 Pythia models perform in mypy vs mypy++</figcaption>
 </figure>
-<p>In Fig. <a href="#fig:hl_mypy">2</a>, we can see the test result for
+<p>In Fig. <a href="#fig:hl_mypy">3</a>, we can see the test result for
 the pythia models using the mypy and mypy++ type systems (Fig. <a
-href="#fig:hl_scale">1</a> uses mypy++). As we expected, the mypy
+href="#fig:hl_scale">2</a> uses mypy++). As we expected, the mypy
 results (red bar) are always above the mypy++ results (blue bar), as
 mypy++ is a stricter type system. There are six tests in the dataset
 involving non-annotated functions, and using the weaker mypy typesystem
@@ -574,8 +575,8 @@ step 2 to
 paper</span></p>
 <figure id="fig:hl_time">
 <img src="images/hl_revision_results.svg"
-alt="Figure 3: A line graph showing how the performance of the Pythia 6.9 model changes during training" />
-<figcaption aria-hidden="true">Figure 3: A line graph showing how the
+alt="Figure 4: A line graph showing how the performance of the Pythia 6.9 model changes during training" />
+<figcaption aria-hidden="true">Figure 4: A line graph showing how the
 performance of the Pythia 6.9 model changes during training</figcaption>
 </figure>
 <p>Again, performance does not increase monotonically. This plot is
@@ -587,8 +588,8 @@ write code which typechecks under mypy before it learns to write code
 which typechecks under mypy++ and throws no type errors at runtime.</p>
 <figure id="fig:hl_moral">
 <img src="images/hl_mypy_vs_grep_revisions.svg"
-alt="Figure 4: A graph showing how often the Pythia 6.9b produces code that typechecks on the tests, vs produces code that shows true understanding." />
-<figcaption aria-hidden="true">Figure 4: A graph showing how often the
+alt="Figure 5: A graph showing how often the Pythia 6.9b produces code that typechecks on the tests, vs produces code that shows true understanding." />
+<figcaption aria-hidden="true">Figure 5: A graph showing how often the
 Pythia 6.9b produces code that typechecks on the tests, vs produces code
 that shows true understanding.</figcaption>
 </figure>
@@ -705,13 +706,13 @@ both model size and number of training steps.
 <span class="aside AT">AT: should we mention this in the intro/contributions/or a "key results" section like tlide?</span></p>
 <figure id="fig:mm-vs-mmlr-sizes">
 <img src="images/mm-vs-mmlr.svg"
-alt="Figure 5: The performance of pure mass means probing vs mass means probing with linear regression for different Pythia model sizes. Binary-cross entropy is plotted, so lower is better." />
-<figcaption aria-hidden="true">Figure 5: The performance of pure mass
+alt="Figure 6: The performance of pure mass means probing vs mass means probing with linear regression for different Pythia model sizes. Binary-cross entropy is plotted, so lower is better." />
+<figcaption aria-hidden="true">Figure 6: The performance of pure mass
 means probing vs mass means probing with linear regression for different
 Pythia model sizes. Binary-cross entropy is plotted, so lower is
 better.</figcaption>
 </figure>
-<p>In Fig. <a href="#fig:mm-vs-mmlr-sizes">5</a>, we can see that pure
+<p>In Fig. <a href="#fig:mm-vs-mmlr-sizes">6</a>, we can see that pure
 mass means probing gives lower loss for smaller models (those with less
 than 410 million parameters), but that for larger models weighting
 layers using linear regression gives lower loss consistently.</p>
@@ -728,12 +729,12 @@ role="doc-noteref"><sup>11</sup></a>
 <span class="aside AT">AT: see appendix D for mm vs LR</span></p>
 <figure id="fig:models-and-steps">
 <img src="images/accuracy_during_pretraining.svg"
-alt="Figure 6: The performance, measured in binary cross-entropy, of each Pythia model size during pretraining. Since this graph is of loss, lower is better" />
-<figcaption aria-hidden="true">Figure 6: The performance, measured in
+alt="Figure 7: The performance, measured in binary cross-entropy, of each Pythia model size during pretraining. Since this graph is of loss, lower is better" />
+<figcaption aria-hidden="true">Figure 7: The performance, measured in
 binary cross-entropy, of each Pythia model size during pretraining.
 Since this graph is of loss, lower is better</figcaption>
 </figure>
-<p>In Fig. <a href="#fig:models-and-steps">6</a>, we plot loss against
+<p>In Fig. <a href="#fig:models-and-steps">7</a>, we plot loss against
 scale and time. While we measured accuracy for every available Pythia
 model size, we exclude the smallest (14m) from this plot since it would
 exist entirely above the top of the plot. We notice turning points in
@@ -755,11 +756,12 @@ hidden state and measuring probe activation. We then color the box above
 that token depending on the activations, and the scoring threshold
 inferred at train-time<a href="#fn13" class="footnote-ref" id="fnref13"
 role="doc-noteref"><sup>13</sup></a>.</p>
-<figure>
-<img src="images/reading_diagram.svg"
-alt="A diagram showing a simple program, and the probes nullability predictions for each variable load." />
-<figcaption aria-hidden="true">A diagram showing a simple program, and
-the probes nullability predictions for each variable load.</figcaption>
+<figure id="fig:reading2">
+<img src="images/reading_diagram.svg" class="inlinefig"
+alt="Figure 8: A diagram showing a simple program, and the probes nullability predictions for each variable load." />
+<figcaption aria-hidden="true">Figure 8: A diagram showing a simple
+program, and the probes nullability predictions for each variable
+load.</figcaption>
 </figure>
 <p>We can see here sixteen tokens that correspond to variable reads in
 the program, and all but one are probed as non-optional (correctly). The
@@ -1244,7 +1246,7 @@ p
 id="detailed-high-level-nullability-test-results">C Detailed High-Level
 Nullability Test Results</h1>
 <h2 class="unnumbered" id="across-scale">C.1 Across Scale</h2>
-<p>You can see in fig. <a href="#fig:hl_scale">1</a> that the smallest
+<p>You can see in fig. <a href="#fig:hl_scale">2</a> that the smallest
 three models don’t pass any test. After that, the trend line for tests
 passed goes upwards, but it’s not monotonic: Pythia 410m passes only one
 test, while Pythia 160m passes three, and Pythia 6.9b passes the most
@@ -1281,7 +1283,7 @@ None and returning a string when the input is a string. Neither of these
 cases is correct, as the main function expects this to return a Number
 that can be added to one.</p>
 <h2 class="unnumbered" id="across-time">C.2 Across Time</h2>
-<p>We say in fig. <a href="#fig:hl_time">3</a> that while the model
+<p>We say in fig. <a href="#fig:hl_time">4</a> that while the model
 generally gets better at passing these tests during training, the
 performance is not always increasing. Zooming in on a particular test,
 we can see what this looks like. When asked to complete this code:</p>

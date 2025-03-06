@@ -11,16 +11,16 @@
 }
 
 figure {
-  width: min(max(36em, 100vw), 54em);
+  width: min(max(36em, 100vw), 54em, calc(100vw - 24px));
   margin-left: min(max(-9em, calc(18em - 50vw)),0em);
 }
 figure img {
-  width: min(max(36em, 100vw), 54em)
+  width: min(max(36em, 100vw), 54em, calc(100vw - 24px))
 }
 figcaption{
     margin-top: -1em;
     margin-bottom: 2em;
-    width: min(max(36em, 100vw), 54em);
+    width: min(max(36em, 100vw), 54em, calc(100vw - 24px));
     display:flex;
     justify-content: center
 }

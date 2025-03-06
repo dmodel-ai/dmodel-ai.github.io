@@ -350,8 +350,10 @@ def main(x: int) -> None:
 def process_value(value):
 ```
 
-With two layers of indirection, we start to hit the limits of the
-capabilities of even frontier models. Llama 405b is unable to
+In Test 4, instead of `main` calling `process_value` directly, it
+calls `handle_value`, which itself calls `process_value` in a
+branch. With two layers of indirection, we start to hit the limits of
+the capabilities of even frontier models. Llama 405b is unable to
 successfully pass this test, as are smaller models like Qwen Coder
 32b, while DeepSeek V3 (671b parameters) is able to pass it. However,
 Pythia 6.9b is still able to pass this test pretty consistently.

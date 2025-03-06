@@ -181,6 +181,24 @@
   file = {/home/atondwal/Zotero/storage/LJ3PLWY5/Gorton - 2024 - Group Crosscoders for Mechanistic Analysis of Symmetry.pdf}
 }
 
+@misc{hanna23,
+  title = {How Does {{GPT-2}} Compute Greater-than?: {{Interpreting}} Mathematical Abilities in a Pre-Trained Language Model},
+  shorttitle = {How Does {{GPT-2}} Compute Greater-Than?},
+  author = {Hanna, Michael and Liu, Ollie and Variengien, Alexandre},
+  year = {2023},
+  month = nov,
+  number = {arXiv:2305.00586},
+  eprint = {2305.00586},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2305.00586},
+  urldate = {2025-03-06},
+  abstract = {Pre-trained language models can be surprisingly adept at tasks they were not explicitly trained on, but how they implement these capabilities is poorly understood. In this paper, we investigate the basic mathematical abilities often acquired by pre-trained language models. Concretely, we use mechanistic interpretability techniques to explain the (limited) mathematical abilities of GPT-2 small. As a case study, we examine its ability to take in sentences such as "The war lasted from the year 1732 to the year 17", and predict valid two-digit end years (years {$>$} 32). We first identify a circuit, a small subset of GPT-2 small's computational graph that computes this task's output. Then, we explain the role of each circuit component, showing that GPT-2 small's final multi-layer perceptrons boost the probability of end years greater than the start year. Finally, we find related tasks that activate our circuit. Our results suggest that GPT-2 small computes greater-than using a complex but general mechanism that activates across diverse contexts.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Artificial Intelligence,Computer Science - Computation and Language,Computer Science - Machine Learning},
+  file = {/home/atondwal/Zotero/storage/IKT74TKA/Hanna et al. - 2023 - How does GPT-2 compute greater-than Interpreting mathematical abilities in a pre-trained language.pdf;/home/atondwal/Zotero/storage/Q9CCTKKT/2305.html}
+}
+
 @misc{huh24,
   title = {The {{Platonic Representation Hypothesis}}},
   author = {Huh, Minyoung and Cheung, Brian and Wang, Tongzhou and Isola, Phillip},
@@ -249,6 +267,23 @@
   file = {/home/atondwal/Zotero/storage/KE6CGKIJ/Li et al. - 2024 - Inference-Time Intervention Eliciting Truthful Answers from a Language Model.pdf;/home/atondwal/Zotero/storage/YGXVKHNZ/2306.html}
 }
 
+@misc{linzen16,
+  title = {Assessing the {{Ability}} of {{LSTMs}} to {{Learn Syntax-Sensitive Dependencies}}},
+  author = {Linzen, Tal and Dupoux, Emmanuel and Goldberg, Yoav},
+  year = {2016},
+  month = nov,
+  number = {arXiv:1611.01368},
+  eprint = {1611.01368},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.1611.01368},
+  urldate = {2025-03-06},
+  abstract = {The success of long short-term memory (LSTM) neural networks in language processing is typically attributed to their ability to capture long-distance statistical regularities. Linguistic regularities are often sensitive to syntactic structure; can such dependencies be captured by LSTMs, which do not have explicit structural representations? We begin addressing this question using number agreement in English subject-verb dependencies. We probe the architecture's grammatical competence both using training objectives with an explicit grammatical target (number prediction, grammaticality judgments) and using language models. In the strongly supervised settings, the LSTM achieved very high overall accuracy (less than 1\% errors), but errors increased when sequential and structural information conflicted. The frequency of such errors rose sharply in the language-modeling setting. We conclude that LSTMs can capture a non-trivial amount of grammatical structure given targeted supervision, but stronger architectures may be required to further reduce errors; furthermore, the language modeling signal is insufficient for capturing syntax-sensitive dependencies, and should be supplemented with more direct supervision if such dependencies need to be captured.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Computation and Language},
+  file = {/home/atondwal/Zotero/storage/FY2EKZWV/Linzen et al. - 2016 - Assessing the Ability of LSTMs to Learn Syntax-Sensitive Dependencies.pdf;/home/atondwal/Zotero/storage/W9QTQ6T3/1611.html}
+}
+
 @misc{liu24,
   title = {A {{Survey}} of {{Lottery Ticket Hypothesis}}},
   author = {Liu, Bohan and Zhang, Zijie and He, Peixiong and Wang, Zhensen and Xiao, Yang and Ye, Ruimeng and Zhou, Yang and Ku, Wei-Shinn and Hui, Bo},
@@ -265,6 +300,14 @@
   langid = {english},
   keywords = {Computer Science - Machine Learning,Computer Science - Neural and Evolutionary Computing},
   file = {/home/atondwal/Zotero/storage/F7RKL9G3/Liu et al. - 2024 - A Survey of Lottery Ticket Hypothesis.pdf}
+}
+
+@article{mathwin,
+  title = {Identifying a {{Preliminary Circuit}} for {{Predicting Gendered Pronouns}} in {{GPT-2 Small}}},
+  author = {Mathwin, Chris and Corlouer, Guillaume and Kran, Esben and Barez, Fazl and Nanda, Neel},
+  abstract = {We identify the broad structure of a circuit that is associated with correctly predicting a gendered pronoun given the subject of a rhetorical question. Progress towards identifying this circuit is achieved through a variety of existing tools, namely Conmy's Automatic Circuit Discovery and Nanda's Exploratory Analysis tools.},
+  langid = {english},
+  file = {/home/atondwal/Zotero/storage/3BMCV4Q8/Mathwin et al. - Identifying a Preliminary Circuit for Predicting Gendered Pronouns in GPT-2 Small.pdf}
 }
 
 @misc{mcinnes20,
@@ -360,6 +403,42 @@
   langid = {english},
   keywords = {Computer Science - Computation and Language,Computer Science - Machine Learning},
   file = {/home/atondwal/Zotero/storage/LX4QIYNG/Tigges et al. - 2024 - LLM Circuit Analyses Are Consistent Across Training and Scale.pdf}
+}
+
+@misc{vig20,
+  title = {Causal {{Mediation Analysis}} for {{Interpreting Neural NLP}}: {{The Case}} of {{Gender Bias}}},
+  shorttitle = {Causal {{Mediation Analysis}} for {{Interpreting Neural NLP}}},
+  author = {Vig, Jesse and Gehrmann, Sebastian and Belinkov, Yonatan and Qian, Sharon and Nevo, Daniel and Sakenis, Simas and Huang, Jason and Singer, Yaron and Shieber, Stuart},
+  year = {2020},
+  month = nov,
+  number = {arXiv:2004.12265},
+  eprint = {2004.12265},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2004.12265},
+  urldate = {2025-03-06},
+  abstract = {Common methods for interpreting neural models in natural language processing typically examine either their structure or their behavior, but not both. We propose a methodology grounded in the theory of causal mediation analysis for interpreting which parts of a model are causally implicated in its behavior. It enables us to analyze the mechanisms by which information flows from input to output through various model components, known as mediators. We apply this methodology to analyze gender bias in pre-trained Transformer language models. We study the role of individual neurons and attention heads in mediating gender bias across three datasets designed to gauge a model's sensitivity to gender bias. Our mediation analysis reveals that gender bias effects are (i) sparse, concentrated in a small part of the network; (ii) synergistic, amplified or repressed by different components; and (iii) decomposable into effects flowing directly from the input and indirectly through the mediators.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Computation and Language},
+  file = {/home/atondwal/Zotero/storage/PHPQTJIT/Vig et al. - 2020 - Causal Mediation Analysis for Interpreting Neural NLP The Case of Gender Bias.pdf;/home/atondwal/Zotero/storage/32ZAJZLR/2004.html}
+}
+
+@misc{wang22,
+  title = {Interpretability in the {{Wild}}: A {{Circuit}} for {{Indirect Object Identification}} in {{GPT-2}} Small},
+  shorttitle = {Interpretability in the {{Wild}}},
+  author = {Wang, Kevin and Variengien, Alexandre and Conmy, Arthur and Shlegeris, Buck and Steinhardt, Jacob},
+  year = {2022},
+  month = nov,
+  number = {arXiv:2211.00593},
+  eprint = {2211.00593},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2211.00593},
+  urldate = {2025-03-06},
+  abstract = {Research in mechanistic interpretability seeks to explain behaviors of machine learning models in terms of their internal components. However, most previous work either focuses on simple behaviors in small models, or describes complicated behaviors in larger models with broad strokes. In this work, we bridge this gap by presenting an explanation for how GPT-2 small performs a natural language task called indirect object identification (IOI). Our explanation encompasses 26 attention heads grouped into 7 main classes, which we discovered using a combination of interpretability approaches relying on causal interventions. To our knowledge, this investigation is the largest end-to-end attempt at reverse-engineering a natural behavior "in the wild" in a language model. We evaluate the reliability of our explanation using three quantitative criteria--faithfulness, completeness and minimality. Though these criteria support our explanation, they also point to remaining gaps in our understanding. Our work provides evidence that a mechanistic understanding of large ML models is feasible, opening opportunities to scale our understanding to both larger models and more complex tasks.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Artificial Intelligence,Computer Science - Computation and Language,Computer Science - Machine Learning},
+  file = {/home/atondwal/Zotero/storage/A2TNGWAI/Wang et al. - 2022 - Interpretability in the Wild a Circuit for Indirect Object Identification in GPT-2 small.pdf;/home/atondwal/Zotero/storage/VK4U3B62/2211.html}
 }
 
 @misc{xin24,

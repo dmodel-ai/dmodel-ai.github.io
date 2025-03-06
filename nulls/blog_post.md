@@ -187,13 +187,27 @@ bar: list[int] = []
 for corejoice in foo:
 ```
 
-causes all the Pythia models to fail the test. Our results\AT{ what results? add a figure/table/plot} show that
-the Pythia models rely heavily on features like variable naming when
-reasoning about for loops.  Fortunately, many other typing rules, like
-$(App)$ (function application) and $(IfOut)$, do not exhibit such a strong
-reliance on variable naming and constants.^[Stay tuned in the future ([@sec:future])
-for a more in-depth exploration of how the models behave on individual
-typing rules with different contexts and variable names.]
+causes all the Pythia models to fail the test.
+
+To test the reliance on these features more robustly, we generated 100
+random variable namings and constant values for the above program, as
+well as for small program that test other typing rules. We also
+balanced these tests with programs that made use of the same language
+constructs, but where the loop variable was *not* optional. We found
+that when lists and for loops were involved, Pythia 2.8b was only able
+to correctly label 57% of the programs, only slightly better than
+chance. Even Pythia 12b could only correctly label 68% of the
+tests. These results show that the Pythia models rely heavily on these
+non-semantic features when reasoning about for loops.
+
+Fortunately, many other typing rules do not exhibit such a strong
+reliance on variable naming and constants. In the same setting of
+generated programs, we found that Pythia 2.8b was able to correctly
+label programs using the Abs, Var, App, and If_Out a much greater
+proportion of the time (99%, 93%, 98%, and 86% respectively). Stay
+tuned in the future ([@sec:future]) for a more in-depth exploration of
+how the models behave on individual typing rules when we increase the
+variability of our program generation.
 
 ## Interprocedural Analysis {#sec:inter}
 

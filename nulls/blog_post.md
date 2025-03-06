@@ -205,7 +205,7 @@ Fortunately, many other typing rules do not exhibit such a strong
 reliance on variable naming and constants. In the same setting of
 generated programs, we found that Pythia 2.8b was able to correctly
 label programs using the Abs, Var, App, and If_Out a much greater
-proportion of the time (99%, 93%, 98%, and 86% respectively). Stay
+proportion of the time (99%, 93%, 86%, and 98% respectively). Stay
 tuned in the future ([@Sec:future]) for a more in-depth exploration of
 how the models behave on individual typing rules when we increase the
 variability of our program generation.

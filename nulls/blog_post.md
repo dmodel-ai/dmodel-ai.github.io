@@ -302,8 +302,11 @@ If we want code that does not `TypeError` at runtime, we can
 strengthen our type checker by requiring that there be some valid,
 non-`Any`, type for the function that typechecks at the call site and
 in the function body. This new typechecker is still checking
-unannotated functions, but passing fewer of them. We'll call this
-augmented type system mypy++.
+unannotated functions, but passing fewer of them.^[In particular, it
+won't pass a `process_value` body that just returns the `value`
+argument, since the call site will fail at runtime trying to add one
+to a nullable string, while default mypy will pass such a body] We'll
+call this augmented type system mypy++.
 
 In Appendix [B.2](#sec:unannotatedfuncs), we formalize the unannotated
 function rules for mypy vs mypy++.

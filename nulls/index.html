@@ -390,10 +390,11 @@ Python: mypy++</h3>
 <p>If we want code that does not <code>TypeError</code> at runtime, we
 can strengthen our type checker by requiring that there be some valid,
 non-<code>Any</code>, type<a href="#fn5" class="footnote-ref"
-id="fnref5" role="doc-noteref"><sup>5</sup></a> for the function that
-typechecks at the call site and in the function body. This type need not
-appear in the source code, but is required to exist. We’ll call this
-augmented type system mypy++.</p>
+id="fnref5"
+role="doc-noteref"><sup>5</sup></a><span class="aside AS">AS: Don't think this footnote is true</span>
+for the function that typechecks at the call site and in the function
+body. This type need not appear in the source code, but is required to
+exist. We’ll call this augmented type system mypy++.</p>
 <p>In Appendix <a href="#sec:unannotatedfuncs">B.2</a>, we formalize the
 unannotated function rules for mypy vs mypy++.</p>
 <p>There’s no consistent threshold of size at which Pythia models can

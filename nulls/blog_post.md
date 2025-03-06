@@ -512,12 +512,13 @@ PCA from contrasting pairs method used in @marks24 and @zou25. See
 "Mass Mean Probing vs Linear Regression" in the appendix].
 
 We then tested two methods for determining the relative importance of
-the different layers --- either allowing the magnitude of the difference
-of means vector to determine the importance of the layer in the final
-probe, or to learn coefficients for each layer using linear
-regression. We found that which method is more accurate on test data
-varies over both model size and number of training steps.
-\AT{should we mention this in the intro/contributions/or a "key results" section like tlide?}
+the different layers --- either allowing the magnitude of the
+difference of means vector to determine the importance of the layer in
+the final probe (MM), or to learn coefficients for each layer using
+linear regression (MM-LR). We found that which method is more accurate
+on test data varies over both model size and number of training steps.
+\AT{should we mention this in the intro/contributions/or a "key
+results" section like tlide?}
 
 ![The performance of pure mass means shift vs mass means shift
  with linear regression for different Pythia model sizes. Lower is

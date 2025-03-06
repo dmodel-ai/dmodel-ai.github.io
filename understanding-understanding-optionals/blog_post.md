@@ -72,10 +72,10 @@ In this work:
 * We find that models develop an internal concept of nullability as
   they scale up and are trained for longer. ([@sec:probing])
 
-By the end of this post, we'll be able to build a probe that uses the
-models activations to determine whether the model thinks a variable
-read corresponds to a nullable variable, and show that internal
-knowledge like so:
+We end with a demo: after we train a probe that uses the
+determines whether the model thinks a variable
+read corresponds to a nullable variable, we can demonstrate that internal
+knowledge in a reading diagram:
 
 ![A diagram showing a simple program, and the probes nullability
  predictions for each variable load.](images/reading_diagram.svg){#fig:reading1 .inlinefig}
@@ -542,31 +542,35 @@ LR on the cross-layer weights, thanks to our investigations above.]
  model size during pretraining. Since this graph is of loss, lower is
  better](images/accuracy_during_pretraining.svg){#fig:models-and-steps}
 
-\todo{position the min loss stuff in terms of scaling laws or something}
 In [@fig:models-and-steps], we plot loss against scale and time.
-While we
-measured accuracy for every available Pythia model size, we exclude
+While we measured accuracy for every available Pythia model size, we exclude
 the smallest (14m) from this plot since it would
 exist entirely above the top of the plot.
-We notice turning points in the models' understanding of nullability at 1b parameters and \todo{number of tokens}.
-We explore the texture of these in \todo{future work}.
+
+One thing that is interesting to note is that models up to 1b reach
+a minimum loss before loss for this task climbing again. This may be because the
+features beyond this point become more complex --- less linear, or the represented
+features themselves represent more subtle concepts. Our suspicion is that this
+pattern would continue even for the larger models if we continued to overtrain them for longer.
+\todo{position the min loss stuff in terms of scaling laws or something?}
+
+We hope to get a better understanding of this phenomenon by studying the
+decomposed nullability reasoning as described in @sec:intra and Appendix [B.1](#sec:commonrules).
+\todo{future work}.
 
 ## Visualizing Probe Outputs
 
-Now that we've shown how to train these probes with increasing
-accuracy, lets bring back the reading diagram we showed in the intro,
-and go a bit more into depth with it.
+Let us return to the reading diagram from the introduction.
 
-We adapted this style of reading diagram from @zou25, but only show
-the activations on tokens that represent variable loads, since that is
-where we trained our probe^[There is also a much more practical
+This diagram is adapted from the style of reading diagram from @zou25, but only
+show the activations on tokens that represent variable loads^[This is, of course, where we trained our probes, but there is also a practical
 reason: right after the model has generated a variable that will be
 written to, it often does not have access to the assigning expression
 or type annotation, giving it no way to determine if the value will be
-optional or now.]. For each measured token, we're running the model
-until just after that token, then extracting it's hidden state and
-measuring probe activation. We then color the box above that token
-depending on the activations, and the scoring threshold inferred at
+optional or now.]. For each position of interest, we prompt the model with the
+partial program that consists of all tokens up to (preceeding) and including
+that position. We then probe the model at the following token. We color the box above that position
+based on the output of the probe, and a scoring threshold inferred at
 train-time^[Red tokens are significantly below the threshold, and
 green tokens are significantly above it; tokens that scored near the
 threshold would have a near-white color, but no such tokens appear in
@@ -575,16 +579,14 @@ this example.].
 ![A diagram showing a simple program, and the probes nullability
  predictions for each variable load.](images/reading_diagram.svg){#fig:reading2 .inlinefig}
 
-We can see here sixteen tokens that correspond to variable reads in
-the program, and all but one are probed as non-optional
-(correctly). The only nullable variable in this program is `result`,
-since it comes from `find_value` which returns `Optional[int]`. So
-when this variable appears for the first time in the `if` statement
-checking if it's none, the model knows it is nullable, and the results
+In this program, there are sixteen tokens that correspond to variable loads,
+and (correctly) all but one are marked as non-optional.
+The only nullable variable in this program is `result`,
+since it comes from `find_value` which returns `Optional[int]`.^[When this variable appears for the first time, it is in the `if` statement
+that checks if it's `None`. Then, the model knows it is nullable, and the results
 of the probe reflect that understanding. But when it appears a second
-time on the next line, in the format string of `print`, the model no
-longer thinks it is optional, since the body of this if statement only
-runs if it is *not* `None`; the probe accurately reflects this.
+time on the next line, in the format string of `print`, the body of this if statement only
+runs if it is *not* `None`. The model understand this as well, and the probe accurately reflects this.]
 
 # Related Work {#sec:related}
 

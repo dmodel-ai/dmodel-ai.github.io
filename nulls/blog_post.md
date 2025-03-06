@@ -201,7 +201,7 @@ We can further challenge the model by adding layers of procedural indirection
 between the source and sink of nullable values, thereby testing the model's
 _interprocedural_ understanding. First, we demonstrate how to write such tests,
 and the difficulties of writing tests that may be too easy ([@sec:inter_test]).
-Then, we present a harder problem ([@sec:annot]) and introduce a stronger type system `mypy++` to formalized the needed reasoning ([@sec:mypypp]).
+Then, we present a harder problem ([@sec:unannot]) and introduce a stronger type system `mypy++` to formalized the needed reasoning ([@sec:mypypp]).
 
 ### A simple test {#sec:inter_test}
 
@@ -239,7 +239,7 @@ proceeding. Looking at the type annotation turns out to be easier for
 the model than scanning through a list to determine if there are None
 and non-None values, resulting in an easier test overall.
 
-### Annotating types {#sec:annot}
+### Unannotated Functions {#sec:unannot}
 
 So how would we *actually* test for interprocedural nullability
 understanding in the model? Well, type annotations on Python functions

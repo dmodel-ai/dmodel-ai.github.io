@@ -607,15 +607,17 @@ based on prior papers. We probe all layers instead. We use Mass Mean
 Shift probing for each layer, because it’s been shown empirically <span
 class="citation" data-cites="li24">(Li et al. 2024)</span> to generalize
 better in high dimensional spaces than logistic regression<a href="#fn9"
-class="footnote-ref" id="fnref9"
-role="doc-noteref"><sup>9</sup></a>.</p>
+class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a>.
+This technique involves taking the means of each class, and using their
+difference as the reading vector.</p>
 <p>We then tested two methods for determining the relative importance of
 the different layers — either allowing the magnitude of the difference
 of means vector to determine the importance of the layer in the final
-probe, or to learn coefficients for each layer using linear regression.
-We found that which method is more accurate on test data varies over
-both model size and number of training steps.
-<span class="aside AT">AT: should we mention this in the intro/contributions/or a "key results" section like tlide?</span></p>
+probe (MM), or to learn coefficients for each layer using linear
+regression (MM-LR). We found that which method is more accurate on test
+data varies over both model size and number of training steps.
+<span class="aside AT">AT: should we mention this in the intro/contributions/or a "key
+results" section like tlide?</span></p>
 <figure id="fig:mm-vs-mmlr-sizes">
 <img src="images/mm-vs-mmlr.svg"
 alt="Figure 5: The performance of pure mass means shift vs mass means shift with linear regression for different Pythia model sizes. Lower is better." />

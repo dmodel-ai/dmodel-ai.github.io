@@ -319,7 +319,7 @@ pass the test, but only intermittently. Even 6.9b, the best performing
 size on this test, fails the test in its second-to-last available
 revision^[Despite this, it does pass the test 40% of the available
 revisions, about triple what the other closest sizes can
-accomplish]. You can see how this evolves over scale in @fig:hl_mypy
+accomplish]. You can see how this evolves over scale in @fig:hl_scale
 and time in @fig:hl_moral.  See @Sec:results for further discussion of
 performance over time.
 
@@ -392,32 +392,33 @@ fraction of python programs in the wild are thus annotated.
 ## External Test Results Across Training and Scale {#sec:eval_results}
 
 We wrote three variations of each of these tests, resulting in 15
-tests total. Below, you can see the number of passing tests for each
-model.
+tests total. In [@Fig:hl_scale] below, we can see the number of passing tests for each
+model under mypy and mypy++.
 \AT{should we be plotting lpr? instead of raw pass rate? but log 15 is pretty small...}
 
 ![A bar graph showing how several sizes of model perform on the
- high-level nullability tests](images/hl_model_results.svg){#fig:hl_scale}
+ high-level nullability tests](images/hl_mypy_vs_grep_models.svg){#fig:hl_scale}
 
-In [@Fig:hl_scale], we can see the number of passing tests for each
-model. We can see that, generally speaking, models get better with scale: Pythia-2.8b
-parameters can pass about half the tests, but we need the much larger and more
-parameter efficient Llama-405b to pass all of the tests. This matches our expectations
-that eval scores should scale logarithmically, indicating that these tests are well distributed.
+We can see the number of fully passing tests for each model in
+blue. Generally speaking, models get better with scale: Pythia-2.8b
+parameters can pass about half the tests, but we need the much larger
+and more parameter efficient Llama-405b to pass all of the tests. This
+matches our expectations that eval scores should scale
+logarithmically, indicating that these tests are well distributed.
 
-![A bar plot showing how the Pythia models perform in mypy vs
- mypy++](images/hl_mypy_vs_grep_models.svg){#fig:hl_mypy}
-
-\todo{let's merge these figures}
-In [@Fig:hl_mypy], we see the test result for the pythia models
-using the mypy and mypy++ type systems.
-As we expected, the mypy results (red bar) are always above
-the mypy++ results (blue bar), as mypy++ is a stricter type
-system. There are six tests in the dataset involving non-annotated
-functions, and using the weaker mypy typesystem causes up to five more
-tests to pass than using mypy++^[We don't see all six non-annotated
-function tests passing under mypy, because models can still fail these
-tests by producing invalid syntax.]
+\todo{let's merge these figures} We can also see the test result for
+the pythia models under the weaker mypy success criteria.  As we
+expected, the mypy results (red bar) are (almost^[Deepseek has one
+model output that demonstrates complete understanding of nullability,
+and runs fine at runtime, but fails the typechecker. This is because
+the code it generates catches the `TypeError` and changes control flow
+instead of checking for `None` values up front.]) always above the
+mypy++ results (blue bar), as mypy++ is a stricter type system. There
+are six tests in the dataset involving non-annotated functions, and
+using the weaker mypy typesystem causes up to five more tests to pass
+than using mypy++^[We don't see all six non-annotated function tests
+passing under mypy, because models can still fail these tests by
+producing invalid syntax.]
 
 Next, we want to understand the training dynamics at play here. Below,
 we can see how Pythia 6.9b performs on the tests during training from

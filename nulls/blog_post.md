@@ -141,7 +141,6 @@ def main() -> None:
   for num in some_numbers:
 ```
 
-\todo{What about `return`? Replace this with an example that makes more sense?}
 The simplest way to pass this test is to introduce a branch `if num is None`,
 but several variants are also valid: `if num is not None`, `if num ==
 None`, `if isinstance(num, int)`. That is, this example is constructed such

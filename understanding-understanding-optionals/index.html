@@ -269,9 +269,10 @@ reliance on variable naming and constants.<a href="#fn2"
 class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
 <h2 data-number="2.2" id="interprocedural-analysis"><span
 class="header-section-number">2.2</span> Interprocedural Analysis</h2>
-<p>We can challenge the model more, adding layers of indirection between
-the source and sink of nullable values, and testing the model’s
-<em>interprocedural</em> understanding. Here’s one such test:</p>
+<p>Even without obfuscating variable names, we can challenge the model
+by adding layers of procedural indirection between the source and sink
+of nullable values, thereby testing the model’s <em>interprocedural</em>
+understanding. Here’s one such test:</p>
 <p><em>Test 2</em></p>
 <div class="sourceCode" id="cb4"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Optional</span>
@@ -286,28 +287,27 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a hr
 <p>In this test, we’ve taken the same logic and spread it across
 <code>main</code> and another function, <code>positive_numbers</code>.
 Ideally, the model would have to think a little harder to understand
-that the <code>some_numbers</code> is flowing through the function call
-into the body of <code>positive_numbers</code>, causing the for loop
-body to need a <code>None</code> check. In practice though, we find this
-test is actually <em>easier</em> for the model to pass, with models as
-small as Pythia 1b passing it, and Pythia 12b learning to pass it 13% of
-the way into training.</p>
+that <code>some_numbers</code> is flowing from <code>main</code> through
+the function call into the body of <code>positive_numbers</code>,
+causing the for loop body to need a <code>None</code> check. In practice
+though, we find this test is actually <em>easier</em> for the model to
+pass than Test 1, with models as small as Pythia 1b passing it, and
+Pythia 12b learning to pass it 13% of the way into training.</p>
 <p>Because of the type annotations on the <code>positive_numbers</code>
 function, the model doesn’t need to pay attention to <code>main</code>
 at all. It can just look at <code>positive_numbers</code>, and use the
-type annotation to know that result contains
-<code>Optional[int]</code>s, so that since <code>num</code> is Nullable,
-it must be checked for None before proceeding. Looking at the type
-annotation turns out to be easier for the model than scanning through a
-list to determine if there are None and non-None values, resulting in an
-easier test overall.</p>
+type annotation to know that <code>numbers</code> contains
+<code>Optional[int]</code>s. Then, using the For rule it can reason that
+<code>num</code> is nullable, so it must be checked for None before
+proceeding. Looking at the type annotation turns out to be easier for
+the model than scanning through a list to determine if there are None
+and non-None values, resulting in an easier test overall.</p>
 <p>So how would we <em>actually</em> test for interprocedural
-nullability understanding in the model? Well, the type annotations on
-Python functions aren’t required<a href="#fn3" class="footnote-ref"
-id="fnref3" role="doc-noteref"><sup>3</sup></a>, so we can instead
-provide the model with an unannotated function, and see if it still
-understands the flow of values from the call site into the function
-body. Here’s a test that does that:</p>
+nullability understanding in the model? Well, type annotations on Python
+functions aren’t required<a href="#fn3" class="footnote-ref" id="fnref3"
+role="doc-noteref"><sup>3</sup></a>, so we can instead provide the model
+with an <strong>unannotated</strong> function, and see if it still
+understands the flow of nullability. Here’s a test that does that:</p>
 <p><em>Test 3</em></p>
 <div class="sourceCode" id="cb5"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
@@ -335,16 +335,14 @@ the body of <code>process_value</code>, including just returning the
 argument, without a static type error. But at runtime, code that
 exploits this fact would still fail.</p>
 <p>If we want code that actually makes sense at runtime, we can
-strengthen our type checker a bit, by requiring that there be some valid
-(non-Any) type for the function that works at the call site and in the
-function body. We still won’t be requiring that this type is actually
-written down anywhere, but we will be requiring that it exist. This is
-called “type inference”, when we let the checker pick a type for us, as
-long as there is one that works. We’ll call this augmented type system
-mypy++.<span class="aside AT">AT: audience should know what type inference is</span></p>
+strengthen our type checker a bit by requiring that there be some valid
+(non-Any) type for the function that works both at the call site and in
+the function body. We still won’t be requiring that this type is
+actually written down anywhere, but we will be requiring that it exist.
+We’ll call this augmented type system mypy++.</p>
 <p>In Appendix <a href="#sec:unannotatedfuncs">B.2</a>, we formalize the
 unannotated function rules for mypy vs mypy++.</p>
-<p>This test is a bit trickier than our previous ones, and we find that
+<p>Test 3 is a bit trickier than our previous ones, and we find that
 there’s no consistent threshold of size at which Pythia models can pass
 it. Pythia 1b, 2.8b, and 6.9b pass the test in their final revisions,
 but Pythia 410m, 1.4b, and 12b don’t. The bigger models all have points
@@ -352,13 +350,14 @@ in training where they can pass the test, but only intermittently. Even
 6.9b, the best performing size on this test, fails the test in its
 second-to-last available revision<a href="#fn4" class="footnote-ref"
 id="fnref4" role="doc-noteref"><sup>4</sup></a>.
-<span class="aside AT">AT: should we say something about
-12b not solving it?</span></p>
+<span class="aside AT">AT: should we say
+something about 12b not solving it?</span></p>
 <p>What the models <em>can</em> do well, however, is learn to pass these
 tests in the mypy type system (as opposed to mypy++). In that system,
 where they don’t need to reason globally about the functions but only
-locally, this test is one of the easiest for the models to complete.
-<span class="aside AT">AT: perhaps somewhere we should discuss implications for RL</span></p>
+locally, this test is one of the easiest for the models to complete.<a
+href="#fn5" class="footnote-ref" id="fnref5"
+role="doc-noteref"><sup>5</sup></a></p>
 <p>Since this test suite is meant to be informative beyond the sizes of
 the Pythia models, we also add another layer of indirection to add more
 difficulty, in this test:</p>
@@ -393,8 +392,8 @@ Python code is not type-annotated, you could imagine that LLM’s can
 reason about dataflow correctness without annotations better than they
 can write their own typing annotations. The next program tests the
 models ability to write its own type annotations; the trailling colon
-makes the type expression the only valid completion<a href="#fn5"
-class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a></p>
+makes the type expression the only valid completion<a href="#fn6"
+class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a></p>
 <p><em>Test 5</em>:</p>
 <div class="sourceCode" id="cb7"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_48() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
@@ -407,10 +406,10 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a hr
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_square(number:</span></code></pre></div>
 <p>None of the Pythia models are able to succesfully pass this test,
-demonstrating that writing these annotaions is indeed difficult for
-LLM’s.<span class="aside AT">AT: maybe too strong. "indeed more difficult than"?</span>
-Qwen Coder 32B is also incapable of passing this test, but both Llama
-405B and DeepSeek V3 pass it.</p>
+demonstrating that writing these annotations is indeed more difficult
+for LLM’s than implicitly reasoning about the types. Qwen Coder 32B is
+also incapable of passing this test, but both Llama 405B and DeepSeek V3
+pass it.</p>
 <h2 data-number="2.4"
 id="external-test-results-across-training-and-scale"><span
 class="header-section-number">2.4</span> External Test Results Across
@@ -429,8 +428,8 @@ sizes of model perform on the high-level nullability tests</figcaption>
 passing tests for each model. We can see that generally models get
 better with scale.
 <span class=aside>I don't think this footnote is clear enough to add anything</span>
-<a href="#fn6" class="footnote-ref" id="fnref6"
-role="doc-noteref"><sup>6</sup></a> Model performance on these tests is
+<a href="#fn7" class="footnote-ref" id="fnref7"
+role="doc-noteref"><sup>7</sup></a> Model performance on these tests is
 approximately logarithmic in model size: models of 2.8 billion
 parameters can pass about half the tests, but it takes more than 405
 billion parameters to pass all of the tests. This matches previous post-
@@ -449,8 +448,8 @@ href="#fig:hl_scale">2</a> uses mypy++). As we expected, the mypy
 results (red bar) are always above the mypy++ results (blue bar), as
 mypy++ is a stricter type system. There are six tests in the dataset
 involving non-annotated functions, and using the weaker mypy typesystem
-causes up to five more tests to pass than using mypy++<a href="#fn7"
-class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a></p>
+causes up to five more tests to pass than using mypy++<a href="#fn8"
+class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a></p>
 <p>Next, we want to understand the training dynamics at play here. Below
 we can see how Pythia 6.9b performs on the tests during training from
 step 2 to
@@ -463,8 +462,8 @@ alt="Figure 4: A line graph showing how the performance of the Pythia 6.9 model 
 performance of the Pythia 6.9 model changes during training</figcaption>
 </figure>
 <p>Again, performance does not increase monotonically. This plot is
-quite noisy, so in the sequel, we will show smoothed<a href="#fn8"
-class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a>
+quite noisy, so in the sequel, we will show smoothed<a href="#fn9"
+class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a>
 charts.</p>
 <p>In the graph below, we see that each individual model also learns to
 write code which typechecks under mypy before it learns to write code
@@ -577,9 +576,9 @@ class="header-section-number">3.3</span> Extracting Reading Vectors</h2>
 based on prior papers. We probe all layers instead. We use Mass Mean
 Shift probing for each layer, because it’s been shown empirically <span
 class="citation" data-cites="li24">(Li et al. 2024)</span> to generalize
-better in high dimensional spaces than logistic regression<a href="#fn9"
-class="footnote-ref" id="fnref9"
-role="doc-noteref"><sup>9</sup></a>.</p>
+better in high dimensional spaces than logistic regression<a
+href="#fn10" class="footnote-ref" id="fnref10"
+role="doc-noteref"><sup>10</sup></a>.</p>
 <p>We then tested two methods for determining the relative importance of
 the different layers — either allowing the magnitude of the difference
 of means vector to determine the importance of the layer in the final
@@ -607,8 +606,8 @@ across time and scale <span class="citation"
 data-cites="tigges24">(Tigges et al. 2024)</span>. We use mass-means
 shift probing <span class="citation" data-cites="li24">(Li et al.
 2024)</span> on all layers, and a linear regression to determine the
-weights of each layer.<a href="#fn10" class="footnote-ref" id="fnref10"
-role="doc-noteref"><sup>10</sup></a>
+weights of each layer.<a href="#fn11" class="footnote-ref" id="fnref11"
+role="doc-noteref"><sup>11</sup></a>
 <span class="aside AT">AT: see appendix D for mm vs LR</span></p>
 <figure id="fig:models-and-steps">
 <img src="images/accuracy_during_pretraining.svg"
@@ -632,13 +631,13 @@ and go a bit more into depth with it.</p>
 <p>We adapted this style of reading diagram from <span class="citation"
 data-cites="zou25">Zou et al. (2025)</span>, but only show the
 activations on tokens that represent variable loads, since that is where
-we trained our probe<a href="#fn11" class="footnote-ref" id="fnref11"
-role="doc-noteref"><sup>11</sup></a>. For each measured token, we’re
+we trained our probe<a href="#fn12" class="footnote-ref" id="fnref12"
+role="doc-noteref"><sup>12</sup></a>. For each measured token, we’re
 running the model until just after that token, then extracting it’s
 hidden state and measuring probe activation. We then color the box above
 that token depending on the activations, and the scoring threshold
-inferred at train-time<a href="#fn12" class="footnote-ref" id="fnref12"
-role="doc-noteref"><sup>12</sup></a>.</p>
+inferred at train-time<a href="#fn13" class="footnote-ref" id="fnref13"
+role="doc-noteref"><sup>13</sup></a>.</p>
 <figure id="fig:reading2">
 <img src="images/reading_diagram.svg" class="inlinefig"
 alt="Figure 8: A diagram showing a simple program, and the probes nullability predictions for each variable load." />
@@ -1325,49 +1324,53 @@ class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn4"><p>Despite this, it does pass the test 40% of the available
 revisions, about triple what the other closest sizes can accomplish<a
 href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn5"><p>This is because function declarations with a colon and
+<li id="fn5"><p>This indicates that if you were to train a model using
+typechecking as reinforcement feedback, you would want to use mypy++ and
+not mypy.<a href="#fnref5" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>This is because function declarations with a colon and
 no type, like <code>def fn(x:)</code> are not valid python. Since we’ve
 already seen a usage of <code>get_square</code> that is passed a None
 value, it wouldn’t be type-valid to complete the program with just
 <code>int</code>. So a model can be tested on its understanding of
 <code>Optional</code> annotations by seeing if its completion of the
-partial program includes <code>Optional[int]</code>.<a href="#fnref5"
+partial program includes <code>Optional[int]</code>.<a href="#fnref6"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn6"><p>Pythia 12b performs worse than its 6.9b variant, though
+<li id="fn7"><p>Pythia 12b performs worse than its 6.9b variant, though
 this might be due to under-training at that size. Qwen 32B also performs
 about as well as Pythia 6.9b, it’s not clear if this is due to model
-architecture or something else.<a href="#fnref6" class="footnote-back"
+architecture or something else.<a href="#fnref7" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn7"><p>We don’t see all six non-annotated function tests
+<li id="fn8"><p>We don’t see all six non-annotated function tests
 passing under mypy, because models can still fail these tests by
-producing invalid syntax.<a href="#fnref7" class="footnote-back"
+producing invalid syntax.<a href="#fnref8" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn8"><p>rolling average with a window size of 5<a href="#fnref8"
+<li id="fn9"><p>rolling average with a window size of 5<a href="#fnref9"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn9"><p>Since we don’t have contrasting pairs, just labeled
+<li id="fn10"><p>Since we don’t have contrasting pairs, just labeled
 points, it’s not possible to use the PCA from contrasting pairs method
 used in <span class="citation" data-cites="marks24">Marks and Tegmark
 (2024)</span> and <span class="citation" data-cites="zou25">Zou et al.
 (2025)</span>. See “Mass Mean Probing vs Linear Regression” in the
-appendix<a href="#fnref9" class="footnote-back"
+appendix<a href="#fnref10" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn10"><p> <span class="citation" data-cites="li24">Li et al.
+<li id="fn11"><p> <span class="citation" data-cites="li24">Li et al.
 (2024)</span> and <span class="citation" data-cites="zou25">Zou et al.
 (2025)</span> suggest that mass means probes are best for reading, while
 the direction perpendicular to the separating hyperplane is best for
 intervention. However, previous work leaves open the question of
 cross-layer weights. We use LR on the cross-layer weights, thanks to our
-investigations above.<a href="#fnref10" class="footnote-back"
+investigations above.<a href="#fnref11" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn11"><p>There is also a much more practical reason: right after
+<li id="fn12"><p>There is also a much more practical reason: right after
 the model has generated a variable that will be written to, it often
 does not have access to the assigning expression or type annotation,
 giving it no way to determine if the value will be optional or now.<a
-href="#fnref11" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn12"><p>Red tokens are significantly below the threshold, and
+href="#fnref12" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn13"><p>Red tokens are significantly below the threshold, and
 green tokens are significantly above it; tokens that scored near the
 threshold would have a near-white color, but no such tokens appear in
-this example.<a href="#fnref12" class="footnote-back"
+this example.<a href="#fnref13" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>

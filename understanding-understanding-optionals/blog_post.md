@@ -235,7 +235,9 @@ some related work in [@Sec:related].
 
 We begin by measuring model nullability understanding externally,
 because it provides a "skyline" or upper-bound estimate on our ability
-to extract internal concepts of nullability. To do this, we have the
+to extract internal concepts of nullability.
+
+We have the
 model complete simple partial programs that require an understanding
 of nullability. We refer to this suite of programs as
 `NullabilityEval`. All of the tests in this benchmark suite are
@@ -245,7 +247,7 @@ seven lines long.
 
 We measure the difficulty of these tests by measuring how
 models of different sizes perform. We pay particular focus to
-the Pythia model suite[@biderman23], as they have checkpoints available across
+the Pythia model suite [@biderman23], as they have checkpoints available across
 training runs and various scales. For measuring performance at larger sizes,
 we've included Qwen2.5-Coder-32B\AT{cite}, Llama 3.1 405B Instruct\AT{cite}, and
 DeepSeek-V3 (671B)\AT{cite}.
@@ -289,10 +291,11 @@ valid lines with the regular expression
 
 We find that Pythia models as small as 2.8b can successfully complete
 this test, and that they learn to complete the test in the first third
-of training. Larger Pythia models learn to complete this test earlier,
+of training. Consistent with observations that larger models are more sample-efficent \AT{cite}, larger Pythia models learn to complete this test earlier,
 with Pythia 12b able to complete the test 20% of the way into training
 and Pythia 2.8b able to complete it 28% of the way into
 training.
+\AT{HEREHEREHERE}
 
 ## Understanding Typing Rules
 
@@ -786,7 +789,8 @@ runs if it is *not* `None`; the probe accurately reflects this.
 
 Our decision to use Pythia to study feature evolution across time and scale is
 inspired by @tigges24 . They focus on classic circuits-centered
-interpretability tasks such as IOI [@wang22], Gendered-Pronoun [@mathwin], Greater-Than[@hanna23] , and SVA [@linzen16].
+interpretability tasks such as IOI [@wang22], Gendered-Pronoun [@mathwin],
+Greater-Than[@hanna23] , and SVA [@linzen16].
 
 In our setting, we are more interested in how activations vary across inputs, to extract
 representations of nullability. @zou25 surveys techniques for

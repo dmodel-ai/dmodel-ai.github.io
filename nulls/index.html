@@ -221,19 +221,6 @@ reasoning steps required to reason about nullability both inside
 (Sec. <a href="#sec:intra">2.2</a>) and across (Sec. <a
 href="#sec:inter">2.3</a>) functions. Finally, we present the results of
 our “skyline” analysis. (Sec. <a href="#sec:eval_results">2.5</a>).</p>
-<p>We find that Pythia models as small as 2.8b can successfully complete
-this test, and that they learn to complete the test in the first third
-of training. Consistent with observations that larger models are more
-sample-efficient
-<span class="aside AT">AT: who do I cite for this claim? Kaplan?</span>,
-larger Pythia models learn to complete this test earlier, with Pythia
-12b able to complete the test 20% of the way into training and Pythia
-2.8b able to complete it 28% of the way into training.</p>
-<p>Note that these results differ substantially from those of <span
-class="citation" data-cites="tigges24">Tigges et al. (2024)</span>, who
-find that for <em>circuit</em> analyses (rather than representational
-analyses like ours), circuit parts are learned at roughly the same point
-during training across scale.</p>
 <h2 data-number="2.1" id="sec:task"><span
 class="header-section-number">2.1</span>
 <code>NullabilityEval</code></h2>
@@ -272,14 +259,22 @@ valid next lines, and all of them require some understanding that
 class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
 <h2 data-number="2.2" id="sec:intra"><span
 class="header-section-number">2.2</span> Understanding Typing Rules</h2>
-<p>We see from the results of our first test that these models
-understand nullability to some extent, but how deep is this
-understanding? To quantify this, we give a syntax and semantics of a
-minimalist subset of python that captures nullability in Appendix <a
-href="#sec:commonrules">B.1</a>. We can then classify each partial
-program by which program constructs and rules determine the nullability
-of the target variable. For instance, Test 1 uses the <span
-class="math inline">(List)</span>, <span
+<p>We find that Pythia models as small as 2.8b can successfully complete
+Test 1, and that they learn to complete the test in the first third of
+training. Consistent with observations that larger models are more
+sample-efficient
+<span class="aside AT">AT: who do I cite for this claim? Kaplan?</span>,
+larger Pythia models learn to complete this test earlier, with Pythia
+12b able to complete the test 20% of the way into training and Pythia
+2.8b able to complete it 28% of the way into training.<a href="#fn3"
+class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
+<p>These results indicate that these models understand nullability to
+some extent, but how deep is this understanding? To quantify this, we
+give a syntax and semantics of a minimalist subset of python that
+captures nullability in Appendix <a href="#sec:commonrules">B.1</a>. We
+can then classify each partial program by which program constructs and
+rules determine the nullability of the target variable. For instance,
+Test 1 uses the <span class="math inline">(List)</span>, <span
 class="math inline">(Var)</span>, and <span
 class="math inline">(For)</span> rules.</p>
 <p>So, do Pythia models 2.8b and up understand the semantics of these
@@ -366,8 +361,8 @@ and non-None values, resulting in an easier test overall.</p>
 class="header-section-number">2.3.2</span> Unannotated Functions</h3>
 <p>So how would we <em>actually</em> test for interprocedural
 nullability understanding in the model? Well, type annotations on Python
-functions aren’t required<a href="#fn3" class="footnote-ref" id="fnref3"
-role="doc-noteref"><sup>3</sup></a>, so we can instead provide the model
+functions aren’t required<a href="#fn4" class="footnote-ref" id="fnref4"
+role="doc-noteref"><sup>4</sup></a>, so we can instead provide the model
 with an <strong>unannotated</strong> function, and see if it still
 understands the flow of nullability. Here’s a test that does that:</p>
 <p><em>Test 3</em></p>
@@ -395,10 +390,9 @@ Any, and an Any can be converted to any value type.</p>
 <p>This means that it would be technically type safe to do anything in
 the body of <code>process_value</code>, including just returning the
 argument, without a static type error. All Pythia models with at least
-410 million parameters are able to make use of
-<span class="aside AS">AS: the flaws</span> this to write code for Test
-3 that typechecks under mypy. But at runtime, code that exploits this
-fact would still fail.</p>
+410 million parameters are able to make use of this extra flexibility to
+write code for Test 3 that typechecks under mypy. But at runtime, code
+that exploits it would still fail.</p>
 <h3 data-number="2.3.3" id="sec:mypypp"><span
 class="header-section-number">2.3.3</span> A stricter type system for
 Python: mypy++</h3>
@@ -416,8 +410,8 @@ revisions, but Pythia 410m, 1.4b, and 12b don’t. The models with at
 least 1 billion parameters all have points in training where they can
 pass the test, but only intermittently. Even 6.9b, the best performing
 size on this test, fails the test in its second-to-last available
-revision<a href="#fn4" class="footnote-ref" id="fnref4"
-role="doc-noteref"><sup>4</sup></a>. You can see how this evolves over
+revision<a href="#fn5" class="footnote-ref" id="fnref5"
+role="doc-noteref"><sup>5</sup></a>. You can see how this evolves over
 scale in fig. <a href="#fig:hl_mypy">3</a> and time in fig. <a
 href="#fig:hl_moral">4</a>. See Sec. <a href="#sec:results">3.5</a> for
 further discussion of performance over time.</p>
@@ -425,8 +419,8 @@ further discussion of performance over time.</p>
 tests in the mypy type system (as opposed to mypy++). In that system,
 where they don’t need to reason globally about the functions but only
 locally, this test is one of the easiest for the models to complete.<a
-href="#fn5" class="footnote-ref" id="fnref5"
-role="doc-noteref"><sup>5</sup></a></p>
+href="#fn6" class="footnote-ref" id="fnref6"
+role="doc-noteref"><sup>6</sup></a></p>
 <p>Since this test suite is meant to be informative beyond the sizes of
 the Pythia models, we also add another layer of indirection to add more
 difficulty, in this test:</p>
@@ -509,12 +503,12 @@ the mypy results (red bar) are always above the mypy++ results (blue
 bar), as mypy++ is a stricter type system. There are six tests in the
 dataset involving non-annotated functions, and using the weaker mypy
 typesystem causes up to five more tests to pass than using mypy++<a
-href="#fn6" class="footnote-ref" id="fnref6"
-role="doc-noteref"><sup>6</sup></a></p>
+href="#fn7" class="footnote-ref" id="fnref7"
+role="doc-noteref"><sup>7</sup></a></p>
 <p>Next, we want to understand the training dynamics at play here.
 Below, we can see how Pythia 6.9b performs on the tests during training
-from step 2 to 143000: <a href="#fn7" class="footnote-ref" id="fnref7"
-role="doc-noteref"><sup>7</sup></a></p>
+from step 2 to 143000: <a href="#fn8" class="footnote-ref" id="fnref8"
+role="doc-noteref"><sup>8</sup></a></p>
 <figure id="fig:hl_moral">
 <img src="images/hl_mypy_vs_grep_revisions.svg"
 alt="Figure 4: A plot showing how often the Pythia 6.9b produces code that typechecks on the tests, vs produces code that does not go wrong." />
@@ -608,9 +602,9 @@ class="header-section-number">3.3</span> Extracting Reading Vectors</h2>
 based on prior papers. We probe all layers instead. We use Mass Mean
 Shift probing for each layer, because it’s been shown empirically <span
 class="citation" data-cites="li24">(Li et al. 2024)</span> to generalize
-better in high dimensional spaces than logistic regression<a href="#fn8"
-class="footnote-ref" id="fnref8"
-role="doc-noteref"><sup>8</sup></a>.</p>
+better in high dimensional spaces than logistic regression<a href="#fn9"
+class="footnote-ref" id="fnref9"
+role="doc-noteref"><sup>9</sup></a>.</p>
 <p>We then tested two methods for determining the relative importance of
 the different layers — either allowing the magnitude of the difference
 of means vector to determine the importance of the layer in the final
@@ -637,14 +631,14 @@ class="header-section-number">3.4</span> Visualizing Probe Outputs</h2>
 <p>This diagram is adapted from the style of reading diagram from <span
 class="citation" data-cites="zou25">Zou et al. (2025)</span>, but only
 show the activations on tokens that represent variable loads<a
-href="#fn9" class="footnote-ref" id="fnref9"
-role="doc-noteref"><sup>9</sup></a>. For each position of interest, we
+href="#fn10" class="footnote-ref" id="fnref10"
+role="doc-noteref"><sup>10</sup></a>. For each position of interest, we
 prompt the model with the partial program that consists of all tokens up
 to (preceeding) and including that position. We then probe the model at
 the following token. We color the box above that position based on the
 output of the probe, and a scoring threshold inferred at train-time<a
-href="#fn10" class="footnote-ref" id="fnref10"
-role="doc-noteref"><sup>10</sup></a>.</p>
+href="#fn11" class="footnote-ref" id="fnref11"
+role="doc-noteref"><sup>11</sup></a>.</p>
 <figure id="fig:reading2">
 <img src="images/reading_diagram.svg" class="inlinefig"
 alt="Figure 6: A diagram showing a simple program, and the probes nullability predictions for each variable load." />
@@ -656,8 +650,8 @@ load.</figcaption>
 loads, and (correctly) all but one are marked as non-optional. The only
 nullable variable in this program is <code>result</code>, since it comes
 from <code>find_value</code> which returns <code>Optional[int]</code>.<a
-href="#fn11" class="footnote-ref" id="fnref11"
-role="doc-noteref"><sup>11</sup></a></p>
+href="#fn12" class="footnote-ref" id="fnref12"
+role="doc-noteref"><sup>12</sup></a></p>
 <h2 data-number="3.5" id="sec:results"><span
 class="header-section-number">3.5</span> Probing Results Across Training
 and Scale</h2>
@@ -666,8 +660,8 @@ across time and scale <span class="citation"
 data-cites="tigges24">(Tigges et al. 2024)</span>. We use mass-means
 shift probing <span class="citation" data-cites="li24">(Li et al.
 2024)</span> on all layers, and a linear regression to determine the
-weights of each layer.<a href="#fn12" class="footnote-ref" id="fnref12"
-role="doc-noteref"><sup>12</sup></a>
+weights of each layer.<a href="#fn13" class="footnote-ref" id="fnref13"
+role="doc-noteref"><sup>13</sup></a>
 <span class="aside AT">AT: see appendix D for mm vs LR</span></p>
 <figure id="fig:models-and-steps">
 <img src="images/accuracy_during_pretraining.svg"
@@ -1356,57 +1350,63 @@ for nullability understanding by asking them to complete the program’s
 next lines, then see if those lines matches the regular expression
 <code>num\s*(is\s*(not)?|==)\s*None|isinstance\(num</code>.<a
 href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>Technically this is known as “Optional typing”, but
-that’s confusing in the context of this post. Not to be confused with
-Gradual Typing, as introduced by Siek et al.<a href="#fnref3"
+<li id="fn3"><p>Note that these results differ substantially from those
+of <span class="citation" data-cites="tigges24">Tigges et al.
+(2024)</span>, who find that for <em>circuit</em> analyses (rather than
+representational analyses like ours), circuit parts are learned at
+roughly the same point during training across scale.<a href="#fnref3"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn4"><p>Despite this, it does pass the test 40% of the available
+<li id="fn4"><p>Technically this is known as “Optional typing”, but
+that’s confusing in the context of this post. Not to be confused with
+Gradual Typing, as introduced by Siek et al.<a href="#fnref4"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>Despite this, it does pass the test 40% of the available
 revisions, about triple what the other closest sizes can accomplish<a
-href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn5"><p>This indicates that if you were to train a model using
+href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>This indicates that if you were to train a model using
 typechecking as reinforcement feedback, you would want to use mypy++ and
-not mypy.<a href="#fnref5" class="footnote-back"
+not mypy.<a href="#fnref6" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn6"><p>We don’t see all six non-annotated function tests
+<li id="fn7"><p>We don’t see all six non-annotated function tests
 passing under mypy, because models can still fail these tests by
-producing invalid syntax.<a href="#fnref6" class="footnote-back"
+producing invalid syntax.<a href="#fnref7" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn7"><p>smoothed with a rolling average with a window size of
-5<a href="#fnref7" class="footnote-back"
+<li id="fn8"><p>smoothed with a rolling average with a window size of
+5<a href="#fnref8" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn8"><p>Since we don’t have contrasting pairs, just labeled
+<li id="fn9"><p>Since we don’t have contrasting pairs, just labeled
 points, it’s not possible to use the PCA from contrasting pairs method
 used in <span class="citation" data-cites="marks24">Marks and Tegmark
 (2024)</span> and <span class="citation" data-cites="zou25">Zou et al.
 (2025)</span>. See “Mass Mean Probing vs Linear Regression” in the
-appendix<a href="#fnref8" class="footnote-back"
+appendix<a href="#fnref9" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn9"><p>This is, of course, where we trained our probes, but
+<li id="fn10"><p>This is, of course, where we trained our probes, but
 there is also a practical reason: right after the model has generated a
 variable that will be written to, it often does not have access to the
 assigning expression or type annotation, giving it no way to determine
-if the value will be optional or now.<a href="#fnref9"
+if the value will be optional or now.<a href="#fnref10"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn10"><p>Red tokens are significantly below the threshold, and
+<li id="fn11"><p>Red tokens are significantly below the threshold, and
 green tokens are significantly above it; tokens that scored near the
 threshold would have a near-white color, but no such tokens appear in
-this example.<a href="#fnref10" class="footnote-back"
+this example.<a href="#fnref11" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn11"><p>When this variable appears for the first time, it is in
+<li id="fn12"><p>When this variable appears for the first time, it is in
 the <code>if</code> statement that checks if it’s <code>None</code>.
 Then, the model knows it is nullable, and the results of the probe
 reflect that understanding. But when it appears a second time on the
 next line, in the format string of <code>print</code>, the body of this
 if statement only runs if it is <em>not</em> <code>None</code>. The
 model understand this as well, and the probe accurately reflects this.<a
-href="#fnref11" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn12"><p> <span class="citation" data-cites="li24">Li et al.
+href="#fnref12" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn13"><p> <span class="citation" data-cites="li24">Li et al.
 (2024)</span> and <span class="citation" data-cites="zou25">Zou et al.
 (2025)</span> suggest that mass means probes are best for reading, while
 the direction perpendicular to the separating hyperplane is best for
 intervention. However, previous work leaves open the question of
 cross-layer weights. We use LR on the cross-layer weights, thanks to our
-investigations above.<a href="#fnref12" class="footnote-back"
+investigations above.<a href="#fnref13" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>

@@ -494,10 +494,9 @@ can pass about half the tests, but we need the much larger and more
 parameter efficient Llama-405b to pass all of the tests. This matches
 our expectations that eval scores should scale logarithmically,
 indicating that these tests are well distributed.</p>
-<p><span class=aside>let's merge these figures</span> We can also see
-the test result for the pythia models under the weaker mypy success
-criteria. As we expected, the mypy results (red bar) are (almost<a
-href="#fn8" class="footnote-ref" id="fnref8"
+<p>We can also see the test result for the pythia models under the
+weaker mypy success criteria. As we expected, the mypy results (red bar)
+are (almost<a href="#fn8" class="footnote-ref" id="fnref8"
 role="doc-noteref"><sup>8</sup></a>) always above the mypy++ results
 (blue bar), as mypy++ is a stricter type system. There are six tests in
 the dataset involving non-annotated functions, and using the weaker mypy

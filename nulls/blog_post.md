@@ -461,7 +461,7 @@ concept is activated in the model during any given forward pass (e.g. for honest
 this gives us a lie-detector).
 \AT{ formatting citekey in figcap}
 
-![Figure from  @zou25 showing the reading outputs for several
+![Figure from $\hspace{0.1cm}$ @zou25 $\hspace{0.1cm}$ showing the reading outputs for several
  concepts](images/zhou.png)
 
 ## Designing Prompts to Extract Nullability Activations {#sec:prompts}

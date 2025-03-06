@@ -22,46 +22,47 @@ abstract:
 ---
 
 # Introduction
-The last five years have shown us that Large Language Models can
-effectively write programs in many domains.\AT{cite} This is an impressive
-capability given that writing programs involves having a working
-understanding of many aspects of their semantics. But though we know
-that these large models understand programs to an extent, we still
-don’t know what form that understanding takes; where it has a deep
-understanding and where it uses heuristic reasoning, how it represents
-program knowledge, and what kinds of situations will challenge its
-capabilities.
 
-Fortunately, recent work in model interpretability and
-representation engineering\AT{which work?} has produced promising results
-which give hope towards understanding more and more of the
-internal thought processes of LLMs. Here at $d_{model}$ , we can
-think of no better place to apply these new techniques than
-program understanding, where there are many abstract
-properties that can be symbolically determined. The vast work
-done in programming language theory over the past hundred
-years provides many tools for scaling an understanding of the
-internal thought processes of language models as they write
+The last five years have shown us that large language models, like
+ChatGPT, Claude, and DeepSeek, can effectively write programs in many
+domains.\AT{cite} This is an impressive capability given that writing
+programs involves having a working understanding of many aspects of
+program semantics. But though we know that these large models
+understand programs to an extent, we still don't know many things
+about these models understanding. We don’t know where they have deep
+understanding and where they use heuristic reasoning, how they
+represents program knowledge, and what kinds of situations will
+challenge their capabilities.
+
+Fortunately, recent work in model interpretability and representation
+engineering\AT{which work?} has produced promising results which give
+hope towards understanding more and more of the internal thought
+processes of LLMs. Here at $d_{model}$ , we can think of no better
+place to apply these new techniques than program understanding, where
+there are many abstract properties that can be extracted with static
+analysis. The vast work done in programming language theory over the
+past hundred years provides many tools for scaling an understanding of
+the internal thought processes of language models as they write
 code.\AT{for examples, see cite, cite}
 
 In that spirit, we wanted to start with a simple property that comes
-up in every programming languages, nullability. Nullable values
-are represented differently across languages, null pointers in C++ or
-Java, with explicit Option types in Rust, and with special nil or None
+up in every programming languages, nullability. Nullable values are
+represented differently across languages; as null pointers in C or
+C++, with explicit Option types in Rust, and with special nil or None
 values in dynamic languages like Javascript, Lisp, or Python. In every
-case, understanding where values can be nullable is necessary for even
-their most basic uses, and misunderstanding where they are nullable
-can often be a source of bugs, like a null pointer dereference.
+case, understanding where values can be nullable is necessary for
+writing even basic code, and misunderstanding where they are nullable
+can often be a source of bugs.
 
 Do our models understand when a value is nullable? They must, to be
 able to write code that deals with nullable values, but we haven’t
 known what form this knowledge takes, what situations are likely to
 confuse the model. Until now.\todo{big claim!}
 
-In this work, we contribute:
+In this work:
 
-* A microbenchmark of 15 programs that test basic model understanding
-  of the flow of nullability through a program ([@sec:bench]).
+* We introduce a microbenchmark of 15 programs that test basic model
+  understanding of the flow of nullability through a program.
 
 * We find that models develop an internal concept of
   nullability as they scale up and are trained for longer. ([@sec:probing])
@@ -69,7 +70,7 @@ In this work, we contribute:
 * We find that models begin to understand nullability in a local
   scope, satisfying many requirements of the python typechecker,
   before they start to understand how nullability flows across the
-  program. ([@sec:bench], [@sec:results])
+  program. ([@sec:testing])
 
 # Overview
 
@@ -226,12 +227,12 @@ knowledge like so:
 ![A diagram showing a simple program, and the probes nullability
  predictions for each variable load.](images/reading_diagram.svg){#fig:reading1 .inlinefig}
 
-In [@Sec:bench] we'll describe our external tests of nullability
+In [@Sec:testing] we'll describe our external tests of nullability
 understanding in more detail, and in [@Sec:probing] we'll describe
 measuring the models internal states in detail. Finally, we'll go over
 some related work in [@Sec:related].
 
-# Measuring Nullability Understanding Externally\AT{Externally = token-level?} {#sec:bench}
+# Measuring Nullability Understanding Externally\AT{Externally = token-level?} {#sec:testing}
 
 We begin by measuring model nullability understanding externally,
 because it provides a "skyline" or upper-bound estimate on our ability

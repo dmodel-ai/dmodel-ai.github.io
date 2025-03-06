@@ -92,19 +92,6 @@ we formally decompose the reasoning steps required to reason about
 nullability both inside ([@Sec:intra]) and across ([@Sec:inter]) functions.
 Finally, we present the results of our "skyline" analysis. ([@Sec:eval_results]).
 
-We find that Pythia models as small as 2.8b can successfully complete
-this test, and that they learn to complete the test in the first third
-of training. Consistent with observations that larger models are more sample-efficient \AT{who do I cite for this claim? Kaplan?},
-larger Pythia models learn to complete this test earlier,
-with Pythia 12b able to complete the test 20% of the way into training
-and Pythia 2.8b able to complete it 28% of the way into
-training.
-
-Note that these results differ substantially from those of @tigges24, who find
-that for _circuit_ analyses (rather than representational analyses like ours),
-circuit parts are learned at roughly the same point during training across
-scale.
-
 ## `NullabilityEval` {#sec:task}
 
 To measure nullability understanding externally, we ask the model to
@@ -153,14 +140,25 @@ nullability understanding by asking them to complete the program's next lines, t
 
 ## Understanding Typing Rules {#sec:intra}
 
-We see from the results of our first test that these models understand
-nullability to some extent, but how deep is this understanding? To
-quantify this, we give a syntax and semantics of a minimalist
-subset of python that captures nullability in Appendix
-[B.1](#sec:commonrules). We can then classify each partial program by
-which program constructs and rules determine the nullability of the
-target variable. For instance, Test 1 uses the $(List)$, $(Var)$, and $(For)$
-rules.
+We find that Pythia models as small as 2.8b can successfully complete
+Test 1, and that they learn to complete the test in the first third of
+training. Consistent with observations that larger models are more
+sample-efficient \AT{who do I cite for this claim? Kaplan?}, larger
+Pythia models learn to complete this test earlier, with Pythia 12b
+able to complete the test 20% of the way into training and Pythia 2.8b
+able to complete it 28% of the way into training.^[Note that these
+results differ substantially from those of @tigges24, who find that
+for _circuit_ analyses (rather than representational analyses like
+ours), circuit parts are learned at roughly the same point during
+training across scale.]
+
+These results indicate that these models understand nullability to
+some extent, but how deep is this understanding? To quantify this, we
+give a syntax and semantics of a minimalist subset of python that
+captures nullability in Appendix [B.1](#sec:commonrules). We can then
+classify each partial program by which program constructs and rules
+determine the nullability of the target variable. For instance, Test 1
+uses the $(List)$, $(Var)$, and $(For)$ rules.
 
 So, do Pythia models 2.8b and up understand the semantics of these
 three rules? As it turns out, not exactly. LLM's pick up on a lot of

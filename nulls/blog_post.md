@@ -155,7 +155,7 @@ training across scale.]
 These results indicate that these models understand nullability to
 some extent, but how deep is this understanding? To quantify this, we
 give a syntax and semantics of a minimalist subset of python that
-captures nullability in Appendix [B.1](#sec:commonrules). We can then
+captures nullability in Appendix [B](#sec:formalrules). We can then
 classify each partial program by which program constructs and rules
 determine the nullability of the target variable. For instance, Test 1
 uses the $(List)$, $(Var)$, and $(For)$ rules.
@@ -277,16 +277,17 @@ def main(x: int) -> None:
 def process_value(value):
 ```
 
-Our base set of typing rules (listed as "Common Rules") don't handle
-unannotated functions though, so we're going to have to add some more,
-and here we're faced with a choice. The typing rules for normal Python
-say that functions without return type annotations return the Any
-type, and arguments without a type annotation have the type Any. In
-fact, normal mypy will not check unannotated functions at *all*, even
-for internal consistency; the `--check-untyped-defs` option will add
-some checking back, but the types of arguments and return type will
-still be Any. In Python, a value of any type can be converted to an
-Any, and an Any can be converted to any value type.
+Our base set of typing rules (listed as "Common Rules" in Appendix
+[B.1](#sec:commonrules)) don't handle unannotated functions though, so
+we're going to have to add some more, and here we're faced with a
+choice. The typing rules for normal Python say that functions without
+return type annotations return the Any type, and arguments without a
+type annotation have the type Any. In fact, normal mypy will not check
+unannotated functions at *all*, even for internal consistency; the
+`--check-untyped-defs` option will add some checking back, but the
+types of arguments and return type will still be Any. In Python, a
+value of any type can be converted to an Any, and an Any can be
+converted to any value type.
 
 This means that it would be technically type safe to do anything in
 the body of `process_value`, including just returning the argument,

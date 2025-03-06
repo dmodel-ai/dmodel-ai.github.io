@@ -319,9 +319,7 @@ revision^[Despite this, it does pass the test 40% of the available
 revisions, about triple what the other closest sizes can
 accomplish]. You can see how this evolves over scale in @fig:hl_mypy
 and time in @fig:hl_moral.  See @Sec:results for further discussion of
-performance over time.  \AT{add a table of what we're actually
-claiming here (probably in the appendix) rather than referencing the
-performance on the overall test suite}
+performance over time.
 
 What the models *can* do well, however, is learn to pass these tests
 in the mypy type system (as opposed to mypy++). In that system, where

@@ -110,17 +110,31 @@
   <link rel="stylesheet" href="pandoc.css" />
   <link rel="stylesheet" href="sidenote.css" />
   <script src="sidenotes.js"></script>
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script
-  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
-  type="text/javascript"></script>
+  <script defer=""
+  src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css" />
 </head>
 <body>
 <header id="title-block-header">
 <h1 class="title">Understanding Models Understanding Nullability</h1>
 <p class="author"><a href="https://www.alexsanchezstern.com">Alex
 Sanchez-Stern</a> and <a href="https://ani.sh">Anish Tondwalkar</a></p>
-<p class="date"><span class="math inline">\(d_{model}\)</span></p>
+<p class="date"><span class="math inline">d_{model}</span></p>
 <div class="abstract">
 <div class="abstract-title">Abstract</div>
 Large language models have demonstrated an emergent ability to write
@@ -129,7 +143,7 @@ semantics that is little understood. Recent interpretability work has
 demonstrated that it is possible to extract internal representations of
 natural language concepts, raising the possibility that similar
 techniques could be used to extract program semantics concepts. In this
-work we study how large language models represent the nullability of
+work, we study how large language models represent the nullability of
 program values. We measure how well models of various sizes complete
 programs that use nullable values, and then extract an internal
 representation of nullability.
@@ -139,24 +153,23 @@ representation of nullability.
 class="header-section-number">1</span> Introduction</h1>
 <p>The last five years have shown us that large language models, like
 ChatGPT, Claude, and DeepSeek, can effectively write programs in many
-domains.<span class="aside AT">AT: cite</span> This is an impressive
-capability given that writing programs involves having a working
-understanding of many aspects of program semantics. But though we know
-that these large models understand programs to an extent, we still don’t
-know many things about these models understanding. We don’t know where
-they have deep understanding and where they use heuristic reasoning, how
-they represents program knowledge, and what kinds of situations will
-challenge their capabilities.</p>
+domains. This is an impressive capability, given that writing programs
+involves having a formal understanding of program semantics. But though
+we know that these large models understand programs to an extent, we
+still don’t know many things about these models’ understanding. We don’t
+know where they have deep understanding and where they use heuristic
+reasoning, how they represents program knowledge, and what kinds of
+situations will challenge their capabilities.</p>
 <p>Fortunately, recent work in model interpretability and representation
-engineering<span class="aside AT">AT: which work?</span> has produced
-promising results which give hope towards understanding more and more of
-the internal thought processes of LLMs. Here at <span
-class="math inline">\(d_{model}\)</span> , we can think of no better
-place to apply these new techniques than program understanding, where
-there are many abstract properties that can be extracted with static
-analysis. The vast work done in programming language theory over the
-past hundred years provides many tools for scaling an understanding of
-the internal thought processes of language models as they write
+engineering<span class="aside AT">AT: reframe. recent tools let us....</span>
+has produced promising results which give hope towards understanding
+more and more of the internal thought processes of LLMs. Here at <span
+class="math inline">d_{model}</span> , we can think of no better place
+to apply these new techniques than formal methods, where there are many
+abstract properties that can be extracted with static analysis. The vast
+work done in programming language theory over the past hundred years
+provides many tools for scaling an understanding of the internal thought
+processes of language models as they write
 code.<span class="aside AT">AT: for examples, see cite, cite</span></p>
 <p>In that spirit, we wanted to start with a simple property that comes
 up in every programming languages, nullability. Nullable values are
@@ -196,11 +209,34 @@ load.</figcaption>
 </figure>
 <h1 data-number="2" id="sec:testing"><span
 class="header-section-number">2</span> Measuring Nullability
-Understanding
-Externally<span class="aside AT">AT: Externally = token-level?</span></h1>
-<p>We begin by measuring model nullability understanding externally,
-because it provides a “skyline,” or upper-bound, on our ability to
-extract internal concepts of nullability.</p>
+Understanding Externally</h1>
+<p>We begin with a “skyline” estimate of model understanding of
+nullability (a la <span class="citation" data-cites="feng24binding">Feng
+and Steinhardt (2024)</span>). That is, we evaluate model nullability
+understanding externally, at the token-level, (as opposite to
+internally, at the activation level, using interpretability techniques).
+In this section, we first explain the task of nullability understanding
+(sec. <a href="#sec:task">2.1</a>). Then we formally decompose the
+reasoning steps required to reason about nullability both inside
+(sec. <a href="#sec:intra">2.2</a>) and across (sec. <a
+href="#sec:inter">2.3</a>) functions. Finally, we present the results of
+our “skyline” analysis. (sec. <a href="#sec:eval_results">2.5</a>).</p>
+<p>We find that Pythia models as small as 2.8b can successfully complete
+this test, and that they learn to complete the test in the first third
+of training. Consistent with observations that larger models are more
+sample-efficient
+<span class="aside AT">AT: who do I cite for this claim? Kaplan?</span>,
+larger Pythia models learn to complete this test earlier, with Pythia
+12b able to complete the test 20% of the way into training and Pythia
+2.8b able to complete it 28% of the way into training.</p>
+<p>Note that these results differ substantially from those of <span
+class="citation" data-cites="tigges24">Tigges et al. (2024)</span>, who
+find that for <em>circuit</em> analyses (rather than representational
+analyses like ours), circuit parts are learned at roughly the same point
+during training across scale.</p>
+<h2 data-number="2.1" id="sec:task"><span
+class="header-section-number">2.1</span>
+<code>NullabilityEval</code></h2>
 <p>To measure nullability understanding externally, we ask the model to
 complete simple partial programs that each require an understanding of
 nullability. We refer to this suite of programs as
@@ -219,30 +255,33 @@ limited number of valid next lines in the program, and all of them
 demonstrate some knowledge of the concept of nullability.</p>
 <p>For example, our first test is:</p>
 <p><em>Test 1</em><a href="#fn1" class="footnote-ref" id="fnref1"
-role="doc-noteref"><sup>1</sup></a>:</p>
+role="doc-noteref"><sup>1</sup></a></p>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  some_numbers <span class="op">=</span> [<span class="dv">1</span>, <span class="op">-</span><span class="dv">4</span>, <span class="va">None</span>, <span class="op">-</span><span class="dv">3</span>, <span class="dv">10</span>, <span class="op">-</span><span class="dv">1</span>, <span class="va">None</span>, <span class="va">None</span>, <span class="dv">8</span>]</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  result: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> num <span class="kw">in</span> some_numbers:</span></code></pre></div>
-<p>We find that Pythia models as small as 2.8b can successfully complete
-this test, and that they learn to complete the test in the first third
-of training. Consistent with observations that larger models are more
-sample-efficent <span class="aside AT">AT: cite</span>, larger Pythia
-models learn to complete this test earlier, with Pythia 12b able to
-complete the test 20% of the way into training and Pythia 2.8b able to
-complete it 28% of the way into training.
-<span class="aside AT">AT: HEREHEREHERE</span></p>
-<h2 data-number="2.1" id="understanding-typing-rules"><span
-class="header-section-number">2.1</span> Understanding Typing Rules</h2>
+<span class=aside>What about `return`?</span>
+<p>The simplest way to pass this test is to introduce a branch
+<code>if num is None</code>, but several variants are also valid:
+<code>if num is not None</code>, <code>if num == None</code>,
+<code>if isinstance(num, int)</code>. That is, this example is
+constructed such that there is a small space of valid next lines, and
+all of them require some understanding that <code>num</code> may not be
+an <code>int</code>.<a href="#fn2" class="footnote-ref" id="fnref2"
+role="doc-noteref"><sup>2</sup></a></p>
+<h2 data-number="2.2" id="sec:intra"><span
+class="header-section-number">2.2</span> Understanding Typing Rules</h2>
 <p>We see from the results of our first test that these models
 understand nullability to some extent, but how deep is this
 understanding? To start to quantify this, we give a syntax and semantics
 of a minimalist subset of python that captures nullability in Appendix
 <a href="#sec:commonrules">B.1</a>. We can then classify each partial
 program by which program constructs and rules determine the nullability
-of the target variable. For instance, Test 1 uses the List, Var, and For
-rules.</p>
+of the target variable. For instance, Test 1 uses the <span
+class="math inline">(List)</span>, <span
+class="math inline">(Var)</span>, and <span
+class="math inline">(For)</span> rules.</p>
 <p>So, do Pythia models 2.8b and up understand the semantics of these
 three rules? As it turns out, not exactly. LLM’s pick up on a lot of
 information relationships in their training data that have statistical
@@ -264,15 +303,24 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a hr
 <p>causes all the Pythia models to fail the test. Our results show that
 the Pythia models rely heavily on features like variable naming when
 reasoning about for loops. Fortunately, many other typing rules, like
-App (function application) and If_Out, do not exhibit such a strong
-reliance on variable naming and constants.<a href="#fn2"
-class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
-<h2 data-number="2.2" id="interprocedural-analysis"><span
-class="header-section-number">2.2</span> Interprocedural Analysis</h2>
-<p>Even without obfuscating variable names, we can challenge the model
-by adding layers of procedural indirection between the source and sink
-of nullable values, thereby testing the model’s <em>interprocedural</em>
-understanding. Here’s one such test:</p>
+<span class="math inline">(App)</span> (function application) and <span
+class="math inline">(IfOut)</span>, do not exhibit such a strong
+reliance on variable naming and constants.<a href="#fn3"
+class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>
+<span class="aside AT">AT: reference Future Work section</span></p>
+<h2 data-number="2.3" id="sec:inter"><span
+class="header-section-number">2.3</span> Interprocedural Analysis</h2>
+<p>We can further challenge the model by adding layers of procedural
+indirection between the source and sink of nullable values, thereby
+testing the model’s <em>interprocedural</em> understanding. First, we
+demonstrate how to write such tests, and the difficulties of writing
+tests that may be too easy (sec. <a href="#sec:inter_test">2.3.1</a>).
+Then, we present a harder problem (sec. <a href="#sec:annot">2.3.2</a>)
+and introduce a stronger type system <code>mypy++</code> to formalized
+the needed reasoning (sec. <a href="#sec:mypypp">2.3.3</a>).</p>
+<h3 data-number="2.3.1" id="sec:inter_test"><span
+class="header-section-number">2.3.1</span> A simple test</h3>
+<p>Here’s a simple test for interprocedural analyses:</p>
 <p><em>Test 2</em></p>
 <div class="sourceCode" id="cb4"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Optional</span>
@@ -289,10 +337,10 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a hr
 Ideally, the model would have to think a little harder to understand
 that <code>some_numbers</code> is flowing from <code>main</code> through
 the function call into the body of <code>positive_numbers</code>,
-causing the for loop body to need a <code>None</code> check. In practice
-though, we find this test is actually <em>easier</em> for the model to
-pass than Test 1, with models as small as Pythia 1b passing it, and
-Pythia 12b learning to pass it 13% of the way into training.</p>
+causing the for loop body to need a <code>None</code> check. In
+practice, however, we find this test is actually <em>easier</em> for the
+model to pass than Test 1, with models as small as Pythia 1b passing it,
+and Pythia 12b learning to pass it 13% of the way into training.</p>
 <p>Because of the type annotations on the <code>positive_numbers</code>
 function, the model doesn’t need to pay attention to <code>main</code>
 at all. It can just look at <code>positive_numbers</code>, and use the
@@ -302,10 +350,12 @@ type annotation to know that <code>numbers</code> contains
 proceeding. Looking at the type annotation turns out to be easier for
 the model than scanning through a list to determine if there are None
 and non-None values, resulting in an easier test overall.</p>
+<h3 data-number="2.3.2" id="sec:annot"><span
+class="header-section-number">2.3.2</span> Annotating types</h3>
 <p>So how would we <em>actually</em> test for interprocedural
 nullability understanding in the model? Well, type annotations on Python
-functions aren’t required<a href="#fn3" class="footnote-ref" id="fnref3"
-role="doc-noteref"><sup>3</sup></a>, so we can instead provide the model
+functions aren’t required<a href="#fn4" class="footnote-ref" id="fnref4"
+role="doc-noteref"><sup>4</sup></a>, so we can instead provide the model
 with an <strong>unannotated</strong> function, and see if it still
 understands the flow of nullability. Here’s a test that does that:</p>
 <p><em>Test 3</em></p>
@@ -334,6 +384,9 @@ Any, and an Any can be converted to any value type.</p>
 the body of <code>process_value</code>, including just returning the
 argument, without a static type error. But at runtime, code that
 exploits this fact would still fail.</p>
+<h3 data-number="2.3.3" id="sec:mypypp"><span
+class="header-section-number">2.3.3</span> A stricter type system for
+Python: mypy++</h3>
 <p>If we want code that actually makes sense at runtime, we can
 strengthen our type checker a bit by requiring that there be some valid
 (non-Any) type for the function that works both at the call site and in
@@ -348,16 +401,16 @@ it. Pythia 1b, 2.8b, and 6.9b pass the test in their final revisions,
 but Pythia 410m, 1.4b, and 12b don’t. The bigger models all have points
 in training where they can pass the test, but only intermittently. Even
 6.9b, the best performing size on this test, fails the test in its
-second-to-last available revision<a href="#fn4" class="footnote-ref"
-id="fnref4" role="doc-noteref"><sup>4</sup></a>.
+second-to-last available revision<a href="#fn5" class="footnote-ref"
+id="fnref5" role="doc-noteref"><sup>5</sup></a>.
 <span class="aside AT">AT: should we say
 something about 12b not solving it?</span></p>
 <p>What the models <em>can</em> do well, however, is learn to pass these
 tests in the mypy type system (as opposed to mypy++). In that system,
 where they don’t need to reason globally about the functions but only
 locally, this test is one of the easiest for the models to complete.<a
-href="#fn5" class="footnote-ref" id="fnref5"
-role="doc-noteref"><sup>5</sup></a></p>
+href="#fn6" class="footnote-ref" id="fnref6"
+role="doc-noteref"><sup>6</sup></a></p>
 <p>Since this test suite is meant to be informative beyond the sizes of
 the Pythia models, we also add another layer of indirection to add more
 difficulty, in this test:</p>
@@ -383,8 +436,8 @@ capabilities of even frontier models. Llama 405B is unable to
 successfully pass this test, as are smaller models like Qwen Coder 32B,
 while DeepSeek V3 (671B parameters) is able to pass it. However, Pythia
 6.9B is still able to pass this test pretty consistently.</p>
-<h2 data-number="2.3" id="generating-type-annotations"><span
-class="header-section-number">2.3</span> Generating Type
+<h2 data-number="2.4" id="generating-type-annotations"><span
+class="header-section-number">2.4</span> Generating Type
 Annotations</h2>
 <p>Finally, we can test how good the models are at writing their own
 type annotations for functions. Since most of the publicly available
@@ -392,8 +445,8 @@ Python code is not type-annotated, you could imagine that LLM’s can
 reason about dataflow correctness without annotations better than they
 can write their own typing annotations. The next program tests the
 models ability to write its own type annotations; the trailling colon
-makes the type expression the only valid completion<a href="#fn6"
-class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a></p>
+makes the type expression the only valid completion<a href="#fn7"
+class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a></p>
 <p><em>Test 5</em>:</p>
 <div class="sourceCode" id="cb7"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_48() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
@@ -410,14 +463,12 @@ demonstrating that writing these annotations is indeed more difficult
 for LLM’s than implicitly reasoning about the types. Qwen Coder 32B is
 also incapable of passing this test, but both Llama 405B and DeepSeek V3
 pass it.</p>
-<h2 data-number="2.4"
-id="external-test-results-across-training-and-scale"><span
-class="header-section-number">2.4</span> External Test Results Across
+<h2 data-number="2.5" id="sec:eval_results"><span
+class="header-section-number">2.5</span> External Test Results Across
 Training and Scale</h2>
 <p>We wrote three variations of each of these tests, resulting in 15
 tests total. Below, you can see the number of passing tests for each
 model.</p>
-<span class=aside>more through exploration of why?</span>
 <figure id="fig:hl_scale">
 <img src="images/hl_model_results.svg"
 alt="Figure 2: A bar graph showing how several sizes of model perform on the high-level nullability tests" />
@@ -425,56 +476,46 @@ alt="Figure 2: A bar graph showing how several sizes of model perform on the hig
 sizes of model perform on the high-level nullability tests</figcaption>
 </figure>
 <p>In Fig. <a href="#fig:hl_scale">2</a>, we can see the number of
-passing tests for each model. We can see that generally models get
-better with scale.
-<span class=aside>I don't think this footnote is clear enough to add anything</span>
-<a href="#fn7" class="footnote-ref" id="fnref7"
-role="doc-noteref"><sup>7</sup></a> Model performance on these tests is
+passing tests for each model. We can see that, generally speaking,
+models get better with scale. Model performance on these tests is
 approximately logarithmic in model size: models of 2.8 billion
 parameters can pass about half the tests, but it takes more than 405
+<span class=aside>can't say it like this. can't directly compare parameter counts between generations/architectures</span>
 billion parameters to pass all of the tests. This matches previous post-
 and pre-training evaluations of the capabilities of large language
-models<span class=aside>cite, Kaplan et al, Chincilla</span>, indicating
-that these tests are well distributed.</p>
+models<span class="aside AS">AS: cite, Kaplan et al, Chincilla
+AT:those cites are for loss, not evals!</span>, indicating that
+<span class="aside AT">AT: should we be plotting lpr? instead of raw pass rate? but log 15 is pretty small...</span>
+these tests are well distributed.</p>
 <figure id="fig:hl_mypy">
 <img src="images/hl_mypy_vs_grep_models.svg"
 alt="Figure 3: A bar graph showing how the Pythia models perform in mypy vs mypy++" />
 <figcaption aria-hidden="true">Figure 3: A bar graph showing how the
 Pythia models perform in mypy vs mypy++</figcaption>
 </figure>
-<p>In Fig. <a href="#fig:hl_mypy">3</a>, we can see the test result for
-the pythia models using the mypy and mypy++ type systems (Fig. <a
-href="#fig:hl_scale">2</a> uses mypy++). As we expected, the mypy
-results (red bar) are always above the mypy++ results (blue bar), as
-mypy++ is a stricter type system. There are six tests in the dataset
-involving non-annotated functions, and using the weaker mypy typesystem
-causes up to five more tests to pass than using mypy++<a href="#fn8"
-class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a></p>
-<p>Next, we want to understand the training dynamics at play here. Below
-we can see how Pythia 6.9b performs on the tests during training from
-step 2 to
-143000:<span class=aside>let's use the same axes scaling at the tigges
-paper</span></p>
-<figure id="fig:hl_time">
-<img src="images/hl_revision_results.svg"
-alt="Figure 4: A line graph showing how the performance of the Pythia 6.9 model changes during training" />
-<figcaption aria-hidden="true">Figure 4: A line graph showing how the
-performance of the Pythia 6.9 model changes during training</figcaption>
-</figure>
-<p>Again, performance does not increase monotonically. This plot is
-quite noisy, so in the sequel, we will show smoothed<a href="#fn9"
-class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a>
-charts.</p>
-<p>In the graph below, we see that each individual model also learns to
-write code which typechecks under mypy before it learns to write code
-which typechecks under mypy++ and throws no type errors at runtime.</p>
+<span class=aside>let's merge these figures</span>
+<p>In Fig. <a href="#fig:hl_mypy">3</a>, we see the test result for the
+pythia models using the mypy and mypy++ type systems. As we expected,
+the mypy results (red bar) are always above the mypy++ results (blue
+bar), as mypy++ is a stricter type system. There are six tests in the
+dataset involving non-annotated functions, and using the weaker mypy
+typesystem causes up to five more tests to pass than using mypy++<a
+href="#fn8" class="footnote-ref" id="fnref8"
+role="doc-noteref"><sup>8</sup></a></p>
+<p>Next, we want to understand the training dynamics at play here.
+Below, we can see how Pythia 6.9b performs on the tests during training
+from step 2 to 143000: <a href="#fn9" class="footnote-ref" id="fnref9"
+role="doc-noteref"><sup>9</sup></a></p>
 <figure id="fig:hl_moral">
 <img src="images/hl_mypy_vs_grep_revisions.svg"
-alt="Figure 5: A graph showing how often the Pythia 6.9b produces code that typechecks on the tests, vs produces code that shows true understanding." />
-<figcaption aria-hidden="true">Figure 5: A graph showing how often the
+alt="Figure 4: A graph showing how often the Pythia 6.9b produces code that typechecks on the tests, vs produces code that shows true understanding." />
+<figcaption aria-hidden="true">Figure 4: A graph showing how often the
 Pythia 6.9b produces code that typechecks on the tests, vs produces code
 that shows true understanding.</figcaption>
 </figure>
+<p>We see that each individual model learns to write code which
+typechecks under mypy before it learns to write code which typechecks
+under mypy++ and throws no type errors at runtime.</p>
 <h1 data-number="3" id="sec:probing"><span
 class="header-section-number">3</span> Measuring Nullability
 Understanding Internally</h1>
@@ -491,25 +532,6 @@ that we expect from the external, or token-level understanding evals we
 describe in the previous section.</p>
 <h2 data-number="3.1" id="background"><span
 class="header-section-number">3.1</span> Background</h2>
-<!--
-As language models predict each token in a text, they run their tuned
-circuits over all the previous text. Tokens are first embedded into a
-high-dimensional "token space", and each layer of the transformer
-model is made up of many parallel circuits which transform the
-previous layers output into new embeddings in a new space. Each layer
-can look not just at the output of the layer directly previous, but
-actually all previous layers, through a channel called a residual
-stream.
-
-The paper presents two main approaches to interpreting a language
-model; circuit-based, and representation-based. Circuit based
-interpretability aims to pair down the network to a key set of
-circuits which are sufficient to complete a particular task; this
-allows practitioners to point to a particular part of the model and
-say "this is where \<task\> is done", much like neuroscientists assign
-functionality to different parts of our brain.
-
--->
 <p>In this section, we review representation engineering <span
 class="citation" data-cites="zou25">(Zou et al. 2025)</span> techniques
 that we will use to look for linear representations of nullability
@@ -588,13 +610,13 @@ both model size and number of training steps.
 <span class="aside AT">AT: should we mention this in the intro/contributions/or a "key results" section like tlide?</span></p>
 <figure id="fig:mm-vs-mmlr-sizes">
 <img src="images/mm-vs-mmlr.svg"
-alt="Figure 6: The performance of pure mass means probing vs mass means probing with linear regression for different Pythia model sizes. Binary-cross entropy is plotted, so lower is better." />
-<figcaption aria-hidden="true">Figure 6: The performance of pure mass
+alt="Figure 5: The performance of pure mass means probing vs mass means probing with linear regression for different Pythia model sizes. Binary-cross entropy is plotted, so lower is better." />
+<figcaption aria-hidden="true">Figure 5: The performance of pure mass
 means probing vs mass means probing with linear regression for different
 Pythia model sizes. Binary-cross entropy is plotted, so lower is
 better.</figcaption>
 </figure>
-<p>In Fig. <a href="#fig:mm-vs-mmlr-sizes">6</a>, we can see that pure
+<p>In Fig. <a href="#fig:mm-vs-mmlr-sizes">5</a>, we can see that pure
 mass means probing gives lower loss for smaller models (those with less
 than 410 million parameters), but that for larger models weighting
 layers using linear regression gives lower loss consistently.</p>
@@ -611,12 +633,13 @@ role="doc-noteref"><sup>11</sup></a>
 <span class="aside AT">AT: see appendix D for mm vs LR</span></p>
 <figure id="fig:models-and-steps">
 <img src="images/accuracy_during_pretraining.svg"
-alt="Figure 7: The performance, measured in binary cross-entropy, of each Pythia model size during pretraining. Since this graph is of loss, lower is better" />
-<figcaption aria-hidden="true">Figure 7: The performance, measured in
+alt="Figure 6: The performance, measured in binary cross-entropy, of each Pythia model size during pretraining. Since this graph is of loss, lower is better" />
+<figcaption aria-hidden="true">Figure 6: The performance, measured in
 binary cross-entropy, of each Pythia model size during pretraining.
 Since this graph is of loss, lower is better</figcaption>
 </figure>
-<p>In Fig. <a href="#fig:models-and-steps">7</a>, we plot loss against
+<span class=aside>position the min loss stuff in terms of scaling laws or something</span>
+<p>In fig. <a href="#fig:models-and-steps">6</a>, we plot loss against
 scale and time. While we measured accuracy for every available Pythia
 model size, we exclude the smallest (14m) from this plot since it would
 exist entirely above the top of the plot. We notice turning points in
@@ -640,8 +663,8 @@ inferred at train-time<a href="#fn13" class="footnote-ref" id="fnref13"
 role="doc-noteref"><sup>13</sup></a>.</p>
 <figure id="fig:reading2">
 <img src="images/reading_diagram.svg" class="inlinefig"
-alt="Figure 8: A diagram showing a simple program, and the probes nullability predictions for each variable load." />
-<figcaption aria-hidden="true">Figure 8: A diagram showing a simple
+alt="Figure 7: A diagram showing a simple program, and the probes nullability predictions for each variable load." />
+<figcaption aria-hidden="true">Figure 7: A diagram showing a simple
 program, and the probes nullability predictions for each variable
 load.</figcaption>
 </figure>
@@ -664,8 +687,8 @@ et al. (2024)</span> . They focus on classic circuits-centered
 interpretability tasks such as IOI <span class="citation"
 data-cites="wang22">(Wang et al. 2022)</span>, Gendered-Pronoun <span
 class="citation" data-cites="mathwin">(Mathwin et al., n.d.)</span>,
-Greater-Than<span class="citation" data-cites="hanna23">(Hanna, Liu, and
-Variengien 2023)</span> , and SVA <span class="citation"
+Greater-Than <span class="citation" data-cites="hanna23">(Hanna, Liu,
+and Variengien 2023)</span> , and SVA <span class="citation"
 data-cites="linzen16">(Linzen, Dupoux, and Goldberg 2016)</span>.</p>
 <p>In our setting, we are more interested in how activations vary across
 inputs, to extract representations of nullability. <span
@@ -702,6 +725,11 @@ Feng, Jiahai, Stuart Russell, and Jacob Steinhardt. 2024.
 <span>“Monitoring <span>Latent World States</span> in <span>Language
 Models</span> with <span>Propositional Probes</span>.”</span> arXiv. <a
 href="https://doi.org/10.48550/arXiv.2406.19501">https://doi.org/10.48550/arXiv.2406.19501</a>.
+</div>
+<div id="ref-feng24binding" class="csl-entry" role="listitem">
+Feng, Jiahai, and Jacob Steinhardt. 2024. <span>“How Do <span>Language
+Models Bind Entities</span> in <span>Context</span>?”</span> arXiv. <a
+href="https://doi.org/10.48550/arXiv.2310.17191">https://doi.org/10.48550/arXiv.2310.17191</a>.
 </div>
 <div id="ref-hanna23" class="csl-entry" role="listitem">
 Hanna, Michael, Ollie Liu, and Alexandre Variengien. 2023. <span>“How
@@ -822,7 +850,7 @@ types. But to prevent bare ifs from ever being the correct completion
 for a non-optional type, we’ll design our tests so that there are never
 any values that would convert to False, namely the number zero and the
 empty string.</p>
-<p><span class="math display">\[\begin{aligned}
+<p><span class="math display">\begin{aligned}
 \left[Program\right]  =&amp; [\epsilon] {\huge|}
 \left[\begin{array}{l}Stmt\\Program\end{array}\right]\\
 [Stmt]       =&amp; [Import] | [FnDef] | [Assn] | [ForLoop] | [If] |
@@ -868,49 +896,49 @@ empty string.</p>
 [\texttt{&gt;=}] | [\texttt{is}] | [\texttt{is not}] | [\texttt{==}] |
 [\texttt{!=}]\\
 [ListConts]  =&amp; [Expr] | [Expr,ListConts]\\
-\end{aligned}\]</span></p>
+\end{aligned}</span></p>
 <p>We won’t worry too much about the semantics on a formal level, since
 it’s the same as Python’s semantics on this subset, and we’ll mostly be
 using it informally to justify typing rules here. But we do want to
 formally define our typing rules, since we’ll be measuring the models
 understanding of particular rules. We’ll be using two propositions for
-typing in this language. There’s <span class="math inline">\(\Gamma
-\vdash \left[p\right]
-\vartriangleright \texttt{ok}\)</span>, which says that the program
-<span class="math inline">\(p\)</span> is well typed in environment
-<span class="math inline">\(\Gamma\)</span>. And there’s <span
-class="math inline">\(\Gamma \vdash e : t\)</span>, which says that
-<span class="math inline">\(e\)</span> is well typed with type <span
-class="math inline">\(t\)</span> in environment <span
-class="math inline">\(\Gamma\)</span>. When we exclude the <span
-class="math inline">\(\Gamma\)</span>, we mean that the judgement is
-true under any typing environment, including the empty one.</p>
-<p><span class="math display">\[
+typing in this language. There’s <span class="math inline">\Gamma \vdash
+\left[p\right]
+\vartriangleright \texttt{ok}</span>, which says that the program <span
+class="math inline">p</span> is well typed in environment <span
+class="math inline">\Gamma</span>. And there’s <span
+class="math inline">\Gamma \vdash e : t</span>, which says that <span
+class="math inline">e</span> is well typed with type <span
+class="math inline">t</span> in environment <span
+class="math inline">\Gamma</span>. When we exclude the <span
+class="math inline">\Gamma</span>, we mean that the judgement is true
+under any typing environment, including the empty one.</p>
+<p><span class="math display">
 \tag{Const}
 \frac{Constant\neq\texttt{None}}{\vdash Constant: \text{Atom}}\\
 \hspace{1.0cm}
 \frac{}{\forall t, \vdash \texttt{None}: \texttt{Optional[$t$]}}\\
-\]</span></p>
-<p><span class="math display">\[
+</span></p>
+<p><span class="math display">
 \tag{List}
 \frac{\Gamma \vdash x_1 : t, x_2 : t, ...}
      {\Gamma \vdash \texttt{[$x_1$, $x_2$, ...]} : \texttt{List[$t$]}}
 \hspace{1.0cm}
 \frac{}{\forall t, \vdash \texttt{[]}: \texttt{List[$t$]}}
-\]</span></p>
-<p><span class="math display">\[
+</span></p>
+<p><span class="math display">
 \tag{Weaken}
 \frac{\Gamma \vdash x: t}{\Gamma \vdash x: \texttt{Optional[$t$]}}
-\]</span></p>
-<p><span class="math display">\[
+</span></p>
+<p><span class="math display">
 \tag{Var}
 \Gamma \vdash e: t \hspace{1cm} \Gamma, x: t \vdash [p]
 \vartriangleright \text{ok}
 \over
 \Gamma \vdash \left[\begin{array}{l}\texttt{$x$ = $e$}\\
 p\end{array}\right] \vartriangleright \text{ok}
-\]</span></p>
-<p><span class="math display">\[\begin{gather}
+</span></p>
+<p><span class="math display">\begin{gather}
 \Gamma, x_1: t_1, x_2: t_2, ... \vdash [b] \vartriangleright \text{ok}\\
 \tag{Def}
 \Gamma, f : t_1 \rightarrow t_2 ... \rightarrow t_r \vdash [p]
@@ -924,14 +952,14 @@ p\end{array}\right] \vartriangleright \text{ok}
 p
 \end{array}\right]
 \vartriangleright \text{ok}
-\end{gather}\]</span></p>
-<p><span class="math display">\[
+\end{gather}</span></p>
+<p><span class="math display">
 \tag{App}
 \frac{\Gamma \vdash f : t_1 \rightarrow t_2 ... \rightarrow t_r
 \hspace{1cm} \Gamma \vdash x_1 : t_1, x_2 : t_2, ...}
      {\Gamma \vdash f(x_1, x_2, ...) : t_r}
-\]</span></p>
-<p><span class="math display">\[
+</span></p>
+<p><span class="math display">
 \hspace{-1cm}{
 \tag{IfIn}
 \Gamma \vdash x : \texttt{Optional[$t$]} \hspace{1cm}
@@ -952,8 +980,8 @@ p
 \end{array}\right]
 \vartriangleright \text{ok}
 }
-\]</span></p>
-<p><span class="math display">\[
+</span></p>
+<p><span class="math display">
 \tag{IfOut}
 \Gamma \vdash
 \left[\begin{array}{l}
@@ -978,14 +1006,14 @@ p_3
 p_3
 \end{array}\right]
 \vartriangleright \text{ok}
-\]</span></p>
-<p><span class="math display">\[
+</span></p>
+<p><span class="math display">
 \tag{IfExpr}
 \frac{\Gamma \vdash (e_b : \text{Optional[$t_0$]} \lor e_b :
 \texttt{bool}), e_1 : t, e_2 : t}
      {\Gamma \vdash \texttt{$e_1$ if $e_b$ else $e_2$} : t}
-\]</span></p>
-<p><span class="math display">\[
+</span></p>
+<p><span class="math display">
 \tag{For}
 \Gamma \vdash y\texttt{ : List } t \hspace{1cm} \Gamma, x : t \vdash [p]
 \vartriangleright \text{ok}
@@ -996,15 +1024,15 @@ p_3
 \quad p
 \end{array}\right]
 \vartriangleright \text{ok}
-\]</span></p>
-<p><span class="math display">\[
+</span></p>
+<p><span class="math display">
 \tag{OpInt}
 \Gamma \vdash x_1 : \texttt{int}, x_2 : \texttt{int}, \bigotimes \text{
 in [\texttt{+, -, *, /}]}
 \over
 \Gamma \vdash x_1 \bigotimes x_2 : \texttt{int}
-\]</span></p>
-<p><span class="math display">\[
+</span></p>
+<p><span class="math display">
 \hspace{-1.5cm}
 \tag{OpString}
 \frac{\Gamma \vdash s_1 : \texttt{str}, s_2 : \texttt{str}}
@@ -1012,40 +1040,40 @@ in [\texttt{+, -, *, /}]}
 \hspace{1cm}
 \frac{\Gamma \vdash s : \texttt{str}, x: \texttt{int}}
      {\Gamma \vdash s * x : \texttt{str}}
-\]</span></p>
-<p><span class="math display">\[
+</span></p>
+<p><span class="math display">
 \hspace{-1.5cm}
 \tag{OpEquality}
 \frac{\Gamma \vdash x_1 : t, x_2 : t, \bigotimes \text{ in }
 [\texttt{==, !=, is, is not}]}
      {\Gamma \vdash x_1 \bigotimes x_2 : \texttt{bool}}
-\]</span></p>
-<p><span class="math display">\[
+</span></p>
+<p><span class="math display">
 \hspace{-2cm}
 \tag{OpComparison}
 \frac{\Gamma \vdash x_1 : \texttt{int}, x_2 : \texttt{int}, \bigotimes
 \text{ in } [\texttt{&lt;, &gt;, &lt;=, &gt;=}]}
      {\Gamma \vdash x_1 \bigotimes x_2 : \texttt{bool}}
-\]</span></p>
+</span></p>
 <p>With:</p>
-<p><span class="math display">\[
+<p><span class="math display">
 \tag{ReturnReturn}
 \frac{\Gamma \vdash e : t}{\Gamma \vdash \text{Returns(\texttt{return
 $e$}, $t$)}}
-\]</span> <span class="math display">\[
+</span> <span class="math display">
 \tag{NoReturnExpression}
 \frac{\Gamma \vdash e : t}{\vdash \text{NoReturn([$e$])}}
-\]</span> <span class="math display">\[
+</span> <span class="math display">
 \tag{NoReturnAssign}
 \frac{}{\vdash \text{NoReturn([\texttt{$i$ = $e$}])}}
-\]</span> <span class="math display">\[
+</span> <span class="math display">
 \tag{ReturnIf}
 \frac{\Gamma \vdash \text{Returns($p$, $t$)}}
      {\Gamma \vdash \text{Returns(}\left[\begin{array}{l}\texttt{if
 $e$:}\\ \quad p\end{array}\right],t\text{)}}
 \hspace{1cm}
-\]</span></p>
-<p><span class="math display">\[\begin{gather}
+</span></p>
+<p><span class="math display">\begin{gather}
 \Gamma \vdash \left(\text{Returns($p_1$, $t$)} \land
 \text{Returns($p_2$, $t$)}\right)\lor \\
 \Gamma \vdash \left(\text{Returns($p_1$, $t$)} \land
@@ -1060,15 +1088,15 @@ $t$)}\right)
 \texttt{else:}\\
 \quad p_2
 \end{array}\right]\text{, $t$)}
-\end{gather}\]</span></p>
-<p><span class="math display">\[
+\end{gather}</span></p>
+<p><span class="math display">
 \tag{ReturnFor}
 \frac{\Gamma \vdash \text{Returns($p$, $t$)}}
      {\Gamma \vdash \text{Returns(}\left[\begin{array}{l}
      \texttt{for $x$ in $y$:}\\
      \quad p
      \end{array}\right]\text{, $t$)}}
-\]</span></p>
+</span></p>
 <h2 class="unnumbered" id="sec:unannotatedfuncs">B.2 Unannotated
 Functions</h2>
 <p>The rules above are sufficient for our purposes for dealing with
@@ -1079,7 +1107,7 @@ typed, allowing them to typecheck as any type. Similarly, function
 parameters without a type annotation are implicitly convertable to any
 type. So, for normaly mypy typechecking, we add the following typing
 rules:</p>
-<p><span class="math display">\[\begin{gather}
+<p><span class="math display">\begin{gather}
 \Gamma, x_1 : Any, x_2 : Any, ... \vdash [b] \vartriangleright
 \text{ok}\\
 \tag{DynDef}
@@ -1093,15 +1121,15 @@ rules:</p>
 p
 \end{array}\right]
 \vartriangleright \text{ok}
-\end{gather}\]</span></p>
-<p><span class="math display">\[
+\end{gather}</span></p>
+<p><span class="math display">
 \tag{DynConvert}
 \frac{\Gamma \vdash x : t}
      {\Gamma \vdash x : Any}
      \hspace{0.5cm}
 \frac{\Gamma \vdash x : Any}
      {\Gamma \vdash x : t}
-\]</span></p>
+</span></p>
 <p>These rules allow more python programs to check statically, but they
 mean that some python programs will pass the static checks but still
 throw type errors at runtime. Importantly for us, they can throw runtime
@@ -1109,7 +1137,7 @@ type errors about optionality. A well-written piece of code would not
 just satisfy this type system then, but actually a stronger one that
 would prevent runtime type errors. We’ll call this stronger type system
 mypy++. Instead of the Dyn- rules, it has this one:</p>
-<p><span class="math display">\[\begin{gather}
+<p><span class="math display">\begin{gather}
 \Gamma, x_1 : t_1, x_2 : t_2, ... \vdash [b] \vartriangleright
 \text{ok}\\
 \tag{InferDef}
@@ -1123,7 +1151,7 @@ mypy++. Instead of the Dyn- rules, it has this one:</p>
 p
 \end{array}\right]
 \vartriangleright \text{ok}
-\end{gather}\]</span></p>
+\end{gather}</span></p>
 <h1 class="unnumbered"
 id="detailed-high-level-nullability-test-results">C Detailed High-Level
 Nullability Test Results</h1>
@@ -1165,7 +1193,13 @@ None and returning a string when the input is a string. Neither of these
 cases is correct, as the main function expects this to return a Number
 that can be added to one.</p>
 <h2 class="unnumbered" id="across-time">C.2 Across Time</h2>
-<p>We say in fig. <a href="#fig:hl_time">4</a> that while the model
+<figure id="fig:hl_time">
+<img src="images/hl_revision_results.svg"
+alt="Figure 8: A line graph showing how the performance of the Pythia 6.9 model changes during training" />
+<figcaption aria-hidden="true">Figure 8: A line graph showing how the
+performance of the Pythia 6.9 model changes during training</figcaption>
+</figure>
+<p>We say in fig. <a href="#fig:hl_time">8</a> that while the model
 generally gets better at passing these tests during training, the
 performance is not always increasing. Zooming in on a particular test,
 we can see what this looks like. When asked to complete this code:</p>
@@ -1302,51 +1336,43 @@ to <code>result</code>, because <code>result</code> is declared to only
 contain <code>int</code>s, not <code>Optional[int]</code>s. None of the
 normal operations on <code>int</code>s will work on <code>None</code>s,
 so before <code>num</code> can be processed, something has to be done to
-separate <code>None</code>s and normal <code>int</code>s. The simplest
-way to do this is to introduce a branch <code>if num is None</code>, but
-several variants are also valid: <code>if num is not None</code>,
-<code>if num == None</code>, <code>if isinstance(num, int)</code>. Since
-this is a pretty small space of valid next lines, and all of them imply
-some understanding that <code>num</code> may not be an <code>int</code>,
-we can use this program to test models for nullability understanding by
-asking them to complete the program another lines, then see if they
-produce something that matches these valid lines with the regular
-expression <code>num\s*(is\s*(not)?|==)\s*None|isinstance\(num</code>.<a
+separate <code>None</code>s and normal <code>int</code>s.<a
 href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>Stay tuned in the future for a more in-depth exploration
+<li id="fn2"><p>In particular, we can use this program to test models
+for nullability understanding by asking them to complete the program’s
+next lines, then see if those lines matches the regular expression
+<code>num\s*(is\s*(not)?|==)\s*None|isinstance\(num</code>.<a
+href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Stay tuned in the future for a more in-depth exploration
 of how the models behave on individual typing rules with different
-contexts and variable names.<a href="#fnref2" class="footnote-back"
+contexts and variable names.<a href="#fnref3" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>Technically this is known as “Optional typing”, but
+<li id="fn4"><p>Technically this is known as “Optional typing”, but
 that’s confusing in the context of this post. Not to be confused with
-Gradual Typing, as introduced by Siek et al.<a href="#fnref3"
+Gradual Typing, as introduced by Siek et al.<a href="#fnref4"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn4"><p>Despite this, it does pass the test 40% of the available
+<li id="fn5"><p>Despite this, it does pass the test 40% of the available
 revisions, about triple what the other closest sizes can accomplish<a
-href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn5"><p>This indicates that if you were to train a model using
+href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>This indicates that if you were to train a model using
 typechecking as reinforcement feedback, you would want to use mypy++ and
-not mypy.<a href="#fnref5" class="footnote-back"
+not mypy.<a href="#fnref6" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn6"><p>This is because function declarations with a colon and
+<li id="fn7"><p>This is because function declarations with a colon and
 no type, like <code>def fn(x:)</code> are not valid python. Since we’ve
 already seen a usage of <code>get_square</code> that is passed a None
 value, it wouldn’t be type-valid to complete the program with just
 <code>int</code>. So a model can be tested on its understanding of
 <code>Optional</code> annotations by seeing if its completion of the
-partial program includes <code>Optional[int]</code>.<a href="#fnref6"
+partial program includes <code>Optional[int]</code>.<a href="#fnref7"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn7"><p>Pythia 12b performs worse than its 6.9b variant, though
-this might be due to under-training at that size. Qwen 32B also performs
-about as well as Pythia 6.9b, it’s not clear if this is due to model
-architecture or something else.<a href="#fnref7" class="footnote-back"
-role="doc-backlink">↩︎</a></p></li>
 <li id="fn8"><p>We don’t see all six non-annotated function tests
 passing under mypy, because models can still fail these tests by
 producing invalid syntax.<a href="#fnref8" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn9"><p>rolling average with a window size of 5<a href="#fnref9"
-class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p>smoothed with a rolling average with a window size of
+5<a href="#fnref9" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
 <li id="fn10"><p>Since we don’t have contrasting pairs, just labeled
 points, it’s not possible to use the PCA from contrasting pairs method
 used in <span class="citation" data-cites="marks24">Marks and Tegmark

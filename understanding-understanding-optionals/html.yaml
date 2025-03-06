@@ -6,7 +6,7 @@ number-sections: true
 standalone: true
 output-file: index.html
 html-math-method:
-  method: mathjax
+  method: katex
 css:
   - pandoc.css
   - sidenote.css

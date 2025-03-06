@@ -466,10 +466,11 @@ this gives us a lie-detector).
 
 ## Designing Prompts to Extract Nullability Activations {#sec:prompts}
 
-We avoid dealing with the ambiguities of natural language by working in
-a setting where the model needs only to complete code. analyze the nullability
-of individual variable occurrences. Specifically, we probe for "the variable
-I just generated refers to an nullable quantity", so our prompts looked like:
+We avoid dealing with the ambiguities of natural language by working
+in a setting where the model needs only to analyze the nullability of
+individual variable occurrences. Specifically, we probe for "the
+variable I just generated refers to an nullable quantity", so our
+prompts looked like:
 
 ```python
 def program_1() -> None:

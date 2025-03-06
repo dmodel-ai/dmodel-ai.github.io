@@ -414,8 +414,8 @@ pass the test, but only intermittently. Even 6.9b, the best performing
 size on this test, fails the test in its second-to-last available
 revision<a href="#fn6" class="footnote-ref" id="fnref6"
 role="doc-noteref"><sup>6</sup></a>. You can see how this evolves over
-scale in fig. <a href="#fig:hl_mypy">3</a> and time in fig. <a
-href="#fig:hl_moral">4</a>. See Sec. <a href="#sec:results">3.5</a> for
+scale in fig. <a href="#fig:hl_scale">2</a> and time in fig. <a
+href="#fig:hl_moral">3</a>. See Sec. <a href="#sec:results">3.5</a> for
 further discussion of performance over time.</p>
 <p>What the models <em>can</em> do well, however, is learn to pass these
 tests in the mypy type system (as opposed to mypy++). In that system,
@@ -479,45 +479,39 @@ thus annotated.</p>
 class="header-section-number">2.5</span> External Test Results Across
 Training and Scale</h2>
 <p>We wrote three variations of each of these tests, resulting in 15
-tests total. Below, you can see the number of passing tests for each
-model.
+tests total. In Fig. <a href="#fig:hl_scale">2</a> below, we can see the
+number of passing tests for each model under mypy and mypy++.
 <span class="aside AT">AT: should we be plotting lpr? instead of raw pass rate? but log 15 is pretty small...</span></p>
 <figure id="fig:hl_scale">
-<img src="images/hl_model_results.svg"
+<img src="images/hl_mypy_vs_grep_models.svg"
 alt="Figure 2: A bar graph showing how several sizes of model perform on the high-level nullability tests" />
 <figcaption aria-hidden="true">Figure 2: A bar graph showing how several
 sizes of model perform on the high-level nullability tests</figcaption>
 </figure>
-<p>In Fig. <a href="#fig:hl_scale">2</a>, we can see the number of
-passing tests for each model. We can see that, generally speaking,
-models get better with scale: Pythia-2.8b parameters can pass about half
-the tests, but we need the much larger and more parameter efficient
-Llama-405b to pass all of the tests. This matches our expectations that
-eval scores should scale logarithmically, indicating that these tests
-are well distributed.</p>
-<figure id="fig:hl_mypy">
-<img src="images/hl_mypy_vs_grep_models.svg"
-alt="Figure 3: A bar plot showing how the Pythia models perform in mypy vs mypy++" />
-<figcaption aria-hidden="true">Figure 3: A bar plot showing how the
-Pythia models perform in mypy vs mypy++</figcaption>
-</figure>
-<span class=aside>let's merge these figures</span>
-<p>In Fig. <a href="#fig:hl_mypy">3</a>, we see the test result for the
-pythia models using the mypy and mypy++ type systems. As we expected,
-the mypy results (red bar) are always above the mypy++ results (blue
-bar), as mypy++ is a stricter type system. There are six tests in the
-dataset involving non-annotated functions, and using the weaker mypy
-typesystem causes up to five more tests to pass than using mypy++<a
+<p>We can see the number of fully passing tests for each model in blue.
+Generally speaking, models get better with scale: Pythia-2.8b parameters
+can pass about half the tests, but we need the much larger and more
+parameter efficient Llama-405b to pass all of the tests. This matches
+our expectations that eval scores should scale logarithmically,
+indicating that these tests are well distributed.</p>
+<p><span class=aside>let's merge these figures</span> We can also see
+the test result for the pythia models under the weaker mypy success
+criteria. As we expected, the mypy results (red bar) are (almost<a
 href="#fn8" class="footnote-ref" id="fnref8"
-role="doc-noteref"><sup>8</sup></a></p>
+role="doc-noteref"><sup>8</sup></a>) always above the mypy++ results
+(blue bar), as mypy++ is a stricter type system. There are six tests in
+the dataset involving non-annotated functions, and using the weaker mypy
+typesystem causes up to five more tests to pass than using mypy++<a
+href="#fn9" class="footnote-ref" id="fnref9"
+role="doc-noteref"><sup>9</sup></a></p>
 <p>Next, we want to understand the training dynamics at play here.
 Below, we can see how Pythia 6.9b performs on the tests during training
-from step 2 to 143000: <a href="#fn9" class="footnote-ref" id="fnref9"
-role="doc-noteref"><sup>9</sup></a></p>
+from step 2 to 143000: <a href="#fn10" class="footnote-ref" id="fnref10"
+role="doc-noteref"><sup>10</sup></a></p>
 <figure id="fig:hl_moral">
 <img src="images/hl_mypy_vs_grep_revisions.svg"
-alt="Figure 4: A plot showing how often the Pythia 6.9b produces code that typechecks on the tests, vs produces code that does not go wrong." />
-<figcaption aria-hidden="true">Figure 4: A plot showing how often the
+alt="Figure 3: A plot showing how often the Pythia 6.9b produces code that typechecks on the tests, vs produces code that does not go wrong." />
+<figcaption aria-hidden="true">Figure 3: A plot showing how often the
 Pythia 6.9b produces code that typechecks on the tests, vs produces code
 that does not go wrong.</figcaption>
 </figure>
@@ -606,8 +600,8 @@ occurrence.</p>
 class="header-section-number">3.3</span> Extracting Reading Vectors</h2>
 <p>Prior work focused their probing on a single layer, often handpicked
 based on prior papers. We probe all layers instead. We use Mass Mean
-Shift probing<a href="#fn10" class="footnote-ref" id="fnref10"
-role="doc-noteref"><sup>10</sup></a> for each layer, because it’s been
+Shift probing<a href="#fn11" class="footnote-ref" id="fnref11"
+role="doc-noteref"><sup>11</sup></a> for each layer, because it’s been
 shown empirically <span class="citation" data-cites="li24">(Li et al.
 2024)</span> to generalize better in high dimensional spaces than
 logistic regression.</p>
@@ -621,12 +615,12 @@ data varies over both model size and number of training steps.
 results" section like tilde?</span></p>
 <figure id="fig:mm-vs-mmlr-sizes">
 <img src="images/mm-vs-mmlr.svg"
-alt="Figure 5: The performance of pure mass means shift vs mass means shift with linear regression for different Pythia model sizes. Lower is better." />
-<figcaption aria-hidden="true">Figure 5: The performance of pure mass
+alt="Figure 4: The performance of pure mass means shift vs mass means shift with linear regression for different Pythia model sizes. Lower is better." />
+<figcaption aria-hidden="true">Figure 4: The performance of pure mass
 means shift vs mass means shift with linear regression for different
 Pythia model sizes. Lower is better.</figcaption>
 </figure>
-<p>In Fig. <a href="#fig:mm-vs-mmlr-sizes">5</a>, we can see that pure
+<p>In Fig. <a href="#fig:mm-vs-mmlr-sizes">4</a>, we can see that pure
 mass means probing
 <span class="aside AT">AT: add a y axis label for BCE. This should probably be a line plot.</span>
 gives lower loss for smaller models (those with less than 410 million
@@ -639,18 +633,18 @@ reproduced below.</p>
 <p>This diagram is adapted from the style of reading diagram from <span
 class="citation" data-cites="zou25">Zou et al. (2025)</span>, but only
 show the activations on tokens that represent variable loads<a
-href="#fn11" class="footnote-ref" id="fnref11"
-role="doc-noteref"><sup>11</sup></a>. For each position of interest, we
+href="#fn12" class="footnote-ref" id="fnref12"
+role="doc-noteref"><sup>12</sup></a>. For each position of interest, we
 prompt the model with the partial program that consists of all tokens up
 to (preceding) and including that position. We then probe the model at
 the following token. We color the box above that position based on the
 output of the probe, and a scoring threshold inferred at train-time<a
-href="#fn12" class="footnote-ref" id="fnref12"
-role="doc-noteref"><sup>12</sup></a>.</p>
+href="#fn13" class="footnote-ref" id="fnref13"
+role="doc-noteref"><sup>13</sup></a>.</p>
 <figure id="fig:reading2">
 <img src="images/reading_diagram.svg" class="inlinefig"
-alt="Figure 6: A diagram showing a simple program, and the probes nullability predictions for each variable load." />
-<figcaption aria-hidden="true">Figure 6: A diagram showing a simple
+alt="Figure 5: A diagram showing a simple program, and the probes nullability predictions for each variable load." />
+<figcaption aria-hidden="true">Figure 5: A diagram showing a simple
 program, and the probes nullability predictions for each variable
 load.</figcaption>
 </figure>
@@ -658,8 +652,8 @@ load.</figcaption>
 loads, and (correctly) all but one are marked as non-optional. The only
 nullable variable in this program is <code>result</code>, since it comes
 from <code>find_value</code> which returns <code>Optional[int]</code>.<a
-href="#fn13" class="footnote-ref" id="fnref13"
-role="doc-noteref"><sup>13</sup></a></p>
+href="#fn14" class="footnote-ref" id="fnref14"
+role="doc-noteref"><sup>14</sup></a></p>
 <h2 data-number="3.5" id="sec:results"><span
 class="header-section-number">3.5</span> Probing Results Across Training
 and Scale</h2>
@@ -668,17 +662,17 @@ across time and scale <span class="citation"
 data-cites="tigges24">(Tigges et al. 2024)</span>. We use mass-means
 shift probing <span class="citation" data-cites="li24">(Li et al.
 2024)</span> on all layers, and a linear regression to determine the
-weights of each layer.<a href="#fn14" class="footnote-ref" id="fnref14"
-role="doc-noteref"><sup>14</sup></a>
+weights of each layer.<a href="#fn15" class="footnote-ref" id="fnref15"
+role="doc-noteref"><sup>15</sup></a>
 <span class="aside AT">AT: see appendix D for mm vs LR</span></p>
 <figure id="fig:models-and-steps">
 <img src="images/accuracy_during_pretraining.svg"
-alt="Figure 7: The performance (probe test loss) of each Pythia model size during pretraining. Lower is better." />
-<figcaption aria-hidden="true">Figure 7: The performance (probe test
+alt="Figure 6: The performance (probe test loss) of each Pythia model size during pretraining. Lower is better." />
+<figcaption aria-hidden="true">Figure 6: The performance (probe test
 loss) of each Pythia model size during pretraining. Lower is
 better.</figcaption>
 </figure>
-<p>In fig. <a href="#fig:models-and-steps">7</a>, we plot loss against
+<p>In fig. <a href="#fig:models-and-steps">6</a>, we plot loss against
 scale and time. While we measured accuracy for every available Pythia
 model size, we exclude the smallest (14m) from this plot since it would
 exist entirely above the top of the plot.</p>
@@ -1204,11 +1198,11 @@ this to return a Number that can be added to one.</p>
 <h2 class="unnumbered" id="across-time">C.2 Across Time</h2>
 <figure id="fig:hl_time">
 <img src="images/hl_revision_results.svg"
-alt="Figure 8: A line graph showing how the performance of the Pythia 6.9 model changes during training" />
-<figcaption aria-hidden="true">Figure 8: A line graph showing how the
+alt="Figure 7: A line graph showing how the performance of the Pythia 6.9 model changes during training" />
+<figcaption aria-hidden="true">Figure 7: A line graph showing how the
 performance of the Pythia 6.9 model changes during training</figcaption>
 </figure>
-<p>We say in fig. <a href="#fig:hl_time">8</a> that while the model
+<p>We say in fig. <a href="#fig:hl_time">7</a> that while the model
 generally gets better at passing these tests during training, the
 performance is not always increasing. Zooming in on a particular test,
 we can see what this looks like. When asked to complete this code:</p>
@@ -1374,43 +1368,49 @@ href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 typechecking as reinforcement feedback, you would want to use mypy++ and
 not mypy.<a href="#fnref7" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn8"><p>We don’t see all six non-annotated function tests
+<li id="fn8"><p>Deepseek has one model output that demonstrates complete
+understanding of nullability, and runs fine at runtime, but fails the
+typechecker. This is because the code it generates catches the
+<code>TypeError</code> and changes control flow instead of checking for
+<code>None</code> values up front.<a href="#fnref8"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p>We don’t see all six non-annotated function tests
 passing under mypy, because models can still fail these tests by
-producing invalid syntax.<a href="#fnref8" class="footnote-back"
+producing invalid syntax.<a href="#fnref9" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn9"><p>smoothed with a rolling average with a window size of
-5<a href="#fnref9" class="footnote-back"
+<li id="fn10"><p>smoothed with a rolling average with a window size of
+5<a href="#fnref10" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn10"><p>That is, we set the reading vector to the difference
+<li id="fn11"><p>That is, we set the reading vector to the difference
 between the mean activation for positive class and the mean activation
-for the negative class.<a href="#fnref10" class="footnote-back"
+for the negative class.<a href="#fnref11" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn11"><p>This is, of course, where we trained our probes, but
+<li id="fn12"><p>This is, of course, where we trained our probes, but
 there is also a practical reason: right after the model has generated a
 variable that will be written to, it often does not have access to the
 assigning expression or type annotation, giving it no way to determine
-if the value will be optional or now.<a href="#fnref11"
+if the value will be optional or now.<a href="#fnref12"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn12"><p>Red tokens are significantly below the threshold, and
+<li id="fn13"><p>Red tokens are significantly below the threshold, and
 green tokens are significantly above it; tokens that scored near the
 threshold would have a near-white color, but no such tokens appear in
-this example.<a href="#fnref12" class="footnote-back"
+this example.<a href="#fnref13" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn13"><p>When this variable appears for the first time, it is in
+<li id="fn14"><p>When this variable appears for the first time, it is in
 the <code>if</code> statement that checks if it’s <code>None</code>.
 Then, the model knows it is nullable, and the results of the probe
 reflect that understanding. But when it appears a second time on the
 next line, in the format string of <code>print</code>, the body of this
 if statement only runs if it is <em>not</em> <code>None</code>. The
 model understand this as well, and the probe accurately reflects this.<a
-href="#fnref13" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn14"><p> <span class="citation" data-cites="li24">Li et al.
+href="#fnref14" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn15"><p> <span class="citation" data-cites="li24">Li et al.
 (2024)</span> and <span class="citation" data-cites="zou25">Zou et al.
 (2025)</span> suggest that mass means probes are best for reading, while
 the direction perpendicular to the separating hyperplane is best for
 intervention. However, previous work leaves open the question of
 cross-layer weights. We use LR on the cross-layer weights, thanks to our
-investigations above.<a href="#fnref14" class="footnote-back"
+investigations above.<a href="#fnref15" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>

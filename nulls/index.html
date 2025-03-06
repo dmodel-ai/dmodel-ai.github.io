@@ -5,7 +5,7 @@
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <meta name="author" content="Alex Sanchez-Stern and Anish Tondwalkar" />
-  <title>Understanding Models Understanding Nullability</title>
+  <title>How Language Models Understand Nullability</title>
   <style>
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
@@ -131,7 +131,7 @@
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">Understanding Models Understanding Nullability</h1>
+<h1 class="title">How Language Models Understand Nullability</h1>
 <p class="author"><a href="https://www.alexsanchezstern.com">Alex
 Sanchez-Stern</a> and <a href="https://ani.sh">Anish Tondwalkar</a></p>
 <p class="date"><span class="math inline">d_{model}</span></p>
@@ -569,10 +569,10 @@ for several concepts</figcaption>
 class="header-section-number">3.2</span> Designing Prompts to Extract
 Nullability Activations</h2>
 <p>We avoid dealing with the ambiguities of natural language by working
-in a setting where the model needs only to complete code. analyze the
-nullability of individual variable occurrences. Specifically, we probe
-for “the variable I just generated refers to an nullable quantity”, so
-our prompts looked like:</p>
+in a setting where the model needs only to analyze the nullability of
+individual variable occurrences. Specifically, we probe for “the
+variable I just generated refers to an nullable quantity”, so our
+prompts looked like:</p>
 <div class="sourceCode" id="cb8"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_1() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> find_value(data: List[<span class="bu">int</span>], target: <span class="bu">int</span>) <span class="op">-&gt;</span> Optional[<span class="bu">int</span>]:</span>

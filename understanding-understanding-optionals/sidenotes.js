@@ -123,6 +123,8 @@
       // Force layout so we can measure note height.
       const noteHeight = note.offsetHeight;
       figureElements.forEach((fig, fidx) => {
+          if (fig.matches("figure:has(> .inlinefig)"))
+              return
           figRect = fig.getBoundingClientRect();
           figTop = window.scrollY + figRect.top;
           figBottom = window.scrollY + figRect.bottom;

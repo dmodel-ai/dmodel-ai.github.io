@@ -224,7 +224,7 @@ read corresponds to a nullable variable, and show that internal
 knowledge like so:
 
 ![A diagram showing a simple program, and the probes nullability
- predictions for each variable load.](images/reading_diagram.svg)
+ predictions for each variable load.](images/reading_diagram.svg){#fig:reading1 .inlinefig}
 
 In [@Sec:bench] we'll describe our external tests of nullability
 understanding in more detail, and in [@Sec:probing] we'll describe
@@ -732,7 +732,7 @@ threshold would have a near-white color, but no such tokens appear in
 this example.].
 
 ![A diagram showing a simple program, and the probes nullability
- predictions for each variable load.](images/reading_diagram.svg)
+ predictions for each variable load.](images/reading_diagram.svg){#fig:reading2 .inlinefig}
 
 We can see here sixteen tokens that correspond to variable reads in
 the program, and all but one are probed as non-optional

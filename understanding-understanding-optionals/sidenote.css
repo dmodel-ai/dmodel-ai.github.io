@@ -25,6 +25,14 @@ figcaption{
     justify-content: center
 }
 
+figure:has(> .inlinefig) {
+    max-width: 36em;
+    margin-left: 0;
+}
+
+figure:has(> .inlinefig) figcaption {
+    max-width: 36em;
+}
 
 .aside {
     position: absolute;

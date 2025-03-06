@@ -459,7 +459,6 @@ which are aligned, and away from the states that are not aligned. This
 vector can then be used as a linear model to measure how much of the
 concept is activated in the model during any given forward pass (e.g. for honesty,
 this gives us a lie-detector).
-\AT{ formatting citekey in figcap}
 
 ![Figure from $\hspace{0.1cm}$ @zou25 $\hspace{0.1cm}$ showing the reading outputs for several
  concepts](images/zhou.png)

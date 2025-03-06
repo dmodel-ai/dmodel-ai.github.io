@@ -64,13 +64,13 @@ In this work:
 * We introduce a microbenchmark of 15 programs that test basic model
   understanding of the flow of nullability through a program.
 
-* We find that models develop an internal concept of
-  nullability as they scale up and are trained for longer. ([@sec:probing])
-
 * We find that models begin to understand nullability in a local
   scope, satisfying many requirements of the python typechecker,
   before they start to understand how nullability flows across the
   program. ([@sec:testing])
+
+* We find that models develop an internal concept of nullability as
+  they scale up and are trained for longer. ([@sec:probing])
 
 # Overview
 

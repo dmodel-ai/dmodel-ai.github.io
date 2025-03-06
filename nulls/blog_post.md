@@ -304,8 +304,8 @@ non-`Any`, type for the function that typechecks at the call site and
 in the function body. This new typechecker is still checking
 unannotated functions, but passing fewer of them.^[In particular, it
 won't pass a `process_value` body that just returns the `value`
-argument, since the call site will fail at runtime trying to add one
-to a nullable string, while default mypy will pass such a body.] We'll
+argument, since the call site will fail at runtime, trying to add one
+to a nullable string, while vanilla mypy will pass such a body.] We'll
 call this augmented type system mypy++.
 
 In Appendix [B.2](#sec:unannotatedfuncs), we formalize the unannotated
@@ -360,7 +360,7 @@ branch. With two layers of indirection, we start to hit the limits of
 the capabilities of even frontier models. Llama 405b is unable to
 successfully pass this test, as are smaller models like Qwen Coder
 32b, while DeepSeek V3 (671b parameters) is able to pass it. However,
-Pythia 6.9b is still able to pass this test pretty consistently.
+Pythia 6.9b is still able to pass this test with some consistency.
 
 ## Generating Type Annotations
 

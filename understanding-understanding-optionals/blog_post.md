@@ -416,12 +416,13 @@ understanding.](images/hl_mypy_vs_grep_revisions.svg){#fig:hl_moral}
 At this point, we’ve figured out how to roughly measure nullability
 understanding in the output of various language models, but we still
 don’t know what their internal representations might look like or when
-they emerge. In this section, we detail how we train reading vectors
-[@sec:extraction], using prompts designed to make the model think about
-the phenomena of interest [@sec:prompts]. Finally [@sec:results], we validate that
-these probes improve their understanding of nullability over the course
-of pretraining to the level that we expect from the external, or token-level
-understanding evals we describe in the previous section.
+they emerge. Next, we detail how we train reading vectors
+([@Sec:extraction]), using prompts designed to make the model think
+about the phenomena of interest ([@Sec:prompts]). Finally,
+in [@Sec:results], we validate that these probes improve their
+understanding of nullability over the course of pretraining to the
+level that we expect from the external, or token-level understanding
+evals we describe in the previous section.
 
 ## Background
 

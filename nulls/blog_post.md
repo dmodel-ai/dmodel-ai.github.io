@@ -141,7 +141,8 @@ def main() -> None:
   for num in some_numbers:
 ```
 
-The simplest way to pass this test is to introduce a branch `if num is None`,
+We would like the mode to generate code that performs some operation on the elements of `some_numbers`.
+The simplest way to do that is to introduce a branch `if num is None`,
 but several variants are also valid: `if num is not None`, `if num ==
 None`, `if isinstance(num, int)`. That is, this example is constructed such
 that there is a small space

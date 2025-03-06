@@ -392,13 +392,10 @@ model.
  high-level nullability tests](images/hl_model_results.svg){#fig:hl_scale}
 
 In [@Fig:hl_scale], we can see the number of passing tests for each
-model. \todo{want to say: "We can see that, generally speaking, models get better with scale.
-Model performance on these tests is
-approximately logarithmic in model size: models of 2.8 billion
-parameters can pass about half the tests, but it takes more than 405
-billion parameters to pass all of the tests. This matches previous
-post- and pre-training evaluations of the capabilities of large
-language models, indicating that these tests are well distributed." but can't compare pythia params to llama 3 params }
+model. We can see that, generally speaking, models get better with scale: Pythia-2.8b
+parameters can pass about half the tests, but we need the much larger and more
+parameter efficient Llama-405b to pass all of the tests. This matches our expectations
+that eval scores should scale logarithmically, indicating that these tests are well distributed.
 
 ![A bar plot showing how the Pythia models perform in mypy vs
  mypy++](images/hl_mypy_vs_grep_models.svg){#fig:hl_mypy}

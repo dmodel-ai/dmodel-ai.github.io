@@ -1,5 +1,5 @@
 ---
-title: Understanding Models Understanding Nullability
+title: How Language Models Understand Nullability
 author: '[Alex Sanchez-Stern](https://www.alexsanchezstern.com) and [Anish Tondwalkar](https://ani.sh)'
 date: '$d_{model}$'
 header-includes:

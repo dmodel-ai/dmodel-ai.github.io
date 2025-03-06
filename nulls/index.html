@@ -450,7 +450,7 @@ layers of indirection, we start to hit the limits of the capabilities of
 even frontier models. Llama 405b is unable to successfully pass this
 test, as are smaller models like Qwen Coder 32b, while DeepSeek V3 (671b
 parameters) is able to pass it. However, Pythia 6.9b is still able to
-pass this test pretty consistently.</p>
+pass this test with some consistency.</p>
 <h2 data-number="2.4" id="generating-type-annotations"><span
 class="header-section-number">2.4</span> Generating Type
 Annotations</h2>
@@ -1357,8 +1357,8 @@ Gradual Typing, as introduced by Siek et al.<a href="#fnref4"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn5"><p>In particular, it won’t pass a
 <code>process_value</code> body that just returns the <code>value</code>
-argument, since the call site will fail at runtime trying to add one to
-a nullable string, while default mypy will pass such a body.<a
+argument, since the call site will fail at runtime, trying to add one to
+a nullable string, while vanilla mypy will pass such a body.<a
 href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn6"><p>Despite this, it does pass the test 40% of the available
 revisions, about triple what the other closest sizes can accomplish<a

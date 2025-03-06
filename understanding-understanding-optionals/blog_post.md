@@ -657,22 +657,21 @@ tokens up to and including the variable read occurrence.
 
 \AT{Overall, I'm not really sure what our takeaway is for this section. I think we want the reader to understand that we did some experiements with mass mean probing and the various normalization mehtods, but I'm not sure we're making any compelling point here beyond "we ran the experiment". I think we can appendicize the latter two plots --- they look pretty noisy, and I'm not sure they're acutally something to draw conclusions from}
 
-We use Mass Mean Shift probing which has been shown empirically
-[@li24] to generalize better in high dimensional spaces than logistic
-regression^[Since we don't have contrasting pairs, just labeled points,
-it's not possible to use the PCA from contrasting pairs method used in
-@marks24 and @zou25. See "Mass Mean Probing vs Linear Regression" in the
-appendix].
-
 Prior work focused their probing on a single layer, often handpicked
 based on prior papers. In our experiments, we decided to probe *all*
-layers using a mass means probe, and learn which ones were most
-important from the data. We tested two methods for doing so - either
-allowing the magnitude of the difference of means vector to determine
-the importance of the layer in the final probe, or to learn
-coefficients for each layer using linear regression. We found that
-which method is more accurate on test data varies over both model size
-and number of training steps.
+layers instead. We use Mass Mean Shift probing for each layer, because
+it's been shown empirically [@li24] to generalize better in high
+dimensional spaces than logistic regression^[Since we don't have
+contrasting pairs, just labeled points, it's not possible to use the
+PCA from contrasting pairs method used in @marks24 and @zou25. See
+"Mass Mean Probing vs Linear Regression" in the appendix].
+
+We then tested two methods for determining the relative importance of
+the different layers- either allowing the magnitude of the difference
+of means vector to determine the importance of the layer in the final
+probe, or to learn coefficients for each layer using linear
+regression. We found that which method is more accurate on test data
+varies over both model size and number of training steps.
 
 <!-- In the reading vector, the impact of each layer is based on the
 magnitude of mean difference in that layer.

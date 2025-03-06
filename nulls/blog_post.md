@@ -141,7 +141,7 @@ def main() -> None:
   for num in some_numbers:
 ```
 
-\todo{What about `return`?}
+\todo{What about `return`? Replace this with an example that makes more sense?}
 The simplest way to pass this test is to introduce a branch `if num is None`,
 but several variants are also valid: `if num is not None`, `if num ==
 None`, `if isinstance(num, int)`. That is, this example is constructed such
@@ -155,7 +155,7 @@ nullability understanding by asking them to complete the program's next lines, t
 
 We see from the results of our first test that these models understand
 nullability to some extent, but how deep is this understanding? To
-start to quantify this, we give a syntax and semantics of a minimalist
+quantify this, we give a syntax and semantics of a minimalist
 subset of python that captures nullability in Appendix
 [B.1](#sec:commonrules). We can then classify each partial program by
 which program constructs and rules determine the nullability of the
@@ -188,7 +188,7 @@ bar: list[int] = []
 for corejoice in foo:
 ```
 
-causes all the Pythia models to fail the test. Our results show that
+causes all the Pythia models to fail the test. Our results\AT{ what results? add a figure/table/plot} show that
 the Pythia models rely heavily on features like variable naming when
 reasoning about for loops.  Fortunately, many other typing rules, like
 $(App)$ (function application) and $(IfOut)$, do not exhibit such a strong
@@ -283,26 +283,27 @@ fact would still fail.
 
 ### A stricter type system for Python: mypy++ {#sec:mypypp}
 
-If we want code that actually makes sense at runtime, we can
-strengthen our type checker a bit by requiring that there be some
-valid (non-Any) type for the function that works both at the call site
-and in the function body. We still won't be requiring that this type
-is actually written down anywhere, but we will be requiring that it
-exist. We'll call this augmented type system mypy++.
+If we want code that does not `TypeError` at runtime, we can
+strengthen our type checker by requiring that there be some
+valid, non-`Any`, type^[Technically in python you could still use a union type
+to cause a dynamic cast failure, but we don't have those in our simplified
+subset of python] for the function that typechecks at the call site
+and in the function body. This type need not appear in the source code,
+but is required to exist. We'll call this augmented type system mypy++.
 
 In Appendix [B.2](#sec:unannotatedfuncs), we formalize the unannotated
 function rules for mypy vs mypy++.
 
-Test 3 is a bit trickier than our previous ones, and we find that
-there's no consistent threshold of size at which Pythia models can
-pass it. Pythia 1b, 2.8b, and 6.9b pass the test in their final
-revisions, but Pythia 410m, 1.4b, and 12b don't. The bigger models all
+There's no consistent threshold of size at which Pythia models can
+pass Test 3. Pythia 1b, 2.8b, and 6.9b pass the test in their final
+revisions, but Pythia 410m, 1.4b, and 12b don't. The bigger\AT{how big?} models all
 have points in training where they can pass the test, but only
 intermittently. Even 6.9b, the best performing size on this test,
 fails the test in its second-to-last available revision^[Despite this,
 it does pass the test 40% of the available revisions, about triple
-what the other closest sizes can accomplish]. You can see how this evolves over time in @fig:hl_mypy.
+what the other closest sizes can accomplish]. You can see how this evolves over scale in @fig:hl_mypy and time in @fig:hl_moral.
 See @sec:results for further discussion of performance over time.
+\AT{add a table of what we're actually claiming here (probably in the appendix) rather than referencing the performance on the overall test suite}
 
 What the models *can* do well, however, is learn to pass these tests
 in the mypy type system (as opposed to mypy++). In that system, where
@@ -343,19 +344,9 @@ Pythia 6.9B is still able to pass this test pretty consistently.
 
 ## Generating Type Annotations
 
-Finally, we can test how good the models are at writing their own type
-annotations for functions. Since most of the publicly available Python
-code is not type-annotated, you could imagine that LLM's can reason
-about dataflow correctness without annotations better than they can
-write their own typing annotations. The next program tests the models
-ability to write its own type annotations; the trailling colon makes
-the type expression the only valid completion^[This is because
-function declarations with a colon and no type, like `def fn(x:)` are
-not valid python. Since we’ve already seen a usage of `get_square`
-that is passed a None value, it wouldn’t be type-valid to complete the
-program with just `int`. So a model can be tested on its understanding
-of `Optional` annotations by seeing if its completion of the partial
-program includes `Optional[int]`.]
+Finally, we can test how well the models write write type
+annotations for functions. Here, the trailling colon makes
+the type expression the only valid completion.
 
 *Test 5*:
 ```python
@@ -370,11 +361,13 @@ def program_48() -> None:
 def get_square(number:
 ```
 
-None of the Pythia models are able to succesfully pass this test,
-demonstrating that writing these annotations is indeed more difficult
-for LLM's than implicitly reasoning about the types. Qwen Coder 32B is
+None of the Pythia models pass this test. Qwen Coder 32B is
 also incapable of passing this test, but both Llama 405B and DeepSeek
 V3 pass it.
+
+We would indeed expect that writing type annotations is more difficult than merely
+implicitly reasoning about the types of python programs, as only a small
+fraction of python programs in the wild are thus annotated.
 
 ## External Test Results Across Training and Scale {#sec:eval_results}
 

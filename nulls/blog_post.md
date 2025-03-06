@@ -293,9 +293,9 @@ Any, and an Any can be converted to any value type.
 This means that it would be technically type safe to do anything in
 the body of `process_value`, including just returning the argument,
 without a static type error. All Pythia models with at least 410
-million parameters are able to make use of this to write code for Test
-3 that typechecks under mypy. But at runtime, code that exploits this
-fact would still fail.
+million parameters are able to make use of this extra flexibility to
+write code for Test 3 that typechecks under mypy. But at runtime, code
+that exploits it would still fail.
 
 ### A stricter type system for Python: mypy++ {#sec:mypypp}
 

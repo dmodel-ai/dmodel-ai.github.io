@@ -118,9 +118,9 @@ true under any typing environment, including the empty one.
 
 $$
 \tag{Const}
-\frac{Constant\neq\texttt{None}}{\vdash Constant: \text{Atom}}\\
+\frac{Constant\neq\texttt{None}}{\vdash Constant: \text{Atom}}
 \hspace{1.0cm}
-\frac{}{\forall t, \vdash \texttt{None}: \texttt{Optional[$t$]}}\\
+\frac{}{\forall t, \vdash \texttt{None}: \texttt{Optional[$t$]}}
 $$
 
 $$
@@ -144,7 +144,7 @@ $$
 $$
 
 \begin{gather}
-\Gamma, x_1: t_1, x_2: t_2, ... \vdash [b] \vartriangleright \text{ok}\\
+\Gamma, x_1: t_1, x_2: t_2, ... \vdash [b] \vartriangleright \text{ok}\nonumber\\
 \tag{Def}
 \Gamma, f : t_1 \rightarrow t_2 ... \rightarrow t_r \vdash [p] \vartriangleright \text{ok} \hspace{1cm} \Gamma \vdash \text{Returns($b$, $t_r$)}
 \over
@@ -284,8 +284,8 @@ $$
 $$
 
 \begin{gather}
-\Gamma \vdash \left(\text{Returns($p_1$, $t$)} \land \text{Returns($p_2$, $t$)}\right)\lor \\
-\Gamma \vdash \left(\text{Returns($p_1$, $t$)} \land \text{NoReturns($p_2$)}\right) \lor\\
+\Gamma \vdash \left(\text{Returns($p_1$, $t$)} \land \text{Returns($p_2$, $t$)}\right)\lor \nonumber\\
+\Gamma \vdash \left(\text{Returns($p_1$, $t$)} \land \text{NoReturns($p_2$)}\right) \lor\nonumber\\
 \tag{ReturnIfElse}
 \Gamma \vdash \left(\text{NoReturns($p_1$)} \land \text{Returns($p_2$, $t$)}\right)
 \over

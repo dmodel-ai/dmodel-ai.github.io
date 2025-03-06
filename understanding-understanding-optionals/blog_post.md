@@ -14,7 +14,7 @@ abstract:
   work has demonstrated that it is possible to extract internal
   representations of natural language concepts, raising the
   possibility that similar techniques could be used to extract program
-  semantics concepts. In this work we study how large language models
+  semantics concepts. In this work, we study how large language models
   represent the nullability of program values. We measure how well
   models of various sizes complete programs that use nullable values,
   and then extract an internal representation of nullability.
@@ -25,20 +25,20 @@ abstract:
 
 The last five years have shown us that large language models, like
 ChatGPT, Claude, and DeepSeek, can effectively write programs in many
-domains.\AT{cite} This is an impressive capability given that writing
-programs involves having a working understanding of many aspects of
+domains. This is an impressive capability, given that writing
+programs involves having a formal understanding of
 program semantics. But though we know that these large models
 understand programs to an extent, we still don't know many things
-about these models understanding. We don’t know where they have deep
+about these models' understanding. We don’t know where they have deep
 understanding and where they use heuristic reasoning, how they
 represents program knowledge, and what kinds of situations will
 challenge their capabilities.
 
 Fortunately, recent work in model interpretability and representation
-engineering\AT{which work?} has produced promising results which give
+engineering\AT{reframe. recent tools let us....} has produced promising results which give
 hope towards understanding more and more of the internal thought
 processes of LLMs. Here at $d_{model}$ , we can think of no better
-place to apply these new techniques than program understanding, where
+place to apply these new techniques than formal methods, where
 there are many abstract properties that can be extracted with static
 analysis. The vast work done in programming language theory over the
 past hundred years provides many tools for scaling an understanding of
@@ -80,11 +80,32 @@ knowledge like so:
 ![A diagram showing a simple program, and the probes nullability
  predictions for each variable load.](images/reading_diagram.svg){#fig:reading1 .inlinefig}
 
-# Measuring Nullability Understanding Externally\AT{Externally = token-level?} {#sec:testing}
+# Measuring Nullability Understanding Externally {#sec:testing}
 
-We begin by measuring model nullability understanding externally,
-because it provides a "skyline," or upper-bound, on our ability to
-extract internal concepts of nullability.
+We begin with a "skyline" estimate of model understanding of nullability
+(a la @feng24binding).
+That is, we evaluate model nullability understanding externally,
+at the token-level, (as opposite to internally, at the activation level,
+using interpretability techniques). In this section, we first
+explain the task of nullability understanding ([@sec:task]). Then
+we formally decompose the reasoning steps required to reason about
+nullability both inside ([@sec:intra]) and across ([@sec:inter]) functions.
+Finally, we present the results of our "skyline" analysis. ([@sec:eval_results]).
+
+We find that Pythia models as small as 2.8b can successfully complete
+this test, and that they learn to complete the test in the first third
+of training. Consistent with observations that larger models are more sample-efficient \AT{who do I cite for this claim? Kaplan?},
+larger Pythia models learn to complete this test earlier,
+with Pythia 12b able to complete the test 20% of the way into training
+and Pythia 2.8b able to complete it 28% of the way into
+training.
+
+Note that these results differ substantially from those of @tigges24, who find
+that for _circuit_ analyses (rather than representational analyses like ours),
+circuit parts are learned at roughly the same point during training across
+scale.
+
+## `NullabilityEval` {#sec:task}
 
 To measure nullability understanding externally, we ask the model to
 complete simple partial programs that each require an understanding of
@@ -112,16 +133,7 @@ can’t be directly appended to `result`, because `result` is declared
 to only contain `int`s, not `Optional[int]`s. None of the normal
 operations on `int`s will work on `None`s, so before `num` can be
 processed, something has to be done to separate `None`s and normal
-`int`s.
-The simplest way to do this is to introduce a branch `if num is None`,
-but several variants are also valid: `if num is not None`, `if num ==
-None`, `if isinstance(num, int)`. Since this is a pretty small space
-of valid next lines, and all of them imply some understanding that
-`num` may not be an `int`, we can use this program to test models for
-nullability understanding by asking them to complete the program
-another lines, then see if they produce something that matches these
-valid lines with the regular expression
-`num\s*(is\s*(not)?|==)\s*None|isinstance\(num`.]:
+`int`s.]
 ```python
 def main() -> None:
   some_numbers = [1, -4, None, -3, 10, -1, None, None, 8]
@@ -129,15 +141,17 @@ def main() -> None:
   for num in some_numbers:
 ```
 
-We find that Pythia models as small as 2.8b can successfully complete
-this test, and that they learn to complete the test in the first third
-of training. Consistent with observations that larger models are more sample-efficent \AT{cite}, larger Pythia models learn to complete this test earlier,
-with Pythia 12b able to complete the test 20% of the way into training
-and Pythia 2.8b able to complete it 28% of the way into
-training.
-\AT{HEREHEREHERE}
+\todo{What about `return`?}
+The simplest way to pass this test is to introduce a branch `if num is None`,
+but several variants are also valid: `if num is not None`, `if num ==
+None`, `if isinstance(num, int)`. That is, this example is constructed such
+that there is a small space
+of valid next lines, and all of them require some understanding that
+`num` may not be an `int`.^[In particular, we can use this program to test models for
+nullability understanding by asking them to complete the program's next lines, then see if those lines matches the regular expression
+`num\s*(is\s*(not)?|==)\s*None|isinstance\(num`.]
 
-## Understanding Typing Rules
+## Understanding Typing Rules {#sec:intra}
 
 We see from the results of our first test that these models understand
 nullability to some extent, but how deep is this understanding? To
@@ -145,7 +159,7 @@ start to quantify this, we give a syntax and semantics of a minimalist
 subset of python that captures nullability in Appendix
 [B.1](#sec:commonrules). We can then classify each partial program by
 which program constructs and rules determine the nullability of the
-target variable. For instance, Test 1 uses the List, Var, and For
+target variable. For instance, Test 1 uses the $(List)$, $(Var)$, and $(For)$
 rules.
 
 So, do Pythia models 2.8b and up understand the semantics of these
@@ -177,17 +191,23 @@ for corejoice in foo:
 causes all the Pythia models to fail the test. Our results show that
 the Pythia models rely heavily on features like variable naming when
 reasoning about for loops.  Fortunately, many other typing rules, like
-App (function application) and If_Out, do not exhibit such a strong
+$(App)$ (function application) and $(IfOut)$, do not exhibit such a strong
 reliance on variable naming and constants.^[Stay tuned in the future
 for a more in-depth exploration of how the models behave on individual
 typing rules with different contexts and variable names.]
+\AT{reference Future Work section}
 
-## Interprocedural Analysis
+## Interprocedural Analysis {#sec:inter}
 
-Even without obfuscating variable names, we can challenge the model by
-adding layers of procedural indirection between the source and sink of
-nullable values, thereby testing the model's _interprocedural_
-understanding. Here's one such test:
+We can further challenge the model by adding layers of procedural indirection
+between the source and sink of nullable values, thereby testing the model's
+_interprocedural_ understanding. First, we demonstrate how to write such tests,
+and the difficulties of writing tests that may be too easy ([@sec:inter_test]).
+Then, we present a harder problem ([@sec:annot]) and introduce a stronger type system `mypy++` to formalized the needed reasoning ([@sec:mypypp]).
+
+### A simple test {#sec:inter_test}
+
+Here's a simple test for interprocedural analyses:
 
 *Test 2*
 ```python
@@ -207,7 +227,7 @@ and another function, `positive_numbers`. Ideally, the model would
 have to think a little harder to understand that `some_numbers` is
 flowing from `main` through the function call into the body of
 `positive_numbers`, causing the for loop body to need a `None`
-check. In practice though, we find this test is actually *easier* for
+check. In practice, however, we find this test is actually *easier* for
 the model to pass than Test 1, with models as small as Pythia 1b
 passing it, and Pythia 12b learning to pass it 13% of the way into
 training.
@@ -220,6 +240,8 @@ reason that `num` is nullable, so it must be checked for None before
 proceeding. Looking at the type annotation turns out to be easier for
 the model than scanning through a list to determine if there are None
 and non-None values, resulting in an easier test overall.
+
+### Annotating types {#sec:annot}
 
 So how would we *actually* test for interprocedural nullability
 understanding in the model? Well, type annotations on Python functions
@@ -259,6 +281,8 @@ This means that it would be technically type safe to do anything in
 the body of `process_value`, including just returning the argument,
 without a static type error. But at runtime, code that exploits this
 fact would still fail.
+
+### A stricter type system for Python: mypy++ {#sec:mypypp}
 
 If we want code that actually makes sense at runtime, we can
 strengthen our type checker a bit by requiring that there be some
@@ -353,37 +377,35 @@ for LLM's than implicitly reasoning about the types. Qwen Coder 32B is
 also incapable of passing this test, but both Llama 405B and DeepSeek
 V3 pass it.
 
-## External Test Results Across Training and Scale
+## External Test Results Across Training and Scale {#sec:eval_results}
 
 We wrote three variations of each of these tests, resulting in 15
 tests total. Below, you can see the number of passing tests for each
 model.
 
-\todo{more through exploration of why?}
-
 ![A bar graph showing how several sizes of model perform on the
  high-level nullability tests](images/hl_model_results.svg){#fig:hl_scale}
 
 In [@Fig:hl_scale], we can see the number of passing tests for each
-model. We can see that generally models get better with scale.
-\todo{I don't think this footnote is clear enough to add anything}
-^[Pythia 12b performs worse than its 6.9b variant, though this might
-be due to under-training at that size. Qwen 32B also performs about as
-well as Pythia 6.9b, it's not clear if this is due to model
-architecture or something else.] Model performance on these tests is
+model. We can see that, generally speaking, models get better with scale.
+Model performance on these tests is
 approximately logarithmic in model size: models of 2.8 billion
 parameters can pass about half the tests, but it takes more than 405
+\todo{can't say it like this. can't directly compare parameter counts between generations/architectures}
 billion parameters to pass all of the tests. This matches previous
 post- and pre-training evaluations of the capabilities of large
-language models\todo{cite, Kaplan et al, Chincilla}, indicating that
+language models\AS{cite, Kaplan et al, Chincilla
+AT:those cites are for loss, not evals!}, indicating that
+\AT{should we be plotting lpr? instead of raw pass rate? but log 15 is pretty small...}
 these tests are well distributed.
 
 ![A bar graph showing how the Pythia models perform in mypy vs
  mypy++](images/hl_mypy_vs_grep_models.svg){#fig:hl_mypy}
 
-In [@Fig:hl_mypy], we can see the test result for the pythia models
-using the mypy and mypy++ type systems ([@Fig:hl_scale] uses
-mypy++). As we expected, the mypy results (red bar) are always above
+\todo{let's merge these figures}
+In [@Fig:hl_mypy], we see the test result for the pythia models
+using the mypy and mypy++ type systems.
+As we expected, the mypy results (red bar) are always above
 the mypy++ results (blue bar), as mypy++ is a stricter type
 system. There are six tests in the dataset involving non-annotated
 functions, and using the weaker mypy typesystem causes up to five more
@@ -391,25 +413,18 @@ tests to pass than using mypy++^[We don't see all six non-annotated
 function tests passing under mypy, because models can still fail these
 tests by producing invalid syntax.]
 
-Next, we want to understand the training dynamics at play here. Below
+Next, we want to understand the training dynamics at play here. Below,
 we can see how Pythia 6.9b performs on the tests during training from
-step 2 to 143000:\todo{let's use the same axes scaling at the tigges
-paper}
-
-![A line graph showing how the performance of the Pythia
-6.9 model changes during training](images/hl_revision_results.svg){#fig:hl_time}
-
-Again, performance does not increase monotonically.  This plot is
-quite noisy, so in the sequel, we will show smoothed^[rolling average
-with a window size of 5] charts.
-
-In the graph below, we see that each individual model also learns to
-write code which typechecks under mypy before it learns to write code
-which typechecks under mypy++ and throws no type errors at runtime.
+step 2 to 143000: ^[smoothed with a rolling average with a window size of 5]
 
 ![A graph showing how often the Pythia 6.9b produces code that
 typechecks on the tests, vs produces code that shows true
 understanding.](images/hl_mypy_vs_grep_revisions.svg){#fig:hl_moral}
+
+We see that each individual model learns to
+write code which typechecks under mypy before it learns to write code
+which typechecks under mypy++ and throws no type errors at runtime.
+
 
 # Measuring Nullability Understanding Internally {#sec:probing}
 
@@ -425,26 +440,6 @@ level that we expect from the external, or token-level understanding
 evals we describe in the previous section.
 
 ## Background
-
-<!--
-As language models predict each token in a text, they run their tuned
-circuits over all the previous text. Tokens are first embedded into a
-high-dimensional "token space", and each layer of the transformer
-model is made up of many parallel circuits which transform the
-previous layers output into new embeddings in a new space. Each layer
-can look not just at the output of the layer directly previous, but
-actually all previous layers, through a channel called a residual
-stream.
-
-The paper presents two main approaches to interpreting a language
-model; circuit-based, and representation-based. Circuit based
-interpretability aims to pair down the network to a key set of
-circuits which are sufficient to complete a particular task; this
-allows practitioners to point to a particular part of the model and
-say "this is where \<task\> is done", much like neuroscientists assign
-functionality to different parts of our brain.
-
--->
 
 In this section, we review representation engineering [@zou25] techniques that
 we will use to look for linear representations of nullability inside the model.
@@ -547,7 +542,8 @@ LR on the cross-layer weights, thanks to our investigations above.]
  model size during pretraining. Since this graph is of loss, lower is
  better](images/accuracy_during_pretraining.svg){#fig:models-and-steps}
 
-In [@Fig:models-and-steps], we plot loss against scale and time.
+\todo{position the min loss stuff in terms of scaling laws or something}
+In [@fig:models-and-steps], we plot loss against scale and time.
 While we
 measured accuracy for every available Pythia model size, we exclude
 the smallest (14m) from this plot since it would
@@ -595,7 +591,7 @@ runs if it is *not* `None`; the probe accurately reflects this.
 Our decision to use Pythia to study feature evolution across time and scale is
 inspired by @tigges24 . They focus on classic circuits-centered
 interpretability tasks such as IOI [@wang22], Gendered-Pronoun [@mathwin],
-Greater-Than[@hanna23] , and SVA [@linzen16].
+Greater-Than [@hanna23] , and SVA [@linzen16].
 
 In our setting, we are more interested in how activations vary across inputs, to extract
 representations of nullability. @zou25 surveys techniques for

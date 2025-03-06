@@ -410,6 +410,9 @@ Number that can be added to one.
 
 ## Across Time
 
+![A line graph showing how the performance of the Pythia
+6.9 model changes during training](images/hl_revision_results.svg){#fig:hl_time}
+
 We say in @fig:hl_time that while the model generally gets better at
 passing these tests during training, the performance is not always
 increasing.  Zooming in on a particular test, we can see what this

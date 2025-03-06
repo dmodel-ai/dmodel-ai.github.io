@@ -305,7 +305,7 @@ in the function body. This new typechecker is still checking
 unannotated functions, but passing fewer of them.^[In particular, it
 won't pass a `process_value` body that just returns the `value`
 argument, since the call site will fail at runtime trying to add one
-to a nullable string, while default mypy will pass such a body] We'll
+to a nullable string, while default mypy will pass such a body.] We'll
 call this augmented type system mypy++.
 
 In Appendix [B.2](#sec:unannotatedfuncs), we formalize the unannotated

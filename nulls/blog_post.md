@@ -527,7 +527,8 @@ regression gives lower loss consistently.
 
 ## Visualizing Probe Outputs
 
-Let us return to the reading diagram from the introduction.
+Let us return to the reading diagram from the introduction, reproduced
+below.
 
 This diagram is adapted from the style of reading diagram from @zou25, but only
 show the activations on tokens that represent variable loads^[This is, of course, where we trained our probes, but there is also a practical

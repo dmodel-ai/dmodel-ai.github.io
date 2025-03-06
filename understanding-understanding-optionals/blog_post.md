@@ -785,7 +785,7 @@ runs if it is *not* `None`; the probe accurately reflects this.
 
 Our decision to use Pythia to study feature evolution across time and scale is
 inspired by @tigges24 . They focus on classic circuits-centered
-interpretability tasks such as IOI[@wang22], Gendered-Pronoun[@mathwin], Greater-Than[@hanna23] , and SVA [@linzen16].
+interpretability tasks such as IOI [@wang22], Gendered-Pronoun [@mathwin], Greater-Than[@hanna23] , and SVA [@linzen16].
 
 In our setting, we are more interested in how activations vary across inputs, to extract
 representations of nullability. @zou25 surveys techniques for

@@ -317,15 +317,15 @@ Understanding
 Externally<span class="aside AT">AT: Externally = token-level?</span></h1>
 <p>We begin by measuring model nullability understanding externally,
 because it provides a “skyline” or upper-bound estimate on our ability
-to extract internal concepts of nullability. To do this, we have the
-model complete simple partial programs that require an understanding of
-nullability. We refer to this suite of programs as
+to extract internal concepts of nullability.</p>
+<p>We have the model complete simple partial programs that require an
+understanding of nullability. We refer to this suite of programs as
 <code>NullabilityEval</code>. All of the tests in this benchmark suite
 are composed of three functions or less, where the largest function is
 seven lines long.</p>
 <p>We measure the difficulty of these tests by measuring how models of
 different sizes perform. We pay particular focus to the Pythia model
-suite<span class="citation" data-cites="biderman23">(Biderman et al.
+suite <span class="citation" data-cites="biderman23">(Biderman et al.
 2023)</span>, as they have checkpoints available across training runs
 and various scales. For measuring performance at larger sizes, we’ve
 included Qwen2.5-Coder-32B<span class="aside AT">AT: cite</span>, Llama
@@ -345,9 +345,12 @@ demonstrate some knowledge of the concept of nullability.<a href="#fn2"
 class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
 <p>We find that Pythia models as small as 2.8b can successfully complete
 this test, and that they learn to complete the test in the first third
-of training. Larger Pythia models learn to complete this test earlier,
-with Pythia 12b able to complete the test 20% of the way into training
-and Pythia 2.8b able to complete it 28% of the way into training.</p>
+of training. Consistent with observations that larger models are more
+sample-efficent <span class="aside AT">AT: cite</span>, larger Pythia
+models learn to complete this test earlier, with Pythia 12b able to
+complete the test 20% of the way into training and Pythia 2.8b able to
+complete it 28% of the way into training.
+<span class="aside AT">AT: HEREHEREHERE</span></p>
 <h2 data-number="3.1" id="understanding-typing-rules"><span
 class="header-section-number">3.1</span> Understanding Typing Rules</h2>
 <p>How deep is this understanding of nullability? We give a syntax and

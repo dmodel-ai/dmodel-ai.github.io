@@ -406,19 +406,19 @@ and more parameter efficient Llama-405b to pass all of the tests. This
 matches our expectations that eval scores should scale
 logarithmically, indicating that these tests are well distributed.
 
-\todo{let's merge these figures} We can also see the test result for
-the pythia models under the weaker mypy success criteria.  As we
-expected, the mypy results (red bar) are (almost^[Deepseek has one
-model output that demonstrates complete understanding of nullability,
-and runs fine at runtime, but fails the typechecker. This is because
-the code it generates catches the `TypeError` and changes control flow
-instead of checking for `None` values up front.]) always above the
-mypy++ results (blue bar), as mypy++ is a stricter type system. There
-are six tests in the dataset involving non-annotated functions, and
-using the weaker mypy typesystem causes up to five more tests to pass
-than using mypy++^[We don't see all six non-annotated function tests
-passing under mypy, because models can still fail these tests by
-producing invalid syntax.]
+We can also see the test result for the pythia models under the weaker
+mypy success criteria.  As we expected, the mypy results (red bar) are
+(almost^[Deepseek has one model output that demonstrates complete
+understanding of nullability, and runs fine at runtime, but fails the
+typechecker. This is because the code it generates catches the
+`TypeError` and changes control flow instead of checking for `None`
+values up front.]) always above the mypy++ results (blue bar), as
+mypy++ is a stricter type system. There are six tests in the dataset
+involving non-annotated functions, and using the weaker mypy
+typesystem causes up to five more tests to pass than using mypy++^[We
+don't see all six non-annotated function tests passing under mypy,
+because models can still fail these tests by producing invalid
+syntax.]
 
 Next, we want to understand the training dynamics at play here. Below,
 we can see how Pythia 6.9b performs on the tests during training from
@@ -512,7 +512,7 @@ difference between the mean activation for positive class and the mean
 activation for the negative class.]
 for each layer, because it's been shown empirically
 [@li24] to generalize better in high dimensional spaces than logistic
-regression. 
+regression.
 
 We then tested two methods for determining the relative importance of
 the different layers --- either allowing the magnitude of the

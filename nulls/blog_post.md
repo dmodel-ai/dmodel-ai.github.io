@@ -67,10 +67,10 @@ In this work:
 * We find that models begin to understand nullability in a local
   scope, satisfying many requirements of the python typechecker,
   before they start to understand how nullability flows across the
-  program. ([@sec:testing])
+  program. ([@Sec:testing])
 
 * We find that models develop an internal concept of nullability as
-  they scale up and are trained for longer. ([@sec:probing])
+  they scale up and are trained for longer. ([@Sec:probing])
 
 We end with a demo: after we train a probe that uses the
 determines whether the model thinks a variable
@@ -87,10 +87,10 @@ We begin with a "skyline" estimate of model understanding of nullability
 That is, we evaluate model nullability understanding externally,
 at the token-level, (as opposite to internally, at the activation level,
 using interpretability techniques). In this section, we first
-explain the task of nullability understanding ([@sec:task]). Then
+explain the task of nullability understanding ([@Sec:task]). Then
 we formally decompose the reasoning steps required to reason about
-nullability both inside ([@sec:intra]) and across ([@sec:inter]) functions.
-Finally, we present the results of our "skyline" analysis. ([@sec:eval_results]).
+nullability both inside ([@Sec:intra]) and across ([@Sec:inter]) functions.
+Finally, we present the results of our "skyline" analysis. ([@Sec:eval_results]).
 
 We find that Pythia models as small as 2.8b can successfully complete
 this test, and that they learn to complete the test in the first third
@@ -205,7 +205,7 @@ reliance on variable naming and constants. In the same setting of
 generated programs, we found that Pythia 2.8b was able to correctly
 label programs using the Abs, Var, App, and If_Out a much greater
 proportion of the time (99%, 93%, 98%, and 86% respectively). Stay
-tuned in the future ([@sec:future]) for a more in-depth exploration of
+tuned in the future ([@Sec:future]) for a more in-depth exploration of
 how the models behave on individual typing rules when we increase the
 variability of our program generation.
 
@@ -214,8 +214,8 @@ variability of our program generation.
 We can further challenge the model by adding layers of procedural indirection
 between the source and sink of nullable values, thereby testing the model's
 _interprocedural_ understanding. First, we demonstrate how to write such tests,
-and the difficulties of writing tests that may be too easy ([@sec:inter_test]).
-Then, we present a harder problem ([@sec:unannot]) and introduce a stronger type system `mypy++` to formalized the needed reasoning ([@sec:mypypp]).
+and the difficulties of writing tests that may be too easy ([@Sec:inter_test]).
+Then, we present a harder problem ([@Sec:unannot]) and introduce a stronger type system `mypy++` to formalized the needed reasoning ([@Sec:mypypp]).
 
 ### A simple test {#sec:inter_test}
 
@@ -314,7 +314,7 @@ intermittently. Even 6.9b, the best performing size on this test,
 fails the test in its second-to-last available revision^[Despite this,
 it does pass the test 40% of the available revisions, about triple
 what the other closest sizes can accomplish]. You can see how this evolves over scale in @fig:hl_mypy and time in @fig:hl_moral.
-See @sec:results for further discussion of performance over time.
+See @Sec:results for further discussion of performance over time.
 \AT{add a table of what we're actually claiming here (probably in the appendix) rather than referencing the performance on the overall test suite}
 
 What the models *can* do well, however, is learn to pass these tests
@@ -579,7 +579,7 @@ One thing that is interesting to note is that models up to 1b reach
 a minimum loss before loss for this task climbing again. Charitably, this may be because the
 features beyond this point become more complex --- less linear, or the represented
 features themselves represent more subtle concepts. Cynically, this reflects
-that models---small models in particular---do not uniformly improve at this task over training, as we observed in @sec:mypypp.
+that models---small models in particular---do not uniformly improve at this task over training, as we observed in @Sec:mypypp.
 
 Our suspicion is that this
 pattern would continue even for the larger models if we continued to overtrain them for longer.
@@ -588,7 +588,7 @@ pattern would continue even for the larger models if we continued to overtrain t
 # Future Work {#sec:future}
 
 We hope to get a better understanding of this phenomenon by studying the
-decomposed nullability reasoning as described in @sec:intra and Appendix [B.1](#sec:commonrules).
+decomposed nullability reasoning as described in @Sec:intra and Appendix [B.1](#sec:commonrules).
 
 # Related Work {#sec:related}
 

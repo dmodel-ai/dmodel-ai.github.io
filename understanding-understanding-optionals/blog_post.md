@@ -8,16 +8,16 @@ bibliography: all.bib
 linkReferences: true
 abstract:
 
-  Large language models have demonstrated impressive emergent
-  capabilities, including the ability to write code, but this ability
-  requires a model of program semantics that is little
-  understood. Recent interpretability work has shown the ability to
-  extract internal representations of natural language concepts,
-  raising the possibility that similar techniques could be used to
-  extract program semantics concepts. In this work we study how large
-  language models represent nullability of program values. We measure
-  how well models of various sizes complete programs that use nullable
-  values, and then extract an internal representation of nullability.
+  Large language models have demonstrated an emergent ability to write
+  code, but this ability requires an internal representation of
+  program semantics that is little understood. Recent interpretability
+  work has demonstrated that it is possible to extract internal
+  representations of natural language concepts, raising the
+  possibility that similar techniques could be used to extract program
+  semantics concepts. In this work we study how large language models
+  represent the nullability of program values. We measure how well
+  models of various sizes complete programs that use nullable values,
+  and then extract an internal representation of nullability.
 
 ---
 

@@ -965,11 +965,10 @@ p
 \hspace{1cm} \Gamma \vdash x_1 : t_1, x_2 : t_2, ...}
      {\Gamma \vdash f(x_1, x_2, ...) : t_r}
 </span></p>
-<p><span class="math display">
-\hspace{-1cm}{
-\tag{IfIn}
+<p><span class="math display">\begin{gather}
 \Gamma \vdash x : \texttt{Optional[$t$]} \hspace{1cm}
-\Gamma, x : t \vdash [p] \vartriangleright \text{ok} \hspace{1cm}
+\Gamma, x : t \vdash [p] \vartriangleright \text{ok} \nonumber\\
+\tag{IfIn}
 \bigotimes \text{in} [\texttt{is not, !=}]
 \over
 \Gamma \vdash
@@ -985,8 +984,7 @@ p
 \quad p
 \end{array}\right]
 \vartriangleright \text{ok}
-}
-</span></p>
+\end{gather}</span></p>
 <p><span class="math display">
 \tag{IfOut}
 \Gamma \vdash

@@ -687,6 +687,7 @@ Our suspicion is that this
 pattern would continue even for the larger models if we continued to overtrain them for longer.
 \todo{position the min loss stuff in terms of scaling laws or something?}
 
+\todo{
 In [@Sec:eval_results], we noted that the high-level test results are
 approximately logarithmic in scale. We find a similar phenomena here:
 the binary cross entropy of the trained probe is approximately
@@ -697,6 +698,7 @@ to make this more clear.
 ![The performance of each Pythia model size during pretraining,
  graphed against FLOPs of compute. Lower is
  better](images/log_compute.png){#fig:log_compute}
+}
 
 # Future Work {#sec:future}
 

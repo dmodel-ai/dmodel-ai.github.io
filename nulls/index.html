@@ -708,20 +708,6 @@ particular—do not uniformly improve at this task over training, as we
 observed in Sec. <a href="#sec:mypypp">2.3.3</a>.</p>
 <p>Our suspicion is that this pattern would continue even for the larger
 models if we continued to overtrain them for longer. </p>
-<p>In Sec. <a href="#sec:eval_results">2.5</a>, we noted that the
-high-level test results are approximately logarithmic in scale. We find
-a similar phenomena here: the binary cross entropy of the trained probe
-is approximately logarithmic in amount of compute used. In Fig. <a
-href="#fig:log_compute">7</a>, we re-plot Fig. <a
-href="#fig:models-and-steps">6</a> with the log of compute in the X axis
-to make this more clear.</p>
-<figure id="fig:log_compute">
-<img src="images/log_compute.png"
-alt="Figure 7: The performance of each Pythia model size during pretraining, graphed against FLOPs of compute. Lower is better" />
-<figcaption aria-hidden="true">Figure 7: The performance of each Pythia
-model size during pretraining, graphed against FLOPs of compute. Lower
-is better</figcaption>
-</figure>
 <h1 data-number="4" id="sec:future"><span
 class="header-section-number">4</span> Future Work</h1>
 <p>We hope to get a better understanding of this phenomenon by studying
@@ -1234,11 +1220,11 @@ this to return a Number that can be added to one.</p>
 <h2 class="unnumbered" id="across-time">C.2 Across Time</h2>
 <figure id="fig:hl_time">
 <img src="images/hl_revision_results.svg"
-alt="Figure 8: A line graph showing how the performance of the Pythia 6.9 model changes during training" />
-<figcaption aria-hidden="true">Figure 8: A line graph showing how the
+alt="Figure 7: A line graph showing how the performance of the Pythia 6.9 model changes during training" />
+<figcaption aria-hidden="true">Figure 7: A line graph showing how the
 performance of the Pythia 6.9 model changes during training</figcaption>
 </figure>
-<p>We say in fig. <a href="#fig:hl_time">8</a> that while the model
+<p>We say in fig. <a href="#fig:hl_time">7</a> that while the model
 generally gets better at passing these tests during training, the
 performance is not always increasing. Zooming in on a particular test,
 we can see what this looks like. When asked to complete this code:</p>

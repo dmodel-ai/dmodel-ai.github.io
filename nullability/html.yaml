@@ -11,8 +11,14 @@ html-math-method:
 css:
   - pandoc.css
   - sidenote.css
+  - toc-styles.css
+  - highlights-box.css
 filters:
   # - todo_filter.py
   - appendix-filter.py
   - pandoc-crossref
   - citeproc
+variables:
+  header-includes:
+    - "<script src=\"toc-script.js\"></script>"
+    - "<script src=\"sidenotes.js\"></script>"

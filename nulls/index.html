@@ -110,6 +110,14 @@
   <link rel="stylesheet" href="pandoc.css" />
   <link rel="stylesheet" href="sidenote.css" />
   <script src="sidenotes.js"></script>
+  <style> /* Styles for highlights box */ .highlights-box { position: absolute; width: 220px; right: 0; top: 120px;  /* Adjust this value to position vertically relative to the abstract */ margin-right: 30px; padding: 15px; background-color: #fbfbfb; border-left: 2px solid #eaeaea; font-size: 0.9em; z-index: 10; }
+  /* Make sure it doesn't interfere with title on small screens */ @media (max-width: 900px) { .highlights-box { position: static; width: auto; margin: 20px 0; right: auto; top: auto; } }
+  .highlights-box h3 { margin-top: 0; font-size: 1.1em; font-weight: 500; color: #555; }
+  .highlights-box ul { padding-left: 20px; margin: 10px 0 0 0; line-height: 1.4; }
+  .highlights-box li { margin-bottom: 6px; }
+  .highlights-box a { color: #666; text-decoration: none; }
+  .highlights-box a:hover { text-decoration: underline; color: #333; }
+  /* The container for the abstract needs to be relative for proper positioning */ .abstract { position: relative; } </style>
   <script defer=""
   src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
   <script>document.addEventListener("DOMContentLoaded", function () {
@@ -149,6 +157,32 @@ training checkpoints complete programs that use nullable values, and
 then extract an internal representation of nullability.
 </div>
 </header>
+<div class="highlights-box">
+<h3>
+Highlights
+</h3>
+<ul>
+<li>
+<a href="#fig:reading1"> A <em>reading diagram</em> for nullability </a>
+</li>
+<li>
+<a href="#fig:models-and-steps"> Probe loss over scale and time<br/>
+</a> <img src="images/accuracy_during_pretraining.svg" />
+</li>
+<li>
+<a href="#fig:hl_scale"> <code>NullabilityEval</code> across scale </a>
+<img src="images/hl_mypy_vs_grep_models.svg" />
+</li>
+<li>
+<a href="#fig:mm-vs-mmlr-sizes"> How do we weight reading vectors across
+layers? </a>
+</li>
+<li>
+<a href="#sec:formalrules" style="color: #666; text-decoration: none;">
+Formal semantics </a>
+</li>
+</ul>
+</div>
 <h1 data-number="1" id="introduction"><span
 class="header-section-number">1</span> Introduction</h1>
 <p>The last five years have shown us that large language models, like
@@ -233,9 +267,7 @@ seven lines long.</p>
 class="citation" data-cites="biderman23">(Biderman et al. 2023)</span>,
 as they have checkpoints available across training runs and various
 scales. For measuring performance at larger sizes, we also include
-Qwen2.5-Coder-32b<span class="aside AT">AT: cite</span>, Llama 3.1 405b
-Instruct<span class="aside AT">AT: cite</span>, and DeepSeek-V3
-(671b)<span class="aside AT">AT: cite</span>.</p>
+Qwen2.5-Coder-32b, Llama 3.1 405b Instruct, and DeepSeek-V3 (671b).</p>
 <p>Each partial program is constructed such that there are a very
 limited number of valid next lines in the program, and all of them
 demonstrate some knowledge of the concept of nullability.</p>
@@ -261,12 +293,11 @@ class="header-section-number">2.2</span> Understanding Typing Rules</h2>
 <p>We find that Pythia models as small as 2.8b can successfully complete
 Test 1, and that they learn to complete the test in the first third of
 training. Consistent with observations that larger models are more
-sample-efficient
-<span class="aside AT">AT: who do I cite for this claim? Kaplan?</span>,
-larger Pythia models learn to complete this test earlier, with Pythia
-12b able to complete the test 20% of the way into training and Pythia
-2.8b able to complete it 28% of the way into training.<a href="#fn3"
-class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
+sample-efficient , larger Pythia models learn to complete this test
+earlier, with Pythia 12b able to complete the test 20% of the way into
+training and Pythia 2.8b able to complete it 28% of the way into
+training.<a href="#fn3" class="footnote-ref" id="fnref3"
+role="doc-noteref"><sup>3</sup></a></p>
 <p>These results indicate that these models understand nullability to
 some extent, but how deep is this understanding? To quantify this, we
 give a syntax and semantics of a minimalist subset of python that
@@ -479,8 +510,7 @@ class="header-section-number">2.5</span> External Test Results Across
 Training and Scale</h2>
 <p>We wrote three variations of each of these tests, resulting in 15
 tests total. In Fig. <a href="#fig:hl_scale">2</a> below, we can see the
-number of passing tests for each model under mypy and mypy++.
-<span class="aside AT">AT: should we be plotting lpr? instead of raw pass rate? but log 15 is pretty small...</span></p>
+number of passing tests for each model under mypy and mypy++. </p>
 <figure id="fig:hl_scale">
 <img src="images/hl_mypy_vs_grep_models.svg"
 alt="Figure 2: A bar graph showing how several sizes of model perform on the high-level nullability tests" />
@@ -608,9 +638,7 @@ the different layers — either allowing the magnitude of the difference
 of means vector to determine the importance of the layer in the final
 probe (MM), or to learn coefficients for each layer using linear
 regression (MM-LR). We found that which method is more accurate on test
-data varies over both model size and number of training steps.
-<span class="aside AT">AT: should we mention this in the intro/contributions/or a "key
-results" section like tilde?</span></p>
+data varies over both model size and number of training steps. </p>
 <figure id="fig:mm-vs-mmlr-sizes">
 <img src="images/mm-vs-mmlr.svg"
 alt="Figure 4: The performance of pure mass means shift vs mass means shift with linear regression for different Pythia model sizes. Lower is better." />
@@ -619,11 +647,9 @@ means shift vs mass means shift with linear regression for different
 Pythia model sizes. Lower is better.</figcaption>
 </figure>
 <p>In Fig. <a href="#fig:mm-vs-mmlr-sizes">4</a>, we can see that pure
-mass means probing
-<span class="aside AT">AT: add a y axis label for BCE. This should probably be a line plot.</span>
-gives lower loss for smaller models (those with less than 410 million
-parameters), but that for larger models weighting layers using linear
-regression gives lower loss consistently.</p>
+mass means probing gives lower loss for smaller models (those with less
+than 410 million parameters), but that for larger models weighting
+layers using linear regression gives lower loss consistently.</p>
 <h2 data-number="3.4" id="visualizing-probe-outputs"><span
 class="header-section-number">3.4</span> Visualizing Probe Outputs</h2>
 <p>Let us return to the reading diagram from the introduction,
@@ -661,8 +687,7 @@ data-cites="tigges24">(Tigges et al. 2024)</span>. We use mass-means
 shift probing <span class="citation" data-cites="li24">(Li et al.
 2024)</span> on all layers, and a linear regression to determine the
 weights of each layer.<a href="#fn15" class="footnote-ref" id="fnref15"
-role="doc-noteref"><sup>15</sup></a>
-<span class="aside AT">AT: see appendix D for mm vs LR</span></p>
+role="doc-noteref"><sup>15</sup></a> </p>
 <figure id="fig:models-and-steps">
 <img src="images/accuracy_during_pretraining.svg"
 alt="Figure 6: The performance (probe test loss) of each Pythia model size during pretraining. Lower is better." />
@@ -682,8 +707,7 @@ concepts. Cynically, this reflects that models—small models in
 particular—do not uniformly improve at this task over training, as we
 observed in Sec. <a href="#sec:mypypp">2.3.3</a>.</p>
 <p>Our suspicion is that this pattern would continue even for the larger
-models if we continued to overtrain them for longer.
-<span class=aside>position the min loss stuff in terms of scaling laws or something?</span></p>
+models if we continued to overtrain them for longer. </p>
 <p>In Sec. <a href="#sec:eval_results">2.5</a>, we noted that the
 high-level test results are approximately logarithmic in scale. We find
 a similar phenomena here: the binary cross entropy of the trained probe

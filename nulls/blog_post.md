@@ -4,6 +4,64 @@ author: '[Alex Sanchez-Stern](https://www.alexsanchezstern.com) and [Anish Tondw
 date: '$d_{model}$'
 header-includes:
   - "<script src=\"sidenotes.js\"></script>"
+  - "<style>
+      /* Styles for highlights box */
+      .highlights-box {
+        position: absolute;
+        width: 220px;
+        right: 0;
+        top: 120px;  /* Adjust this value to position vertically relative to the abstract */
+        margin-right: 30px;
+        padding: 15px;
+        background-color: #fbfbfb;
+        border-left: 2px solid #eaeaea;
+        font-size: 0.9em;
+        z-index: 10;
+      }
+      
+      /* Make sure it doesn't interfere with title on small screens */
+      @media (max-width: 900px) {
+        .highlights-box {
+          position: static;
+          width: auto;
+          margin: 20px 0;
+          right: auto;
+          top: auto;
+        }
+      }
+      
+      .highlights-box h3 {
+        margin-top: 0;
+        font-size: 1.1em;
+        font-weight: 500;
+        color: #555;
+      }
+      
+      .highlights-box ul {
+        padding-left: 20px;
+        margin: 10px 0 0 0;
+        line-height: 1.4;
+      }
+      
+      .highlights-box li {
+        margin-bottom: 6px;
+      }
+      
+      .highlights-box a {
+        color: #666;
+        text-decoration: none;
+      }
+      
+      .highlights-box a:hover {
+        text-decoration: underline;
+        color: #333;
+      }
+      
+      /* The container for the abstract needs to be relative for proper positioning */
+      .abstract {
+        position: relative;
+      }
+    </style>"
 bibliography: all.bib
 linkReferences: true
 abstract:
@@ -21,6 +79,38 @@ abstract:
   nullability.
 
 ---
+ <div class="highlights-box">
+  <h3>Highlights</h3>
+  <ul>
+    <li>
+      <a href="#fig:reading1">
+        A *reading diagram* for nullability
+      </a>
+    </li>
+    <li>
+      <a href="#fig:models-and-steps">
+        Probe loss over scale and time<br/>
+      </a>
+      <img src="images/accuracy_during_pretraining.svg" />
+    </li>
+    <li>
+      <a href="#fig:hl_scale">
+        `NullabilityEval` across scale
+      </a>
+      <img src="images/hl_mypy_vs_grep_models.svg" />
+    </li>
+    <li>
+      <a href="#fig:mm-vs-mmlr-sizes">
+        How do we weight reading vectors across layers?
+      </a>
+    </li>
+    <li>
+      <a href="#sec:formalrules" style="color: #666; text-decoration: none;">
+        Formal semantics
+      </a>
+    </li>
+  </ul>
+</div>
 
 # Introduction
 

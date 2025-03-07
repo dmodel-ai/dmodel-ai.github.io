@@ -144,9 +144,9 @@ demonstrated that it is possible to extract internal representations of
 natural language concepts, raising the possibility that similar
 techniques could be used to extract program semantics concepts. In this
 work, we study how large language models represent the nullability of
-program values. We measure how well models of various sizes complete
-programs that use nullable values, and then extract an internal
-representation of nullability.
+program values. We measure how well models of various sizes at various
+training checkpoints complete programs that use nullable values, and
+then extract an internal representation of nullability.
 </div>
 </header>
 <h1 data-number="1" id="introduction"><span
@@ -161,18 +161,17 @@ know where they have deep understanding and where they use heuristic
 reasoning, how they represents program knowledge, and what kinds of
 situations will challenge their capabilities.</p>
 <p>Fortunately, recent work in model interpretability and representation
-engineering<span class="aside AT">AT: reframe. recent tools let us....</span>
-has produced promising results which give hope towards understanding
-more and more of the internal thought processes of LLMs. Here at <span
-class="math inline">d_{model}</span> , we can think of no better place
-to apply these new techniques than formal methods, where there are many
-abstract properties that can be extracted with static analysis. The vast
-work done in programming language theory over the past hundred years
-provides many tools for scaling an understanding of the internal thought
-processes of language models as they write
-code.<span class="aside AT">AT: for examples, see cite, cite</span></p>
+engineering has produced promising results which give hope towards
+understanding more and more of the internal thought processes of LLMs.
+Here at <span class="math inline">d_{model}</span> , we can think of no
+better place to apply these new techniques than formal methods, where
+there are many abstract properties that can be extracted with static
+analysis. The vast work done in programming language theory over the
+past hundred years provides many tools for scaling an understanding of
+the internal thought processes of language models as they write
+code.</p>
 <p>In that spirit, we wanted to start with a simple property that comes
-up in every programming languages, nullability. Nullable values are
+up in every programming language, nullability. Nullable values are
 represented differently across languages; as null pointers in C or C++,
 with explicit Option types in Rust, and with special nil or None values
 in dynamic languages like Javascript, Lisp, or Python. In every case,
@@ -182,7 +181,7 @@ source of bugs.</p>
 <p>Do our models understand when a value is nullable? They must, to be
 able to write code that deals with nullable values, but we haven’t known
 what form this knowledge takes, what situations are likely to confuse
-the model. Until now.<span class=aside>big claim!</span></p>
+the model. Until now.</p>
 <p>In this work:</p>
 <ul>
 <li><p>We introduce a microbenchmark of 15 programs that test basic

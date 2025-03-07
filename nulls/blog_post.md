@@ -16,8 +16,9 @@ abstract:
   possibility that similar techniques could be used to extract program
   semantics concepts. In this work, we study how large language models
   represent the nullability of program values. We measure how well
-  models of various sizes complete programs that use nullable values,
-  and then extract an internal representation of nullability.
+  models of various sizes at various training checkpoints complete programs
+  that use nullable values, and then extract an internal representation of
+  nullability.
 
 ---
 
@@ -35,7 +36,7 @@ represents program knowledge, and what kinds of situations will
 challenge their capabilities.
 
 Fortunately, recent work in model interpretability and representation
-engineering\AT{reframe. recent tools let us....} has produced promising results which give
+engineering has produced promising results which give
 hope towards understanding more and more of the internal thought
 processes of LLMs. Here at $d_{model}$ , we can think of no better
 place to apply these new techniques than formal methods, where
@@ -43,10 +44,10 @@ there are many abstract properties that can be extracted with static
 analysis. The vast work done in programming language theory over the
 past hundred years provides many tools for scaling an understanding of
 the internal thought processes of language models as they write
-code.\AT{for examples, see cite, cite}
+code.
 
 In that spirit, we wanted to start with a simple property that comes
-up in every programming languages, nullability. Nullable values are
+up in every programming language, nullability. Nullable values are
 represented differently across languages; as null pointers in C or
 C++, with explicit Option types in Rust, and with special nil or None
 values in dynamic languages like Javascript, Lisp, or Python. In every
@@ -57,7 +58,7 @@ can often be a source of bugs.
 Do our models understand when a value is nullable? They must, to be
 able to write code that deals with nullable values, but we haven’t
 known what form this knowledge takes, what situations are likely to
-confuse the model. Until now.\todo{big claim!}
+confuse the model. Until now.
 
 In this work:
 

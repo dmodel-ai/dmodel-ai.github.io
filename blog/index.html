@@ -1,178 +1,225 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<!doctype html>
+<html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>blog</title>
-  <style>
-    html {
-      color: #1a1a1a;
-      background-color: #fdfdfd;
-    }
-    body {
-      margin: 0 auto;
-      max-width: 36em;
-      padding-left: 50px;
-      padding-right: 50px;
-      padding-top: 50px;
-      padding-bottom: 50px;
-      hyphens: auto;
-      overflow-wrap: break-word;
-      text-rendering: optimizeLegibility;
-      font-kerning: normal;
-    }
-    @media (max-width: 600px) {
-      body {
-        font-size: 0.9em;
-        padding: 12px;
-      }
-      h1 {
-        font-size: 1.8em;
-      }
-    }
-    @media print {
-      html {
-        background-color: white;
-      }
-      body {
-        background-color: transparent;
-        color: black;
-        font-size: 12pt;
-      }
-      p, h2, h3 {
-        orphans: 3;
-        widows: 3;
-      }
-      h2, h3, h4 {
-        page-break-after: avoid;
-      }
-    }
-    p {
-      margin: 1em 0;
-    }
-    a {
-      color: #1a1a1a;
-    }
-    a:visited {
-      color: #1a1a1a;
-    }
-    img {
-      max-width: 100%;
-    }
-    svg {
-      height: auto;
-      max-width: 100%;
-    }
-    h1, h2, h3, h4, h5, h6 {
-      margin-top: 1.4em;
-    }
-    h5, h6 {
-      font-size: 1em;
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>blog</title>
+    <style type="text/css">
+
+
+    h1{
+      margin-bottom: -5px;
+      font-family: "Computer Modern Serif";
       font-style: italic;
     }
-    h6 {
-      font-weight: normal;
+        .container {
+            font-size: 14px;
+            line-height: 1.6em;
+            /* font-family: "Libre Franklin", "Helvetica Neue", sans-serif; */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans",
+                "Helvetica Neue", Arial, sans-serif;
+            /*, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";*/
+            text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            -webkit-text-size-adjust: 100%;
+        }
+
+    body {
+      margin: 50px auto;
+      max-width: 650px;
     }
-    ol, ul {
-      padding-left: 1.7em;
-      margin-top: 1em;
+
+.date {
+    padding-bottom: 2px;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 80%;
+    color: #333;
+    border-bottom: 1px solid #333;
+}
+
+.date:not(.first-child) {
+    margin-top: 60px;
+}
+
+.note,
+.paper {
+    display: block;
+    text-decoration: none;
+    color: #000;
+    border-bottom: 1px solid #d8d8d8;
+}
+
+.note:hover,
+.paper:hover {
+    padding-left: calc(var(--indent) - 2px);
+    border-left: 2px solid black;
+}
+
+.tags {
+    display: none;
+}
+
+.paper {
+    background: hsla(120, 44%, 86%, 100%);
+    padding: 22px 16px 22px var(--indent);
+}
+
+.paper h3 {
+    font-size: 1.3em;
+    margin-top: 0px;
+    margin-bottom: 12px;
+    /* font-style: italic; */
+}
+
+.paper .byline {
+    font-style: italic;
+    opacity: 0.6;
+    margin-bottom: 12px;
+}
+
+.note {
+    padding: 14px 16px 14px var(--indent);
+}
+
+.note {
+    background: #f9f8f8;
+}
+
+.note h3,
+.note .description {
+    margin: 0px;
+    display: inline;
+}
+
+.note h3 {
+    font-size: 100%;
+    margin-top: 0px;
+}
+
+.note .description::before {
+    content: " - ";
+    opacity: 0.5;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+.container {
+    --indent: 16px;
+    font-size: 120%;
+    margin: 100px 0px 100px calc(0.2 * calc(100% - 700px));
+    max-width: 700px;
+}
+
+.container h1 {
+    grid-row: 1;
+}
+
+.toc {
+    grid-row: 3;
+    grid-column: 1;
+}
+
+.info * {
+    margin: 0px;
+    --font-style: italic;
+    opacity: 0.8;
+}
+
+.info *:not(:first-child) {
+    margin-top: 24px;
+}
+
+.info a {
+    --text-decoration: none;
+    font-weight: bold;
+    color: #000;
+}
+
+h2 {
+    margin-top: 80px;
+    font-size: 170%;
+}
+
+@media only screen and (max-width: 750px) {
+
+    h2 {
+        margin-left: var(--indent);
+        margin-right: var(--indent);
     }
-    li > ol, li > ul {
-      margin-top: 0;
+
+    .info {
+        padding-left: var(--indent);
+        padding-right: var(--indent);
     }
-    blockquote {
-      margin: 1em 0 1em 1.7em;
-      padding-left: 1em;
-      border-left: 2px solid #e6e6e6;
-      color: #606060;
+
+    .date {
+        padding-left: 20px;
     }
-    code {
-      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
-      font-size: 85%;
-      margin: 0;
-      hyphens: manual;
+
+    body {
+        margin: 0px;
     }
-    pre {
-      margin: 1em 0;
-      overflow: auto;
+
+    .container {
+        /* font-size: 100%; */
+        margin: 100px 0px 100px 0px;
+        --indent: 20px;
+        max-width: 100%;
     }
-    pre code {
-      padding: 0;
-      overflow: visible;
-      overflow-wrap: normal;
+
+    .toc {
+        width: 100%;
     }
-    .sourceCode {
-     background-color: transparent;
-     overflow: visible;
+
+    .info {
+        width: calc(100% - calc(2 * var(--indent)));
     }
-    hr {
-      background-color: #1a1a1a;
-      border: none;
-      height: 1px;
-      margin: 1em 0;
+
+    .note>*,
+    .paper>* {
+        max-width: 700px;
     }
-    table {
-      margin: 1em 0;
-      border-collapse: collapse;
-      width: 100%;
-      overflow-x: auto;
-      display: block;
-      font-variant-numeric: lining-nums tabular-nums;
-    }
-    table caption {
-      margin-bottom: 0.75em;
-    }
-    tbody {
-      margin-top: 0.5em;
-      border-top: 1px solid #1a1a1a;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    th {
-      border-top: 1px solid #1a1a1a;
-      padding: 0.25em 0.5em 0.25em 0.5em;
-    }
-    td {
-      padding: 0.125em 0.5em 0.25em 0.5em;
-    }
-    header {
-      margin-bottom: 4em;
-      text-align: center;
-    }
-    #TOC li {
-      list-style: none;
-    }
-    #TOC ul {
-      padding-left: 1.3em;
-    }
-    #TOC > ul {
-      padding-left: 0;
-    }
-    #TOC a:not(:hover) {
-      text-decoration: none;
-    }
-    code{white-space: pre-wrap;}
-    span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
-    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    /* The extra [class] is a hack that increases specificity enough to
-       override a similar rule in reveal.js */
-    ul.task-list[class]{list-style: none;}
-    ul.task-list li input[type="checkbox"] {
-      font-size: inherit;
-      width: 0.8em;
-      margin: 0 0.8em 0.2em -1.6em;
-      vertical-align: middle;
-    }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
-  </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
+}
+
+.toc>p {
+    margin-top: 60px;
+    font-style: italic;
+    color: #333;
+}
+
+.toc>p a {
+    color: #222;
+}
+    </style>
 </head>
+
 <body>
-<p><a href="/steering_characters">Steering Characters with
-Interpretability</a></p>
+      <h1>d<sub>model</sub> </h1>
+    <b>look inside the model</b>
+    <div class="container">
+        <div class="toc">
+            <div class="date">March 2025</div>
+            <a href="/nullability/" class="paper">
+                <h3>How Language Models Understand Nullability</h3>
+                <div class="byline">Sanchez-Stern and Tondwalkar, 2025</div>
+                <div class="description">
+We study how models represent the nullability of program values. We measure how well models of various sizes, at various training checkpoints, complete programs that use nullable values, and then extract an internal representation of nullability. 
+                </div>
+            </a>
+
+            <div class="date">September 2024</div>
+            <a href="/steering_characters/" class="note">
+                <h3> Steering Characters with Interpretability
+                </h3>
+                <div class="description">
+                  We think you can make better characters with steering vectors.
+                  Try it out in our notebook, or check out some of the examples from the screenshots in the post below.
+                </div>
+            </a>
+        </div>
+    </div>
 </body>
+
 </html>

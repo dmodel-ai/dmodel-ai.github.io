@@ -681,7 +681,20 @@ Several techniques exist for constructing linear probes, but after
 experimental measurement we followed the mass means shift from @li24. @li24
 and @zhong23 discuss why mass mean probing might outperform linear regression.
 
+# Acknowledgements and Cite As
 
+We thank Leo Gao, Chlesea Voss, and Zhanna Kaufman for their comments and suggestions during the drafting process.
+
+```
+@article{dmodel2025null,
+    title = {How Language Models Understand Nullability},
+    author = {Sanchez-Stern, Alex and Tondwalkar, Anish},
+    journal = {dmodel},
+    year = {2025},
+    month = mar,
+    url = {https://dmodel.ai/nullability/},
+}
+```
 
 # References {.unnumbered}
 ::: {#refs}

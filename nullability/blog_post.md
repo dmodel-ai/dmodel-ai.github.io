@@ -683,7 +683,7 @@ and @zhong23 discuss why mass mean probing might outperform linear regression.
 
 # Acknowledgements and Cite As
 
-We thank Leo Gao, Chlesea Voss, and Zhanna Kaufman for their comments and suggestions during the drafting process.
+We thank Leo Gao, Chelsea Voss, and Zhanna Kaufman for their comments and suggestions during the drafting process.
 
 ```
 @article{dmodel2025null,

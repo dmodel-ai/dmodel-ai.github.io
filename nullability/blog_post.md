@@ -25,6 +25,7 @@ abstract:
     <li>
       <a href="#fig:reading1">
         A *reading diagram* for nullability
+      <img src="images/reading_diagram_cropped.svg" />
       </a>
     </li>
     <li>
@@ -40,13 +41,28 @@ abstract:
       </a>
     </li>
     <li>
-      <a href="#fig:mm-vs-mmlr-sizes">
-        How do we weight reading vectors across layers?
+      <a href="#sec:formalrules" style="color: #666; text-decoration: none;">
+        Formal semantics
+$$
+\small
+\begin{gather*}
+\Gamma \vdash x : \texttt{Optional[$t$]}\\
+\Gamma, x : t \vdash [p] \vartriangleright \text{ok} \nonumber\\
+\bigotimes \in \{\texttt{is not, !=}\}
+\over
+\Gamma \vdash
+\left[\begin{array}{l}
+\texttt{if $x$:}\\
+\quad p
+\end{array}\right]
+\vartriangleright \text{ok}
+\end{gather*}
+$$
       </a>
     </li>
     <li>
-      <a href="#sec:formalrules" style="color: #666; text-decoration: none;">
-        Formal semantics
+      <a href="#fig:mm-vs-mmlr-sizes">
+        How do we weight reading vectors across layers?
       </a>
     </li>
   </ul>

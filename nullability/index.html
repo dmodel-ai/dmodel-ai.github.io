@@ -241,7 +241,8 @@ Highlights
 </h3>
 <ul>
 <li>
-<a href="#fig:reading1"> A <em>reading diagram</em> for nullability </a>
+<a href="#fig:reading1"> A <em>reading diagram</em> for nullability
+<img src="images/reading_diagram_cropped.svg" /> </a>
 </li>
 <li>
 <a href="#fig:models-and-steps"> Probe loss over scale and time<br/>
@@ -252,12 +253,26 @@ Highlights
 <img src="images/hl_mypy_vs_grep_models.svg" /> </a>
 </li>
 <li>
-<a href="#fig:mm-vs-mmlr-sizes"> How do we weight reading vectors across
-layers? </a>
+<a href="#sec:formalrules" style="color: #666; text-decoration: none;">
+Formal semantics <span class="math display">
+\small
+\begin{gather*}
+\Gamma \vdash x : \texttt{Optional[$t$]}\\
+\Gamma, x : t \vdash [p] \vartriangleright \text{ok} \nonumber\\
+\bigotimes \in \{\texttt{is not, !=}\}
+\over
+\Gamma \vdash
+\left[\begin{array}{l}
+\texttt{if $x$:}\\
+\quad p
+\end{array}\right]
+\vartriangleright \text{ok}
+\end{gather*}
+</span> </a>
 </li>
 <li>
-<a href="#sec:formalrules" style="color: #666; text-decoration: none;">
-Formal semantics </a>
+<a href="#fig:mm-vs-mmlr-sizes"> How do we weight reading vectors across
+layers? </a>
 </li>
 </ul>
 </div>

@@ -23,7 +23,7 @@ abstract:
   <h3>Highlights</h3>
   <ul>
     <li>
-      <a href="#fig:reading1">
+      <a href="#sec:viz">
         A *reading diagram* for nullability
       <img src="images/reading_diagram_cropped.svg" />
       </a>
@@ -581,7 +581,7 @@ gives lower loss for smaller models (those with less than 410 million
 parameters), but that for larger models weighting layers using linear
 regression gives lower loss consistently.
 
-## Visualizing Probe Outputs
+## Visualizing Probe Outputs {#sec:viz}
 
 Let us return to the reading diagram from the introduction, reproduced
 below.

@@ -3,6 +3,8 @@ title: How Language Models Understand Nullability
 author: '[Alex Sanchez-Stern](https://www.alexsanchezstern.com) and [Anish Tondwalkar](https://ani.sh)'
 date: '$d_{model}$'
 header-includes:
+  - "<link rel=\"stylesheet\" href=\"toc-styles.css\">"
+  - "<script src=\"toc-script.js\"></script>"
   - "<script src=\"sidenotes.js\"></script>"
   - "<style>
       /* Styles for highlights box */
@@ -490,6 +492,7 @@ model under mypy and mypy++.
 ![A bar graph showing how several sizes of model perform on the
  high-level nullability tests](images/hl_mypy_vs_grep_models.svg){#fig:hl_scale}
 
+\todo{We should make this one line per scale instead of one bar per scale}
 We can see the number of fully passing tests for each model in
 blue. Generally speaking, models get better with scale: Pythia-2.8b
 parameters can pass about half the tests, but we need the much larger

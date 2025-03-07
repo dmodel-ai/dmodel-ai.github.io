@@ -3,6 +3,7 @@ input-file:
   - appendix_header.md
   - appendicies.md
 number-sections: true
+toc: true
 standalone: true
 output-file: index.html
 html-math-method:

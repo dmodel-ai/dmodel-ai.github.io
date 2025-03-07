@@ -109,6 +109,8 @@
     }  </style>
   <link rel="stylesheet" href="pandoc.css" />
   <link rel="stylesheet" href="sidenote.css" />
+  <link rel="stylesheet" href="toc-styles.css">
+  <script src="toc-script.js"></script>
   <script src="sidenotes.js"></script>
   <style> /* Styles for highlights box */ .highlights-box { position: absolute; width: 220px; right: 0; top: 120px;  /* Adjust this value to position vertically relative to the abstract */ margin-right: 30px; padding: 15px; background-color: #fbfbfb; border-left: 2px solid #eaeaea; font-size: 0.9em; z-index: 10; }
   /* Make sure it doesn't interfere with title on small screens */ @media (max-width: 900px) { .highlights-box { position: static; width: auto; margin: 20px 0; right: auto; top: auto; } }
@@ -157,6 +159,89 @@ training checkpoints complete programs that use nullable values, and
 then extract an internal representation of nullability.
 </div>
 </header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#introduction" id="toc-introduction"><span
+class="toc-section-number">1</span> Introduction</a></li>
+<li><a href="#sec:testing" id="toc-sec:testing"><span
+class="toc-section-number">2</span> Measuring Nullability Understanding
+Externally</a>
+<ul>
+<li><a href="#sec:task" id="toc-sec:task"><span
+class="toc-section-number">2.1</span>
+<code>NullabilityEval</code></a></li>
+<li><a href="#sec:intra" id="toc-sec:intra"><span
+class="toc-section-number">2.2</span> Understanding Typing
+Rules</a></li>
+<li><a href="#sec:inter" id="toc-sec:inter"><span
+class="toc-section-number">2.3</span> Interprocedural Analysis</a>
+<ul>
+<li><a href="#sec:inter_test" id="toc-sec:inter_test"><span
+class="toc-section-number">2.3.1</span> A simple test</a></li>
+<li><a href="#sec:unannot" id="toc-sec:unannot"><span
+class="toc-section-number">2.3.2</span> Unannotated Functions</a></li>
+<li><a href="#sec:mypypp" id="toc-sec:mypypp"><span
+class="toc-section-number">2.3.3</span> A stricter type system for
+Python: mypy++</a></li>
+</ul></li>
+<li><a href="#generating-type-annotations"
+id="toc-generating-type-annotations"><span
+class="toc-section-number">2.4</span> Generating Type
+Annotations</a></li>
+<li><a href="#sec:eval_results" id="toc-sec:eval_results"><span
+class="toc-section-number">2.5</span> External Test Results Across
+Training and Scale</a></li>
+</ul></li>
+<li><a href="#sec:probing" id="toc-sec:probing"><span
+class="toc-section-number">3</span> Measuring Nullability Understanding
+Internally</a>
+<ul>
+<li><a href="#background" id="toc-background"><span
+class="toc-section-number">3.1</span> Background</a></li>
+<li><a href="#sec:prompts" id="toc-sec:prompts"><span
+class="toc-section-number">3.2</span> Designing Prompts to Extract
+Nullability Activations</a></li>
+<li><a href="#sec:extraction" id="toc-sec:extraction"><span
+class="toc-section-number">3.3</span> Extracting Reading
+Vectors</a></li>
+<li><a href="#visualizing-probe-outputs"
+id="toc-visualizing-probe-outputs"><span
+class="toc-section-number">3.4</span> Visualizing Probe Outputs</a></li>
+<li><a href="#sec:results" id="toc-sec:results"><span
+class="toc-section-number">3.5</span> Probing Results Across Training
+and Scale</a></li>
+</ul></li>
+<li><a href="#sec:future" id="toc-sec:future"><span
+class="toc-section-number">4</span> Future Work</a></li>
+<li><a href="#sec:related" id="toc-sec:related"><span
+class="toc-section-number">5</span> Related Work</a></li>
+<li><a href="#references" id="toc-references">References</a></li>
+<li><a href="#appendicies" id="toc-appendicies">Appendicies</a></li>
+<li><a href="#nullability-in-python" id="toc-nullability-in-python">A
+Nullability In Python</a></li>
+<li><a href="#sec:formalrules" id="toc-sec:formalrules">B Python Subset
+Syntax and Typing Rules</a>
+<ul>
+<li><a href="#sec:commonrules" id="toc-sec:commonrules">B.1 Common
+Rules</a></li>
+<li><a href="#sec:unannotatedfuncs" id="toc-sec:unannotatedfuncs">B.2
+Unannotated Functions</a></li>
+</ul></li>
+<li><a href="#detailed-high-level-nullability-test-results"
+id="toc-detailed-high-level-nullability-test-results">C Detailed
+High-Level Nullability Test Results</a>
+<ul>
+<li><a href="#across-scale" id="toc-across-scale">C.1 Across
+Scale</a></li>
+<li><a href="#across-time" id="toc-across-time">C.2 Across Time</a></li>
+<li><a href="#common-mistakes" id="toc-common-mistakes">C.3 Common
+Mistakes</a></li>
+</ul></li>
+<li><a href="#mass-mean-probing-vs-linear-regression"
+id="toc-mass-mean-probing-vs-linear-regression">D Mass Mean Probing vs
+Linear Regression</a></li>
+</ul>
+</nav>
 <div class="highlights-box">
 <h3>
 Highlights

@@ -30,14 +30,14 @@ abstract:
     <li>
       <a href="#fig:models-and-steps">
         Probe loss over scale and time<br/>
-      </a>
       <img src="images/accuracy_during_pretraining.svg" />
+      </a>
     </li>
     <li>
       <a href="#fig:hl_scale">
         `NullabilityEval` across scale
-      </a>
       <img src="images/hl_mypy_vs_grep_models.svg" />
+      </a>
     </li>
     <li>
       <a href="#fig:mm-vs-mmlr-sizes">

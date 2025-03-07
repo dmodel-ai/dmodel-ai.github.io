@@ -245,11 +245,11 @@ Highlights
 </li>
 <li>
 <a href="#fig:models-and-steps"> Probe loss over scale and time<br/>
-</a> <img src="images/accuracy_during_pretraining.svg" />
+<img src="images/accuracy_during_pretraining.svg" /> </a>
 </li>
 <li>
-<a href="#fig:hl_scale"> <code>NullabilityEval</code> across scale </a>
-<img src="images/hl_mypy_vs_grep_models.svg" />
+<a href="#fig:hl_scale"> <code>NullabilityEval</code> across scale
+<img src="images/hl_mypy_vs_grep_models.svg" /> </a>
 </li>
 <li>
 <a href="#fig:mm-vs-mmlr-sizes"> How do we weight reading vectors across
@@ -1068,7 +1068,7 @@ p
 \Gamma \vdash x : \texttt{Optional[$t$]} \hspace{1cm}
 \Gamma, x : t \vdash [p] \vartriangleright \text{ok} \nonumber\\
 \tag{IfIn}
-\bigotimes \text{in} [\texttt{is not, !=}]
+\bigotimes \in \{\texttt{is not, !=}\}
 \over
 \Gamma \vdash
 \left[\begin{array}{l}
@@ -1118,7 +1118,7 @@ p_3
 </span></p>
 <p><span class="math display">
 \tag{For}
-\Gamma \vdash y\texttt{ : List } t \hspace{1cm} \Gamma, x : t \vdash [p]
+\Gamma \vdash y\texttt{ : List } t \qquad  \Gamma, x : t \vdash [p]
 \vartriangleright \text{ok}
 \over
 \Gamma \vdash
@@ -1130,8 +1130,8 @@ p_3
 </span></p>
 <p><span class="math display">
 \tag{OpInt}
-\Gamma \vdash x_1 : \texttt{int}, x_2 : \texttt{int}, \bigotimes \text{
-in [\texttt{+, -, *, /}]}
+\Gamma \vdash x_1 : \texttt{int}, x_2 : \texttt{int}\qquad \bigotimes
+\in \{\text{\texttt{+, -, *, /}\}}
 \over
 \Gamma \vdash x_1 \bigotimes x_2 : \texttt{int}
 </span></p>
@@ -1147,15 +1147,15 @@ in [\texttt{+, -, *, /}]}
 <p><span class="math display">
 \hspace{-1.5cm}
 \tag{OpEquality}
-\frac{\Gamma \vdash x_1 : t, x_2 : t, \bigotimes \text{ in }
-[\texttt{==, !=, is, is not}]}
+\frac{\Gamma \vdash x_1 : t, x_2 : t\qquad \bigotimes \in \{\texttt{==,
+!=, is, is not}\}}
      {\Gamma \vdash x_1 \bigotimes x_2 : \texttt{bool}}
 </span></p>
 <p><span class="math display">
 \hspace{-2cm}
 \tag{OpComparison}
-\frac{\Gamma \vdash x_1 : \texttt{int}, x_2 : \texttt{int}, \bigotimes
-\text{ in } [\texttt{&lt;, &gt;, &lt;=, &gt;=}]}
+\frac{\Gamma \vdash x_1 : \texttt{int}, x_2 : \texttt{int}\qquad
+\bigotimes \in \{\texttt{&lt;, &gt;, &lt;=, &gt;=}\}}
      {\Gamma \vdash x_1 \bigotimes x_2 : \texttt{bool}}
 </span></p>
 <p>With:</p>

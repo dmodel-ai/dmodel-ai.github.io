@@ -167,7 +167,7 @@ $$
 \Gamma \vdash x : \texttt{Optional[$t$]} \hspace{1cm}
 \Gamma, x : t \vdash [p] \vartriangleright \text{ok} \nonumber\\
 \tag{IfIn}
-\bigotimes \text{in} [\texttt{is not, !=}]
+\bigotimes \in \{\texttt{is not, !=}\}
 \over
 \Gamma \vdash
 \left[\begin{array}{l}
@@ -219,7 +219,7 @@ $$
 
 $$
 \tag{For}
-\Gamma \vdash y\texttt{ : List } t \hspace{1cm} \Gamma, x : t \vdash [p] \vartriangleright \text{ok}
+\Gamma \vdash y\texttt{ : List } t \qquad  \Gamma, x : t \vdash [p] \vartriangleright \text{ok}
 \over
 \Gamma \vdash
 \left[\begin{array}{l}
@@ -231,7 +231,7 @@ $$
 
 $$
 \tag{OpInt}
-\Gamma \vdash x_1 : \texttt{int}, x_2 : \texttt{int}, \bigotimes \text{ in [\texttt{+, -, *, /}]}
+\Gamma \vdash x_1 : \texttt{int}, x_2 : \texttt{int}\qquad \bigotimes \in \{\text{\texttt{+, -, *, /}\}}
 \over
 \Gamma \vdash x_1 \bigotimes x_2 : \texttt{int}
 $$
@@ -249,14 +249,14 @@ $$
 $$
 \hspace{-1.5cm}
 \tag{OpEquality}
-\frac{\Gamma \vdash x_1 : t, x_2 : t, \bigotimes \text{ in } [\texttt{==, !=, is, is not}]}
+\frac{\Gamma \vdash x_1 : t, x_2 : t\qquad \bigotimes \in \{\texttt{==, !=, is, is not}\}}
      {\Gamma \vdash x_1 \bigotimes x_2 : \texttt{bool}}
 $$
 
 $$
 \hspace{-2cm}
 \tag{OpComparison}
-\frac{\Gamma \vdash x_1 : \texttt{int}, x_2 : \texttt{int}, \bigotimes \text{ in } [\texttt{<, >, <=, >=}]}
+\frac{\Gamma \vdash x_1 : \texttt{int}, x_2 : \texttt{int}\qquad \bigotimes \in \{\texttt{<, >, <=, >=}\}}
      {\Gamma \vdash x_1 \bigotimes x_2 : \texttt{bool}}
 $$
 

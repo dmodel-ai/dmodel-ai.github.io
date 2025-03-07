@@ -29,14 +29,17 @@ document.addEventListener('DOMContentLoaded', function() {
       if (currentLink) {
         currentLink.classList.add('toc-active');
         
-        // Make the TOC scroll to show the active item if needed
-        const tocRect = toc.getBoundingClientRect();
-        const linkRect = currentLink.getBoundingClientRect();
-        
-        // If the active item is outside the visible area of TOC
-        if (linkRect.top < tocRect.top || linkRect.bottom > tocRect.bottom) {
-          // Scroll to center the active item
-          currentLink.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Only auto-scroll the TOC on desktop (not on mobile)
+        if (window.innerWidth > 1000) {
+          // Make the TOC scroll to show the active item if needed
+          const tocRect = toc.getBoundingClientRect();
+          const linkRect = currentLink.getBoundingClientRect();
+          
+          // If the active item is outside the visible area of TOC
+          if (linkRect.top < tocRect.top || linkRect.bottom > tocRect.bottom) {
+            // Scroll the TOC element itself, not the window
+            toc.scrollTop = toc.scrollTop + (linkRect.top - tocRect.top) - (tocRect.height / 2) + (linkRect.height / 2);
+          }
         }
       }
     }

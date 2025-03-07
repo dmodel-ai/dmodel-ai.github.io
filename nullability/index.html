@@ -109,17 +109,10 @@
     }  </style>
   <link rel="stylesheet" href="pandoc.css" />
   <link rel="stylesheet" href="sidenote.css" />
-  <link rel="stylesheet" href="toc-styles.css">
+  <link rel="stylesheet" href="toc-styles.css" />
+  <link rel="stylesheet" href="highlights-box.css" />
   <script src="toc-script.js"></script>
   <script src="sidenotes.js"></script>
-  <style> /* Styles for highlights box */ .highlights-box { position: absolute; width: 220px; right: 0; top: 120px;  /* Adjust this value to position vertically relative to the abstract */ margin-right: 30px; padding: 15px; background-color: #fbfbfb; border-left: 2px solid #eaeaea; font-size: 0.9em; z-index: 10; }
-  /* Make sure it doesn't interfere with title on small screens */ @media (max-width: 900px) { .highlights-box { position: static; width: auto; margin: 20px 0; right: auto; top: auto; } }
-  .highlights-box h3 { margin-top: 0; font-size: 1.1em; font-weight: 500; color: #555; }
-  .highlights-box ul { padding-left: 20px; margin: 10px 0 0 0; line-height: 1.4; }
-  .highlights-box li { margin-bottom: 6px; }
-  .highlights-box a { color: #666; text-decoration: none; }
-  .highlights-box a:hover { text-decoration: underline; color: #333; }
-  /* The container for the abstract needs to be relative for proper positioning */ .abstract { position: relative; } </style>
   <script defer=""
   src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
   <script>document.addEventListener("DOMContentLoaded", function () {

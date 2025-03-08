@@ -52,7 +52,7 @@ $$
 \over
 \Gamma \vdash
 \left[\begin{array}{l}
-\texttt{if $x$:}\\
+\texttt{if $x$ $\bigotimes$ None:}\\
 \quad p
 \end{array}\right]
 \vartriangleright \text{ok}

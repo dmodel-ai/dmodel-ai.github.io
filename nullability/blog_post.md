@@ -20,13 +20,13 @@ abstract:
 
 ---
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-YWWQ31RWP8"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-7J9NR9273D"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  gtag('config', 'G-YWWQ31RWP8');
+  gtag('config', 'G-7J9NR9273D');
 </script>
 
  <div class="highlights-box">

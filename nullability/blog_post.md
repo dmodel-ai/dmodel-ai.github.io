@@ -119,12 +119,12 @@ confuse the model. Until now.
 In this work:
 
 * We introduce a microbenchmark of 15 programs that test basic model
-  understanding of the flow of nullability through a program.
+  understanding of the flow of nullability through a program. ([@Sec:task])
 
 * We find that models begin to understand nullability in a local
   scope, satisfying many requirements of the python typechecker,
   before they start to understand how nullability flows across the
-  program. ([@Sec:testing])
+  program. ([@Sec:eval_results])
 
 * We find that models develop an internal concept of nullability as
   they scale up and are trained for longer. ([@Sec:probing])

@@ -1,0 +1,76 @@
+.sidenote-index {
+    counter-increment: sidenote-counter;
+    content: counter(sidenote-counter) " ";
+    font-size: 0.5rem;
+    position:relative;
+    bottom:-2em;
+    right:1em;
+}
+.sidenote {
+  font-size: 0.8rem;
+}
+
+figure {
+  width: min(max(36em, 100vw), 54em, calc(100vw - 24px));
+  margin-left: min(max(-9em, calc(18em - 50vw)),0em);
+}
+figure img {
+  width: min(max(36em, 100vw), 54em, calc(100vw - 24px))
+}
+figcaption{
+    margin-top: -1em;
+    margin-bottom: 2em;
+    width: min(max(36em, 100vw), 54em, calc(100vw - 24px));
+    display:flex;
+    justify-content: center
+}
+
+figure:has(> .inlinefig) {
+    max-width: 36em;
+    margin-left: 0;
+}
+
+figure:has(> .inlinefig) figcaption {
+    max-width: 36em;
+}
+
+.aside {
+    position: absolute;
+    left: 0;
+    padding-left: 8rem;
+    width: calc(50vw - 26rem);
+    font-size: 1.2rem;
+    background: orange;
+    display: block;
+}
+.aside.AT{
+    background: lightgreen;
+}
+.aside.AS{
+    background: pink;
+}
+
+
+.highlighted-footnote-ref {
+  background-color: red;
+}
+.highlighted-footnote {
+  color: red;
+}
+.highlighted-footnote a {
+  color: red;
+}
+.highlighted-footnote:link {
+  color: red;
+}
+.highlighted-footnote:visited {
+  color: red;
+}
+
+@media (max-width: 760px) {
+    .sidenote,
+    .marginnote,
+    aside {
+        display: none;
+    }
+}

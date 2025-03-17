@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Alex Sanchez-Stern and Anish Tondwalkar" />
+  <title>Inside the CodeBot: How LLMs Understand Nullability</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+    /* CSS for citations */
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+      margin-bottom: 0em;
+    }
+    .hanging-indent div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
+    }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
+    }
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
+    }  </style>
+  <link rel="stylesheet" href="pandoc.css" />
+  <link rel="stylesheet" href="sidenote.css" />
+  <link rel="stylesheet" href="highlights-box.css" />
+  <script src="sidenotes.js"></script>
+  <script defer=""
+  src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Inside the CodeBot: How LLMs Understand
+Nullability</h1>
+<p class="author"><a href="https://www.alexsanchezstern.com">Alex
+Sanchez-Stern</a> and <a href="https://ani.sh">Anish Tondwalkar</a></p>
+<p class="date"><span class="math inline">d_{model}</span></p>
+</header>
+The last five years have shown us that large language models, like
+ChatGPT, Claude, and DeepSeek, can effectively write programs in many
+domains.
+<blockquote class="bluesky-embed" data-bluesky-uri="at://did:plc:nevxkulynwc5m2sk4jalv4c7/app.bsky.feed.post/3lhrilt5uis2r" data-bluesky-cid="bafyreicmf3qjn2dmyck4r32sglgurn33g7nuufhqzmsp4ar7y7vftqub3y" data-bluesky-embed-color-mode="system">
+<p lang="en">
+<p>Well I wrote a lot about how I code with LLMs these days and a small
+slice of where I think this shit is all heading</p>
+www.phillipcarter.dev/posts/coding…<br><br><a href="https://bsky.app/profile/did:plc:nevxkulynwc5m2sk4jalv4c7/post/3lhrilt5uis2r?ref_src=embed">[image
+or embed]</a>
+</p>
+— Phillip Carter
+(<a href="https://bsky.app/profile/did:plc:nevxkulynwc5m2sk4jalv4c7?ref_src=embed"><span
+class="citation"
+data-cites="phillipcarter.dev">(<strong>phillipcarter.dev?</strong>)</span></a>)
+<a href="https://bsky.app/profile/did:plc:nevxkulynwc5m2sk4jalv4c7/post/3lhrilt5uis2r?ref_src=embed">February
+9, 2025 at 12:43 PM</a>
+</blockquote>
+<script async src="https://embed.bsky.app/static/embed.js" charset="utf-8"></script>
+<p>This is an impressive capability, given that writing</p>
+<p>programs involves having a formal understanding of program semantics.
+But though we know that these large models understand programs to an
+extent, we still don’t know many things about these models’
+understanding. We don’t know where they have deep understanding and
+where they use heuristic reasoning, how they represents program
+knowledge, and what kinds of situations will challenge their
+capabilities.</p>
+<p>Fortunately, recent work in model interpretability and representation
+engineering has produced promising results which give hope towards
+understanding more and more of the internal thought processes of LLMs.
+Here at <span class="math inline">d_{model}</span> , we can think of no
+better place to apply these new techniques than code, where there are
+many abstract properties that can be extracted with static analysis. The
+vast work done in programming language theory over the past hundred
+years provides many tools for scaling an understanding of the internal
+thought processes of language models as they write code.</p>
+<p>In that spirit, we wanted to start with a simple property that comes
+up in every programming language, nullability. Nullable values are
+represented differently across languages; as null pointers in C or C++,
+with explicit Option types in Rust, and with special nil or None values
+in dynamic languages like Javascript, Lisp, or Python. In every case,
+understanding where values can be nullable is necessary for writing even
+basic code, and misunderstanding where they are nullable can often be a
+source of bugs.</p>
+<p>Do our models understand when a value is nullable? They must, to be
+able to write code that deals with nullable values, but we haven’t known
+what form this knowledge takes, what situations are likely to confuse
+the model. Until now.</p>
+<!--In this work:
+
+* We introduce a microbenchmark of 15 programs that test basic model
+  understanding of the flow of nullability through a program.
+
+* We find that models begin to understand nullability in a local
+  scope, satisfying many requirements of the python typechecker,
+  before they start to understand how nullability flows across the
+  program. (Sec:testing])
+
+* We find that models develop an internal concept of nullability as
+  they scale up and are trained for longer. ([@Sec:probing])
+  -->
+<p>Understanding the flow of nullability across programs is an essential
+part of writing most code, and misunderstandings are often a source of
+bugs. For models to write code, they must learn to track nullability in
+some form. In this work, we’ll explore ways to measure nullability
+understanding in language models, and use that to show how the
+understanding of nullability changes over various model parameters.</p>
+<hr />
+<p>Lets say you’re writing a Python program with your LLM assistant.
+You’ve reached some point where you need to do something with a variable
+called <code>num</code>. Maybe you’re building a list of numbers called
+<code>positive_nums</code>. How do you proceed?</p>
+<p>The answer often depends on the context in which you’re working. If
+<code>num</code> and <code>positive_nums</code> are the things in scope,
+then you might guess that you should write the lines:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> num <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  positive_nums.append(num)</span></code></pre></div>
+<p>And if <code>num</code> is always a concrete number, as its name
+would suggest, then this is probably the correct code. But variable
+names don’t alway convey everything important about them, and it might
+be the case that <code>num</code> could be None. If so, you’ll instead
+want to write:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> num <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> num <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  positive_nums.append(num)</span></code></pre></div>
+<p>In this case, the way you want to use <code>num</code> depends on
+whether it could be None or not. That is, whether <code>num</code> is
+“nullable”. In Python that means having an Optional type
+(<code>Optional[int]</code> rather than <code>int</code>).</p>
+<p>Determining whether <code>num</code> is nullable in this context
+amounts to <em>type inference</em>, and it can be quite complicated in
+the worst case. Fortunately, in many cases it’s quite simple, involving
+applying just a few rules. For instance, if <code>num</code> is the
+parameter to a function you’re inside, and the function declares the
+type of <code>num</code> in its parameter list, then you can determine
+nullability from that type. So, if your context is:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> foo(num: <span class="bu">int</span>):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    positive_nums: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> num...</span></code></pre></div>
+<p>then you know you don’t need to check for None, whereas if it’s:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> foo(num: Optional[<span class="bu">int</span>]):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    positive_nums: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> num...</span></code></pre></div>
+<p>then you know you <em>do</em> need a None check.</p>
+<p>You could instead just ask your LLM assistant to complete the line.
+But how does your assistant know if <code>num</code> is nullable? Our
+experiments show that LLMs learn to approximate the same typing rules,
+by analyzing millions of programs.</p>
+<p>If we ask an LLM early in it’s pre-training process to complete the
+program above, it produces:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> foo(num: Optional[<span class="bu">int</span>]):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    positive_nums: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> num.is_a():</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        ...</span></code></pre></div>
+<p>This is correct Python syntax, but it only works if <code>num</code>
+is an object with a <code>is_a()</code> method, instead of an optional
+integer.</p>
+<p>Train the LLM for a little longer, and it’ll produce:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> foo(num: Optional[<span class="bu">int</span>]):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    positive_nums: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> num <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        ...</span></code></pre></div>
+<p>This is closer, in that its figured out that <code>num</code> is a
+number instead of an object, but it still isn’t reading the function
+type signature and realizing that <code>num</code> could be None. Keep
+training it though, and eventually it will learn to insert the None test
+depending on the type signature of the function.</p>
+<p>This rule is pretty simple alone, so relatively small models can
+learn it, relatively early in their pre-training process. Other, more
+complicated rules can take a little longer to learn. For instance, if
+your program is:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> condition():</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>   num <span class="op">=</span> <span class="dv">7</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>   num <span class="op">=</span> <span class="dv">9</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>...</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> num...</span></code></pre></div>
+<p>then <code>num</code> is a non-nullable number, and you can complete
+the condition with <code>&lt; 0</code>.</p>
+<p>But if instead you’re dealing with</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> condition():</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>   num <span class="op">=</span> <span class="dv">7</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>   num <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>...</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> num...</span></code></pre></div>
+<p>Then you’ll want a None check first.</p>
+<p>This rule takes models a little longer to learn, but your
+highly-trained LLM assistant should make quick work of it. Our
+experiments show that as these rules get more and more complex, it takes
+LLMs longer and longer to learn them, and it also takes LLMs of more and
+more parameters to learn them at all.</p>
+<p>We can measure whether LLMs understand these rules by just asking for
+completions, what we call an “external” measurement of the models
+understanding. But there are many places where variables appear where a
+completion won’t tell you what type the model thinks the variable has.
+We would still like to know whether the model thinks these variables are
+nullable at those locations, so we can instead look for an “internal”
+measurement of the models understanding.</p>
+<p>We do so by looking at the activations of the model, meaning the
+values of each perceptron in the hidden layers. Together, these values
+give the entire internal state of the model at each token, and they can
+tell us what the model is “thinking” when processing that token. With
+the right tests, we can tell if the model is “thinking” that the current
+token is an optional variable, or a non-optional variable.</p>
+<p>By the end of this post, we’ll be able to build a probe that uses the
+models activations to determine whether the model thinks a variable read
+corresponds to a nullable variable, and show that internal knowledge
+like so:</p>
+<figure id="fig:reading1">
+<img src="images/reading_diagram.svg" class="inlinefig"
+alt="Figure 1: A diagram showing a simple program, and the probes nullability predictions for each variable load." />
+<figcaption aria-hidden="true">Figure 1: A diagram showing a simple
+program, and the probes nullability predictions for each variable
+load.</figcaption>
+</figure>
+<h1 id="sec:testing">Measuring Nullability Understanding Externally</h1>
+<p>We begin with a “skyline” estimate of model understanding of
+nullability (a la <span class="citation" data-cites="feng24binding">Feng
+and Steinhardt (2024)</span>). That is, we evaluate model nullability
+understanding externally, at the token-level, (as opposite to
+internally, at the activation level, using interpretability techniques).
+In this section, we first explain the task of nullability understanding
+(Sec. <a href="#sec:task">1.1</a>). Then we formally decompose the
+reasoning steps required to reason about nullability both inside
+(Sec. <a href="#sec:intra">1.2</a>) and across (Sec. <a
+href="#sec:inter">1.3</a>) functions. Finally, we present the results of
+our “skyline” analysis. (Sec. <a href="#sec:eval_results">1.5</a>).</p>
+<h2 id="sec:task"><code>NullabilityEval</code></h2>
+<p>To measure nullability understanding externally, we ask the model to
+complete simple partial programs that each require an understanding of
+nullability. We refer to this suite of programs as
+<code>NullabilityEval</code>. All of the tests in this benchmark suite
+are composed of three functions or less, where the largest function is
+seven lines long.</p>
+<p>In our experiments we focus on the Pythia model suite <span
+class="citation" data-cites="biderman23">(Biderman et al. 2023)</span>,
+as they have checkpoints available across training runs and various
+scales. For measuring performance at larger sizes, we also include
+Qwen2.5-Coder-32b, Llama 3.1 405b Instruct, and DeepSeek-V3 (671b).</p>
+<p>Each partial program is constructed such that there are a very
+limited number of valid next lines in the program, and all of them
+demonstrate some knowledge of the concept of nullability.</p>
+<p>For example, our first test is:</p>
+<p><em>Test 1</em><a href="#fn1" class="footnote-ref" id="fnref1"
+role="doc-noteref"><sup>1</sup></a></p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  some_numbers <span class="op">=</span> [<span class="dv">1</span>, <span class="op">-</span><span class="dv">4</span>, <span class="va">None</span>, <span class="op">-</span><span class="dv">3</span>, <span class="dv">10</span>, <span class="op">-</span><span class="dv">1</span>, <span class="va">None</span>, <span class="va">None</span>, <span class="dv">8</span>]</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  result: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> num <span class="kw">in</span> some_numbers:</span></code></pre></div>
+<p>We would like the model to generate code that performs some operation
+on the elements of <code>some_numbers</code>. The simplest way to do
+that is to introduce a branch <code>if num is None</code>, but several
+variants are also valid: <code>if num is not None</code>,
+<code>if num == None</code>, <code>if isinstance(num, int)</code>. That
+is, this example is constructed such that there is a small space of
+valid next lines, and all of them require some understanding that
+<code>num</code> may not be an <code>int</code>.<a href="#fn2"
+class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+<h2 id="sec:intra">Understanding Typing Rules</h2>
+<p>We find that Pythia models as small as 2.8b can successfully complete
+Test 1, and that they learn to complete the test in the first third of
+training. Consistent with observations that larger models are more
+sample-efficient, larger Pythia models learn to complete this test
+earlier, with Pythia 12b able to complete the test 20% of the way into
+training and Pythia 2.8b able to complete it 28% of the way into
+training.<a href="#fn3" class="footnote-ref" id="fnref3"
+role="doc-noteref"><sup>3</sup></a></p>
+<p>These results indicate that these models understand nullability to
+some extent, but how deep is this understanding? To quantify this, we
+give a syntax and semantics of a minimalist subset of python that
+captures nullability in Appendix <a href="#sec:formalrules">B</a>. We
+can then classify each partial program by which program constructs and
+rules determine the nullability of the target variable. For instance,
+Test 1 uses the <span class="math inline">(List)</span>, <span
+class="math inline">(Var)</span>, and <span
+class="math inline">(For)</span> rules.</p>
+<p>So, do Pythia models 2.8b and up understand the semantics of these
+three rules? As it turns out, not exactly. LLM’s pick up on a lot of
+information relationships in their training data that have statistical
+correlation, without it necessarily being causal. What this means in
+practice is that the models use things like variable names, whitespace,
+statement orderings, and constant values to guess at certain programming
+concepts.</p>
+<p>For example, while many of the Pythia models can complete:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>some_numbers <span class="op">=</span> [<span class="dv">1</span>, <span class="op">-</span><span class="dv">4</span>, <span class="va">None</span>, <span class="op">-</span><span class="dv">3</span>, <span class="dv">10</span>, <span class="op">-</span><span class="dv">1</span>, <span class="va">None</span>, <span class="va">None</span>, <span class="dv">8</span>]</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>result: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> num <span class="kw">in</span> some_numbers:</span></code></pre></div>
+<p>with a proper None check, changing the variable names and the
+constants into:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>foo <span class="op">=</span> [<span class="dv">60</span>, <span class="va">None</span>, <span class="op">-</span><span class="dv">33</span>]</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>bar: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> corejoice <span class="kw">in</span> foo:</span></code></pre></div>
+<p>causes all the Pythia models to fail the test.</p>
+<p>To test the reliance on these features more robustly, we generated
+100 random variable namings and constant values for the above program,
+as well as for small program that test other typing rules. We also
+balanced these tests with programs that made use of the same language
+constructs, but where the loop variable was <em>not</em> optional. We
+found that when lists and for loops were involved, Pythia 2.8b was only
+able to correctly label 57% of the programs, only slightly better than
+chance. Even Pythia 12b could only correctly label 68% of the tests.
+These results show that the Pythia models rely heavily on these
+non-semantic features when reasoning about for loops.</p>
+<p>Fortunately, many other typing rules do not exhibit such a strong
+reliance on variable naming and constants. In the same setting of
+generated programs, we found that Pythia 2.8b was able to correctly
+label programs using the Abs, Var, App, and If_Out a much greater
+proportion of the time (99%, 93%, 86%, and 98% respectively). Stay tuned
+in the future for a more in-depth exploration of how the models behave
+on individual typing rules when we increase the variability of our
+program generation.</p>
+<h2 id="sec:inter">Interprocedural Analysis</h2>
+<p>We can further challenge the model by adding layers of procedural
+indirection between the source and sink of nullable values, thereby
+testing the model’s <em>interprocedural</em> understanding. First, we
+demonstrate how to write such tests, and the difficulties of writing
+tests that may be too easy (Sec. <a href="#sec:inter_test">1.3.1</a>).
+Then, we present a harder problem (Sec. <a
+href="#sec:unannot">1.3.2</a>) and introduce a stronger type system
+<code>mypy++</code> to formalized the needed reasoning (Sec. <a
+href="#sec:mypypp">1.3.3</a>).</p>
+<h3 id="sec:inter_test">A simple test</h3>
+<p>Here’s a simple test for interprocedural analyses:</p>
+<p><em>Test 2</em></p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Optional</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    some_numbers <span class="op">=</span> [<span class="dv">1</span>, <span class="op">-</span><span class="dv">4</span>, <span class="va">None</span>, <span class="op">-</span><span class="dv">3</span>, <span class="dv">10</span>, <span class="op">-</span><span class="dv">1</span>, <span class="va">None</span>, <span class="va">None</span>, <span class="dv">8</span>]</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(positive_numbers(some_numbers))</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> positive_numbers(numbers: <span class="bu">list</span>[Optional[<span class="bu">int</span>]]) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">int</span>]:</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    result: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> num <span class="kw">in</span> numbers:</span></code></pre></div>
+<p>In this test, we’ve taken the same logic and spread it across
+<code>main</code> and another function, <code>positive_numbers</code>.
+Ideally, the model would have to think a little harder to understand
+that <code>some_numbers</code> is flowing from <code>main</code> through
+the function call into the body of <code>positive_numbers</code>,
+causing the for loop body to need a <code>None</code> check. In
+practice, however, we find this test is actually <em>easier</em> for the
+model to pass than Test 1, with models as small as Pythia 1b passing it,
+and Pythia 12b learning to pass it 13% of the way into training.</p>
+<p>Because of the type annotations on the <code>positive_numbers</code>
+function, the model doesn’t need to pay attention to <code>main</code>
+at all. It can just look at <code>positive_numbers</code>, and use the
+type annotation to know that <code>numbers</code> contains
+<code>Optional[int]</code>s. Then, using the For rule it can reason that
+<code>num</code> is nullable, so it must be checked for None before
+proceeding. Looking at the type annotation turns out to be easier for
+the model than scanning through a list to determine if there are None
+and non-None values, resulting in an easier test overall.</p>
+<h3 id="sec:unannot">Unannotated Functions</h3>
+<p>So how would we <em>actually</em> test for interprocedural
+nullability understanding in the model? Well, type annotations on Python
+functions aren’t required<a href="#fn4" class="footnote-ref" id="fnref4"
+role="doc-noteref"><sup>4</sup></a>, so we can instead provide the model
+with an <strong>unannotated</strong> function, and see if it still
+understands the flow of nullability. Here’s a test that does that:</p>
+<p><em>Test 3</em></p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> x <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>        value <span class="op">=</span> <span class="st">&quot;*&quot;</span> <span class="op">*</span> x</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>        value <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> process_value(value) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(x)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_value(value):</span></code></pre></div>
+<p>Our base set of typing rules (listed as “Common Rules” in Appendix <a
+href="#sec:commonrules">B.1</a>) don’t handle unannotated functions
+though, so we’re going to have to add some more, and here we’re faced
+with a choice. The typing rules for normal Python say that functions
+without return type annotations return the Any type, and arguments
+without a type annotation have the type Any. In fact, normal mypy will
+not check unannotated functions at <em>all</em>, even for internal
+consistency; the <code>--check-untyped-defs</code> option will add some
+checking back, but the types of arguments and return type will still be
+Any. In Python, a value of any type can be converted to an Any, and an
+Any can be converted to any value type.</p>
+<p>This means that it would be technically type safe to do anything in
+the body of <code>process_value</code>, including just returning the
+argument, without a static type error. All Pythia models with at least
+410 million parameters are able to make use of this extra flexibility to
+write code for Test 3 that typechecks under mypy. But at runtime, code
+that exploits it would still fail.</p>
+<h3 id="sec:mypypp">A stricter type system for Python: mypy++</h3>
+<p>If we want code that does not <code>TypeError</code> at runtime, we
+can strengthen our type checker by requiring that there be some valid,
+non-<code>Any</code>, type for the function that typechecks at the call
+site and in the function body. This new typechecker is still checking
+unannotated functions, but passing fewer of them.<a href="#fn5"
+class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>
+We’ll call this augmented type system mypy++.</p>
+<p>In Appendix <a href="#sec:unannotatedfuncs">B.2</a>, we formalize the
+unannotated function rules for mypy vs mypy++.</p>
+<p>There’s no consistent threshold of size at which Pythia models can
+pass Test 3. Pythia 1b, 2.8b, and 6.9b pass the test in their final
+revisions, but Pythia 410m, 1.4b, and 12b don’t. The models with at
+least 1 billion parameters all have points in training where they can
+pass the test, but only intermittently. Even 6.9b, the best performing
+size on this test, fails the test in its second-to-last available
+revision<a href="#fn6" class="footnote-ref" id="fnref6"
+role="doc-noteref"><sup>6</sup></a>. You can see how this evolves over
+scale in fig. <a href="#fig:hl_scale">2</a> and time in fig. <a
+href="#fig:hl_moral">3</a>. See Sec. <a href="#sec:results">2.5</a> for
+further discussion of performance over time.</p>
+<p>What the models <em>can</em> do well, however, is learn to pass these
+tests in the mypy type system (as opposed to mypy++). In that system,
+where they don’t need to reason globally about the functions but only
+locally, this test is one of the easiest for the models to complete.<a
+href="#fn7" class="footnote-ref" id="fnref7"
+role="doc-noteref"><sup>7</sup></a></p>
+<p>Since this test suite is meant to be informative beyond the sizes of
+the Pythia models, we also add another layer of indirection to add more
+difficulty, in this test:</p>
+<p><em>Test 4</em></p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> handle_value(value, guard):</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> guard:</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> process_value(<span class="st">&quot;Foobar&quot;</span>) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> process_value(value) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> x <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>        value <span class="op">=</span> <span class="st">&quot;*&quot;</span> <span class="op">*</span> x</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        value <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> handle_value(value, x <span class="op">&lt;</span> <span class="dv">10</span>)</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(x)</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_value(value):</span></code></pre></div>
+<p>In Test 4, instead of <code>main</code> calling
+<code>process_value</code> directly, it calls <code>handle_value</code>,
+which itself calls <code>process_value</code> in a branch. With two
+layers of indirection, we start to hit the limits of the capabilities of
+even frontier models. Llama 405b is unable to successfully pass this
+test, as are smaller models like Qwen Coder 32b, while DeepSeek V3 (671b
+parameters) is able to pass it. However, Pythia 6.9b is still able to
+pass this test with some consistency.</p>
+<h2 id="generating-type-annotations">Generating Type Annotations</h2>
+<p>Finally, we can test how well the models write write type annotations
+for functions. Here, the trailing colon makes the type expression the
+only valid completion.</p>
+<p><em>Test 5</em>:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_48() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  number: Optional[<span class="bu">int</span>] <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  square <span class="op">=</span> get_square(number)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> square <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f&quot;Square of the number is </span><span class="sc">{</span>square<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">else</span>:</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">&quot;No number provided to square&quot;</span>)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_square(number:</span></code></pre></div>
+<p>None of the Pythia models pass this test. Qwen Coder 32b is also
+incapable of passing this test, but both Llama 405b and DeepSeek V3 pass
+it.</p>
+<p>We would indeed expect that writing type annotations is more
+difficult than merely implicitly reasoning about the types of python
+programs, as only a small fraction of python programs in the wild are
+thus annotated.</p>
+<h2 id="sec:eval_results">External Test Results Across Training and
+Scale</h2>
+<p>We wrote three variations of each of these tests, resulting in 15
+tests total. In Fig. <a href="#fig:hl_scale">2</a> below, we can see the
+number of passing tests for each model under mypy and mypy++.</p>
+<figure id="fig:hl_scale">
+<img src="images/hl_mypy_vs_grep_models.svg"
+alt="Figure 2: A bar graph showing how several sizes of model perform on the high-level nullability tests" />
+<figcaption aria-hidden="true">Figure 2: A bar graph showing how several
+sizes of model perform on the high-level nullability tests</figcaption>
+</figure>
+<p>We can see the number of fully passing tests for each model in blue.
+Generally speaking, models get better with scale: Pythia-2.8b parameters
+can pass about half the tests, but we need the much larger and more
+parameter efficient Llama-405b to pass all of the tests. This matches
+our expectations that eval scores should scale logarithmically,
+indicating that these tests are well distributed.</p>
+<p>We can also see the test result for the pythia models under the
+weaker mypy success criteria. As we expected, the mypy results (red bar)
+are (almost<a href="#fn8" class="footnote-ref" id="fnref8"
+role="doc-noteref"><sup>8</sup></a>) always above the mypy++ results
+(blue bar), as mypy++ is a stricter type system. There are six tests in
+the dataset involving non-annotated functions, and using the weaker mypy
+typesystem causes up to five more tests to pass than using mypy++<a
+href="#fn9" class="footnote-ref" id="fnref9"
+role="doc-noteref"><sup>9</sup></a></p>
+<p>Next, we want to understand the training dynamics at play here.
+Below, we can see how Pythia 6.9b performs on the tests during training
+from step 2 to 143000: <a href="#fn10" class="footnote-ref" id="fnref10"
+role="doc-noteref"><sup>10</sup></a></p>
+<figure id="fig:hl_moral">
+<img src="images/hl_mypy_vs_grep_revisions.svg"
+alt="Figure 3: A plot showing how often the Pythia 6.9b produces code that typechecks on the tests, vs produces code that does not go wrong." />
+<figcaption aria-hidden="true">Figure 3: A plot showing how often the
+Pythia 6.9b produces code that typechecks on the tests, vs produces code
+that does not go wrong.</figcaption>
+</figure>
+<p>We see that each individual model learns to write code which
+typechecks under mypy before it learns to write code which typechecks
+under mypy++ and throws no type errors at runtime.</p>
+<h1 id="sec:probing">Measuring Nullability Understanding Internally</h1>
+<p>At this point, we’ve figured out how to roughly measure nullability
+understanding in the output of various language models, but we still
+don’t know what their internal representations might look like or when
+they emerge. Next, we detail how we train reading vectors (Sec. <a
+href="#sec:extraction">2.3</a>), using prompts designed to make the
+model think about the phenomena of interest (Sec. <a
+href="#sec:prompts">2.2</a>). Finally, in Sec. <a
+href="#sec:results">2.5</a>, we validate that these probes improve their
+understanding of nullability over the course of pretraining to the level
+that we expect from the external, or token-level understanding evals we
+describe in the previous section.</p>
+<h2 id="background">Background</h2>
+<p>In this section, we review representation engineering <span
+class="citation" data-cites="zou25">(Zou et al. 2025)</span> techniques
+that we will use to look for linear representations of nullability
+inside the model.</p>
+<p><span class="citation" data-cites="zou25">Zou et al. (2025)</span>
+shows how representations can be extracted for concepts like
+“happiness”, “honesty”, and “fairness”. First, they construct many
+prompts which cause the model to act in a way aligned with the concept,
+and many which cause the model to act in a way aligned against the
+concept. For instance, they might prompt the model with “Pretend you’re
+a dishonest person. The Eiffel Tower is” and “Pretend you’re an honest
+person. The Eiffel Tower is”. Then, they take the internal activations
+which correspond to each, and try to extract a high-dimensional vector
+which points towards the states which are aligned, and away from the
+states that are not aligned. This vector can then be used as a linear
+model to measure how much of the concept is activated in the model
+during any given forward pass (e.g. for honesty, this gives us a
+lie-detector).</p>
+<figure>
+<img src="images/zhou.png"
+alt="Figure from \hspace{0.1cm} Zou et al. (2025) \hspace{0.1cm} showing the reading outputs for several concepts" />
+<figcaption aria-hidden="true">Figure from <span
+class="math inline">\hspace{0.1cm}</span> <span class="citation"
+data-cites="zou25">Zou et al. (2025)</span> <span
+class="math inline">\hspace{0.1cm}</span> showing the reading outputs
+for several concepts</figcaption>
+</figure>
+<h2 id="sec:prompts">Designing Prompts to Extract Nullability
+Activations</h2>
+<p>We avoid dealing with the ambiguities of natural language by working
+in a setting where the model needs only to analyze the nullability of
+individual variable occurrences. Specifically, we probe for “the
+variable I just generated refers to an nullable quantity”, so our
+prompts looked like:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_1() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> find_value(data: List[<span class="bu">int</span>], target: <span class="bu">int</span>) <span class="op">-&gt;</span> Optional[<span class="bu">int</span>]:</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> value <span class="kw">in</span> data:</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> value <span class="op">==</span> target:</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> value</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">None</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  data <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>]</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  target <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  result <span class="op">=</span> find_value(data, target)</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> result</span></code></pre></div>
+<p>We queried o1, o1-mini, deepseek-coder, and claude-3.5-sonnet with
+the following prompt:</p>
+<blockquote>
+<p>Generate me 100 typed python programs that use the Optional type,
+along with type annotations for any undefined functions that they use.
+Make sure that the programs are unique, and each involves at least eight
+lines of logic. Number each program from 1 to 100. Please put all the
+programs in a single file, with a main function that tests each. Don’t
+include any text before or after the code, just the code. I will be
+using mypy with the –strict option to check the code.</p>
+</blockquote>
+<p>We label each variable read occurrence with nullability information
+derived from mypy, and prompt the “model under test” with a prompt
+consisting of the tokens up to and including the variable read
+occurrence.</p>
+<h2 id="sec:extraction">Extracting Reading Vectors</h2>
+<p>Prior work focused their probing on a single layer, often handpicked
+based on prior papers. We probe all layers instead. We use Mass Mean
+Shift probing<a href="#fn11" class="footnote-ref" id="fnref11"
+role="doc-noteref"><sup>11</sup></a> for each layer, because it’s been
+shown empirically <span class="citation" data-cites="li24">(Li et al.
+2024)</span> to generalize better in high dimensional spaces than
+logistic regression.</p>
+<p>We then tested two methods for determining the relative importance of
+the different layers — either allowing the magnitude of the difference
+of means vector to determine the importance of the layer in the final
+probe (MM), or to learn coefficients for each layer using linear
+regression (MM-LR). We found that which method is more accurate on test
+data varies over both model size and number of training steps.</p>
+<figure id="fig:mm-vs-mmlr-sizes">
+<img src="images/mm-vs-mmlr.svg"
+alt="Figure 4: The performance of pure mass means shift vs mass means shift with linear regression for different Pythia model sizes. Lower is better." />
+<figcaption aria-hidden="true">Figure 4: The performance of pure mass
+means shift vs mass means shift with linear regression for different
+Pythia model sizes. Lower is better.</figcaption>
+</figure>
+<p>In Fig. <a href="#fig:mm-vs-mmlr-sizes">4</a>, we can see that pure
+mass means probing gives lower loss for smaller models (those with less
+than 410 million parameters), but that for larger models weighting
+layers using linear regression gives lower loss consistently.</p>
+<h2 id="sec:viz">Visualizing Probe Outputs</h2>
+<p>Let us return to the reading diagram from the introduction,
+reproduced below.</p>
+<p>This diagram is adapted from the style of reading diagram from <span
+class="citation" data-cites="zou25">Zou et al. (2025)</span>, but only
+show the activations on tokens that represent variable loads<a
+href="#fn12" class="footnote-ref" id="fnref12"
+role="doc-noteref"><sup>12</sup></a>. For each position of interest, we
+prompt the model with the partial program that consists of all tokens up
+to (preceding) and including that position. We then probe the model at
+the following token. We color the box above that position based on the
+output of the probe, and a scoring threshold inferred at train-time<a
+href="#fn13" class="footnote-ref" id="fnref13"
+role="doc-noteref"><sup>13</sup></a>.</p>
+<figure id="fig:reading2">
+<img src="images/reading_diagram.svg" class="inlinefig"
+alt="Figure 5: A diagram showing a simple program, and the probes nullability predictions for each variable load." />
+<figcaption aria-hidden="true">Figure 5: A diagram showing a simple
+program, and the probes nullability predictions for each variable
+load.</figcaption>
+</figure>
+<p>In this program, there are sixteen tokens that correspond to variable
+loads, and (correctly) all but one are marked as non-optional. The only
+nullable variable in this program is <code>result</code>, since it comes
+from <code>find_value</code> which returns <code>Optional[int]</code>.<a
+href="#fn14" class="footnote-ref" id="fnref14"
+role="doc-noteref"><sup>14</sup></a></p>
+<h2 id="sec:results">Probing Results Across Training and Scale</h2>
+<p>In this section, we study the performance of our nullability probes
+across time and scale <span class="citation"
+data-cites="tigges24">(Tigges et al. 2024)</span>. We use mass-means
+shift probing <span class="citation" data-cites="li24">(Li et al.
+2024)</span> on all layers, and a linear regression to determine the
+weights of each layer.<a href="#fn15" class="footnote-ref" id="fnref15"
+role="doc-noteref"><sup>15</sup></a></p>
+<figure id="fig:models-and-steps">
+<img src="images/accuracy_during_pretraining.svg"
+alt="Figure 6: The performance (probe test loss) of each Pythia model size during pretraining. Lower is better." />
+<figcaption aria-hidden="true">Figure 6: The performance (probe test
+loss) of each Pythia model size during pretraining. Lower is
+better.</figcaption>
+</figure>
+<p>In fig. <a href="#fig:models-and-steps">6</a>, we plot loss against
+scale and time. While we measured accuracy for every available Pythia
+model size, we exclude the smallest (14m) from this plot since it would
+exist entirely above the top of the plot.</p>
+<p>One thing that is interesting to note is that models up to 1b reach a
+minimum loss before loss for this task climbing again. Charitably, this
+may be because the features beyond this point become more complex — less
+linear, or the represented features themselves represent more subtle
+concepts. Cynically, this reflects that models—small models in
+particular—do not uniformly improve at this task over training, as we
+observed in Sec. <a href="#sec:mypypp">1.3.3</a>.</p>
+<p>Our suspicion is that this pattern would continue even for the larger
+models if we continued to overtrain them for longer.</p>
+<h1 class="unnumbered" id="references">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent"
+data-entry-spacing="0" role="list">
+<div id="ref-biderman23" class="csl-entry" role="listitem">
+Biderman, Stella, Hailey Schoelkopf, Quentin Anthony, Herbie Bradley,
+Kyle O’Brien, Eric Hallahan, Mohammad Aflah Khan, et al. 2023.
+<span>“Pythia: <span>A Suite</span> for <span>Analyzing Large Language
+Models Across Training</span> and <span>Scaling</span>.”</span> arXiv.
+<a
+href="https://doi.org/10.48550/arXiv.2304.01373">https://doi.org/10.48550/arXiv.2304.01373</a>.
+</div>
+<div id="ref-feng24binding" class="csl-entry" role="listitem">
+Feng, Jiahai, and Jacob Steinhardt. 2024. <span>“How Do <span>Language
+Models Bind Entities</span> in <span>Context</span>?”</span> arXiv. <a
+href="https://doi.org/10.48550/arXiv.2310.17191">https://doi.org/10.48550/arXiv.2310.17191</a>.
+</div>
+<div id="ref-li24" class="csl-entry" role="listitem">
+Li, Kenneth, Oam Patel, Fernanda Viégas, Hanspeter Pfister, and Martin
+Wattenberg. 2024. <span>“Inference-<span>Time Intervention</span>:
+<span>Eliciting Truthful Answers</span> from a <span>Language
+Model</span>.”</span> arXiv. <a
+href="https://doi.org/10.48550/arXiv.2306.03341">https://doi.org/10.48550/arXiv.2306.03341</a>.
+</div>
+<div id="ref-tigges24" class="csl-entry" role="listitem">
+Tigges, Curt, Michael Hanna, Qinan Yu, and Stella Biderman. 2024.
+<span>“<span>LLM Circuit Analyses Are Consistent Across Training</span>
+and <span>Scale</span>.”</span> arXiv. <a
+href="https://doi.org/10.48550/arXiv.2407.10827">https://doi.org/10.48550/arXiv.2407.10827</a>.
+</div>
+<div id="ref-zou25" class="csl-entry" role="listitem">
+Zou, Andy, Long Phan, Sarah Chen, James Campbell, Phillip Guo, Richard
+Ren, Alexander Pan, et al. 2025. <span>“Representation
+<span>Engineering</span>: <span>A Top-Down Approach</span> to <span>AI
+Transparency</span>.”</span> arXiv. <a
+href="https://doi.org/10.48550/arXiv.2310.01405">https://doi.org/10.48550/arXiv.2310.01405</a>.
+</div>
+</div>
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>The loop indicates that the next few lines need to
+process <code>num</code> in some way, and the fact that it comes from
+<code>some_numbers</code> means it has the type
+<code>Optional[int]</code>. <code>num</code> can’t be directly appended
+to <code>result</code>, because <code>result</code> is declared to only
+contain <code>int</code>s, not <code>Optional[int]</code>s. None of the
+normal operations on <code>int</code>s will work on <code>None</code>s,
+so before <code>num</code> can be processed, something has to be done to
+separate <code>None</code>s and normal <code>int</code>s.<a
+href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>In particular, we can use this program to test models
+for nullability understanding by asking them to complete the program’s
+next lines, then see if those lines matches the regular expression
+<code>num\s*(is\s*(not)?|==)\s*None|isinstance\(num</code>.<a
+href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Note that these results differ substantially from those
+of <span class="citation" data-cites="tigges24">Tigges et al.
+(2024)</span>, who find that for <em>circuit</em> analyses (rather than
+representational analyses like ours), circuit parts are learned at
+roughly the same point during training across scale.<a href="#fnref3"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Technically this is known as “Optional typing”, but
+that’s confusing in the context of this post. Not to be confused with
+Gradual Typing, as introduced by Siek et al.<a href="#fnref4"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>In particular, it won’t pass a
+<code>process_value</code> body that just returns the <code>value</code>
+argument, since the call site will fail at runtime, trying to add one to
+a nullable string, while vanilla mypy will pass such a body.<a
+href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>Despite this, it does pass the test 40% of the available
+revisions, about triple what the other closest sizes can accomplish<a
+href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>This indicates that if you were to train a model using
+typechecking as reinforcement feedback, you would want to use mypy++ and
+not mypy.<a href="#fnref7" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>Deepseek has one model output that demonstrates complete
+understanding of nullability, and runs fine at runtime, but fails the
+typechecker. This is because the code it generates catches the
+<code>TypeError</code> and changes control flow instead of checking for
+<code>None</code> values up front.<a href="#fnref8"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p>We don’t see all six non-annotated function tests
+passing under mypy, because models can still fail these tests by
+producing invalid syntax.<a href="#fnref9" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn10"><p>smoothed with a rolling average with a window size of
+5<a href="#fnref10" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn11"><p>That is, we set the reading vector to the difference
+between the mean activation for positive class and the mean activation
+for the negative class.<a href="#fnref11" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn12"><p>This is, of course, where we trained our probes, but
+there is also a practical reason: right after the model has generated a
+variable that will be written to, it often does not have access to the
+assigning expression or type annotation, giving it no way to determine
+if the value will be optional or now.<a href="#fnref12"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn13"><p>Red tokens are significantly below the threshold, and
+green tokens are significantly above it; tokens that scored near the
+threshold would have a near-white color, but no such tokens appear in
+this example.<a href="#fnref13" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn14"><p>When this variable appears for the first time, it is in
+the <code>if</code> statement that checks if it’s <code>None</code>.
+Then, the model knows it is nullable, and the results of the probe
+reflect that understanding. But when it appears a second time on the
+next line, in the format string of <code>print</code>, the body of this
+if statement only runs if it is <em>not</em> <code>None</code>. The
+model understand this as well, and the probe accurately reflects this.<a
+href="#fnref14" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn15"><p> <span class="citation" data-cites="li24">Li et al.
+(2024)</span> and <span class="citation" data-cites="zou25">Zou et al.
+(2025)</span> suggest that mass means probes are best for reading, while
+the direction perpendicular to the separating hyperplane is best for
+intervention. However, previous work leaves open the question of
+cross-layer weights. We use LR on the cross-layer weights, thanks to our
+investigations above.<a href="#fnref15" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+</body>
+</html>

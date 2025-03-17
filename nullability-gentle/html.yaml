@@ -1,0 +1,17 @@
+input-file:
+  - blog_post.md
+standalone: true
+output-file: index.html
+html-math-method:
+  method: katex
+css:
+  - pandoc.css
+  - sidenote.css
+  - highlights-box.css
+filters:
+  # - todo_filter.py
+  - pandoc-crossref
+  - citeproc
+variables:
+  header-includes:
+    - "<script src=\"sidenotes.js\"></script>"

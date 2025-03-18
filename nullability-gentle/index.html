@@ -138,41 +138,53 @@ Nullability</h1>
 Sanchez-Stern</a> and <a href="https://ani.sh">Anish Tondwalkar</a></p>
 <p class="date"><span class="math inline">d_{model}</span></p>
 </header>
-The last five years have shown us that large language models, like
-ChatGPT, Claude, and DeepSeek, can effectively write programs in many
-domains.
-<blockquote class="bluesky-embed" data-bluesky-uri="at://did:plc:nevxkulynwc5m2sk4jalv4c7/app.bsky.feed.post/3lhrilt5uis2r" data-bluesky-cid="bafyreicmf3qjn2dmyck4r32sglgurn33g7nuufhqzmsp4ar7y7vftqub3y" data-bluesky-embed-color-mode="system">
-<p lang="en">
-<p>Well I wrote a lot about how I code with LLMs these days and a small
-slice of where I think this shit is all heading</p>
-www.phillipcarter.dev/posts/coding…<br><br><a href="https://bsky.app/profile/did:plc:nevxkulynwc5m2sk4jalv4c7/post/3lhrilt5uis2r?ref_src=embed">[image
-or embed]</a>
+<p><img src="images/robot-brain.png" class="smallimage"
+alt="A line drawing of a robot with a brain on their antenna" /><br />
 </p>
-— Phillip Carter
-(<a href="https://bsky.app/profile/did:plc:nevxkulynwc5m2sk4jalv4c7?ref_src=embed"><span
-class="citation"
-data-cites="phillipcarter.dev">(<strong>phillipcarter.dev?</strong>)</span></a>)
-<a href="https://bsky.app/profile/did:plc:nevxkulynwc5m2sk4jalv4c7/post/3lhrilt5uis2r?ref_src=embed">February
-9, 2025 at 12:43 PM</a>
-</blockquote>
-<script async src="https://embed.bsky.app/static/embed.js" charset="utf-8"></script>
-<p>This is an impressive capability, given that writing</p>
-<p>programs involves having a formal understanding of program semantics.
-But though we know that these large models understand programs to an
-extent, we still don’t know many things about these models’
-understanding. We don’t know where they have deep understanding and
-where they use heuristic reasoning, how they represents program
-knowledge, and what kinds of situations will challenge their
-capabilities.</p>
-<p>Fortunately, recent work in model interpretability and representation
-engineering has produced promising results which give hope towards
-understanding more and more of the internal thought processes of LLMs.
-Here at <span class="math inline">d_{model}</span> , we can think of no
-better place to apply these new techniques than code, where there are
-many abstract properties that can be extracted with static analysis. The
-vast work done in programming language theory over the past hundred
-years provides many tools for scaling an understanding of the internal
-thought processes of language models as they write code.</p>
+<p>The last five years have shown us that large language models, like
+ChatGPT, Claude, and DeepSeek, can effectively write code in many
+domains. The excitement around these developments has been huge, with
+many people claiming that these models can write entire web servers and
+apps from scratch. Whats certainly true is that these tools have opened
+up programming to a whole new class of people who consider themselves
+non-technical.</p>
+<p><img
+src="https://github.blog/wp-content/uploads/2022/09/unexpectedcopilot3.gif?w=1024&amp;resize=1024%2C576"
+alt="A gif of github copilot completing a phone number validating function as the user types" /><br />
+</p>
+<p>But there are still many unanswered questions about this capability.
+How often, and in what situations, can LLM’s write correct code entirely
+on their own? And maybe more importantly, but harder to answer: Do LLM’s
+“understand” the code they are writing?</p>
+<p>Understanding is a tricky concept to measure. Some would say that
+LLM’s can’t have understanding, because they aren’t biological organisms
+with sentience. But they certainly have something akin to “thought
+processes”: chains of predictions that determine their final outputs.
+Recently, it’s become possible to study these processes more deeply,
+measuring internal “beliefs” of the model as they think. This gives us a
+powerful tool for determining what kinds of problems LLM’s falter on,
+when they’ll succceed, and when they are “thinking through” problems
+more fully versus just guessing at a solution.</p>
+<p>So far, these techniques for measuring internal model state have been
+mostly applied to chatbots writing normal text, what we call “natural
+language” (as opposed to computer languages). This makes sense, since
+some of the most critical LLM tasks involve chatting with a user, and
+some of the most interesting concepts to measure, such as honesty or
+power-seeking, apply most readily to these conversations. But it’s
+pretty hard to say quantitative things about natural language concepts,
+so our ability to rigorously study internal representations is limited
+to smaller scales, where we can read over chatbots output as humans and
+determine whether their level of “honesty” (or some other interesting
+concept) matches the internal thing we’re measuring.</p>
+<p><img src="images/zou.png"
+alt="A diagram from Zou showing probes that read hallucination, honesty, morality, and power-seeking from the outputs of a chatbot." /><br />
+</p>
+<p>Code, on the other hand, is another matter. Humans have been studying
+properties of code for a long time, and there are many abstract
+properties that can now be determined using static analysis. If we pick
+the right properties, we don’t need to worry about our ability to label
+data; static analysis can do that for us, so we can easily scale up and
+train on thousands of examples generated from scratch.</p>
 <p>In that spirit, we wanted to start with a simple property that comes
 up in every programming language, nullability. Nullable values are
 represented differently across languages; as null pointers in C or C++,
@@ -185,26 +197,20 @@ source of bugs.</p>
 able to write code that deals with nullable values, but we haven’t known
 what form this knowledge takes, what situations are likely to confuse
 the model. Until now.</p>
-<!--In this work:
-
-* We introduce a microbenchmark of 15 programs that test basic model
-  understanding of the flow of nullability through a program.
-
-* We find that models begin to understand nullability in a local
-  scope, satisfying many requirements of the python typechecker,
-  before they start to understand how nullability flows across the
-  program. (Sec:testing])
-
-* We find that models develop an internal concept of nullability as
-  they scale up and are trained for longer. ([@Sec:probing])
-  -->
-<p>Understanding the flow of nullability across programs is an essential
-part of writing most code, and misunderstandings are often a source of
-bugs. For models to write code, they must learn to track nullability in
-some form. In this work, we’ll explore ways to measure nullability
-understanding in language models, and use that to show how the
-understanding of nullability changes over various model parameters.</p>
+<p><img src="images/robot-glow.png"
+alt="A robot with glowing eyes" /><br />
+</p>
 <hr />
+<p>Before we get into the nitty-gritty details, lets take a step back.
+To set up this work, we’ll first want to talk about what nullability
+actually is, and how we can define it formally and reason about it. Then
+we can start to measure what situations models are good at reasoning
+about nullability. Next, we’ll introduce techniques that have been used
+to “probe” the internals of a model for different concepts. Finally
+we’ll put it all together into a nullability probe, that can tell you at
+any variable location in the program, whether the model thinks the value
+there could be null.</p>
+<h2 id="what-is-nullability">What is Nullability?</h2>
 <p>Lets say you’re writing a Python program with your LLM assistant.
 You’ve reached some point where you need to do something with a variable
 called <code>num</code>. Maybe you’re building a list of numbers called

@@ -6,6 +6,8 @@ bibliography: all.bib
 linkReferences: true
 ---
 
+![A line drawing of a robot with a brain on their antenna](images/robot-brain.png){.smallimage}\
+
 The last five years have shown us that large language models, like
 ChatGPT, Claude, and DeepSeek, can effectively write code in many
 domains. The excitement around these developments has been huge, with
@@ -13,6 +15,10 @@ many people claiming that these models can write entire web servers
 and apps from scratch. Whats certainly true is that these tools have
 opened up programming to a whole new class of people who consider
 themselves non-technical.
+
+![A gif of github copilot completing a phone number validating
+ function as the user
+ types](https://github.blog/wp-content/uploads/2022/09/unexpectedcopilot3.gif?w=1024&resize=1024%2C576)\
 
 But there are still many unanswered questions about this
 capability. How often, and in what situations, can LLM's write correct
@@ -41,15 +47,16 @@ is limited to smaller scales, where we can read over chatbots output
 as humans and determine whether their level of "honesty" (or some
 other interesting concept) matches the internal thing we're measuring.
 
-Here at $d_{model}$, we think we have a solution to this problem:
-measure concepts in code first, where we can rigorously check them, in
-order to develop a map of LLM internals, and then translate this
-knowledge to any domain you care about. There are many properties of
-code that are "abstract" enough to not be obvious in the syntax of
-programs, but still measurable using static analysis. This allows us
-to scale evaluation and training of our internal measurements without
-worrying about running out of data or needing to generate labels of
-subjective judgements.
+![A diagram from Zou showing probes that read hallucination, honesty,
+ morality, and power-seeking from the outputs of a
+ chatbot.](images/zou.png)\
+
+Code, on the other hand, is another matter. Humans have been studying
+properties of code for a long time, and there are many abstract
+properties that can now be determined using static analysis. If we
+pick the right properties, we don't need to worry about our ability to
+label data; static analysis can do that for us, so we can easily scale
+up and train on thousands of examples generated from scratch.
 
 In that spirit, we wanted to start with a simple property that comes
 up in every programming language, nullability. Nullable values are
@@ -65,6 +72,8 @@ able to write code that deals with nullable values, but we haven’t
 known what form this knowledge takes, what situations are likely to
 confuse the model. Until now.
 
+![A robot with glowing eyes](images/robot-glow.png)\
+
 ---
 
 Before we get into the nitty-gritty details, lets take a step back. To
@@ -75,7 +84,7 @@ reasoning about nullability. Next, we'll introduce techniques that
 have been used to "probe" the internals of a model for different
 concepts. Finally we'll put it all together into a nullability probe,
 that can tell you at any variable location in the program, whether the
-model thinks the value there could be null (or in Python, None).
+model thinks the value there could be null.
 
 What is Nullability?
 --------------------

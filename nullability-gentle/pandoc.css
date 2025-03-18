@@ -1,6 +1,6 @@
 html {
-  color: #1a1a1a;
-  background-color: #fdfdfd;
+  color: #424242;
+  background-color: rgb(254, 241, 210);
 }
 body {
   margin: 0 auto;
@@ -13,6 +13,7 @@ body {
   overflow-wrap: break-word;
   text-rendering: optimizeLegibility;
   font-kerning: normal;
+  background-color: rgb(254, 241, 210);
 }
 @media (max-width: 600px) {
   body {
@@ -254,4 +255,11 @@ div.csl-right-inline {
 }
 div.csl-indent {
   margin-left: 2em;
+}
+
+.smallimage {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    height: 16em;
 }

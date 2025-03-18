@@ -4,7 +4,7 @@ html {
 }
 body {
   margin: 0 auto;
-  max-width: 36em;
+  max-width: 46em;
   padding-left: 50px;
   padding-right: 50px;
   padding-top: 50px;
@@ -106,6 +106,18 @@ pre code {
   overflow: visible;
   overflow-wrap: normal;
 }
+pre.sourceCode {
+    background-color: white;
+    border-style: solid;
+    border-radius: 0.5em;
+    padding: 0.7em;
+    color: black;
+    font-size: 14pt;
+    line-height: 1;
+    width: fit-content;
+    min-width: 24em;
+    margin-left: 1.5em;
+}
 .sourceCode {
  background-color: transparent;
  overflow: visible;
@@ -178,7 +190,6 @@ pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }

@@ -15,3 +15,4 @@ filters:
 variables:
   header-includes:
     - "<script src=\"sidenotes.js\"></script>"
+    - "<script src=\"highlight_code_portions.js\"></script>"

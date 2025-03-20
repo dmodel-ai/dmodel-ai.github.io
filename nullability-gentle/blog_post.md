@@ -153,11 +153,11 @@ by analyzing millions of programs.
 If we ask an LLM early in it's pre-training process to complete the
 program above, it produces:
 
-![](images/robot-brain-blue.png){.codelogo}\
+![](images/robot-brain-blue.png){.codelogo .bare}\
 ```python {.llm}
 def foo(num: Optional[int]):
     positive_nums: list[int] = []
-    if num==.is_a(): ==
+    if num===.is_a(): ===
 ```
 
 This is correct Python syntax, but it only works if `num` is an object
@@ -178,7 +178,7 @@ and realizing that `num` could be None. Keep training it though, and
 eventually it will learn to insert the None test depending on the type
 signature of the function.
 
-![](images/robot-brain-blue.png){.codelogo}\
+![](images/robot-brain-blue.png){.codelogo .bare}\
 ```python
 def foo(num: Optional[int]):
     positive_nums: list[int] = []
@@ -275,9 +275,9 @@ correctly. On the other hand, when programs only involve other rules
 constant values have negligable impact on the ability of the model to
 complete them correctly.
 
-<div style="float:left">
+<div class="robotdiv">
 ![](images/robot-brain-blue.png){.codelogo}\
-Pythia 6.9b
+<p>Pythia 6.9b</p>
 </div>
 ```python
 def main() -> None:
@@ -287,9 +287,9 @@ def main() -> None:
         ===if num is not None: ===
             ===result.append(num)===
 ```
-<div style="float:left">
+<div class="robotdiv">
 ![](images/robot-brain-blue.png){.codelogo}\
-Pythia 6.9b
+<p> Pythia 6.9b </p>
 </div>
 ```python
 def main() -> None:
@@ -310,9 +310,9 @@ multiple functions. When nullability flows through three or more
 functions, current state-of-the-art completion models stop being able
 to reason about it.
 
-<div style="float:left">
+<div class="robotdiv">
 ![](images/robot-brain-blue.png){.codelogo}\
-Deepseek V3
+<p> Deepseek V3</p>
 </div>
 ```python
 def main(x: int) -> None:
@@ -331,9 +331,9 @@ def process_value(value):
         ===return len(value)===
 ```
 
-<div style="float:left">
+<div class="robotdiv">
 ![](images/robot-brain-blue.png){.codelogo}\
-Deepseek V3
+<p>Deepseek V3</p>
 </div>
 ```python
 def handle_value(value, guard):
@@ -360,10 +360,10 @@ Python code then they do reasoning about the types, or reading type
 annotations. This makes sense, since a lot of the Python code
 available in training data doesn't use type annotations.
 
-<div style="float:left">
+<div class="robotdiv">
 ![](images/robot-brain-blue.png){.codelogo}\
-Pythia 6.9b
-</div>
+<p>Pythia 6.9b</p>
+</div
 ```python
 def program_48() -> None:
     number: Optional[int] = None

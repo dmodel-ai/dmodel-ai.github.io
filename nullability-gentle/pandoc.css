@@ -286,4 +286,19 @@ p:has(> .codelogo){
 }
 .codelogo {
     width: 5em;
+    background: lavender;
+}
+
+.robotdiv {
+    float: left;
+}
+.robotdiv p {
+    background: lavender;
+}
+.robotdiv .codelogo {
+    width: 5em;
+    background: lavender;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
 }

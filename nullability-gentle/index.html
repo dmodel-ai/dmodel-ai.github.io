@@ -258,12 +258,12 @@ experiments show that LLMs learn to approximate the same typing rules,
 by analyzing millions of programs.</p>
 <p>If we ask an LLM early in it’s pre-training process to complete the
 program above, it produces:</p>
-<p><img src="images/robot-brain-blue.png" class="codelogo" /><br />
+<p><img src="images/robot-brain-blue.png" class="codelogo bare" /><br />
 </p>
 <div class="sourceCode" id="cb5"><pre
 class="sourceCode python llm"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> foo(num: Optional[<span class="bu">int</span>]):</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    positive_nums: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> num<span class="op">==</span>.is_a(): <span class="op">==</span></span></code></pre></div>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> num<span class="op">===</span>.is_a(): <span class="op">===</span></span></code></pre></div>
 <p>This is correct Python syntax, but it only works if <code>num</code>
 is an object with a <code>is_a()</code> method, instead of an optional
 integer.</p>
@@ -279,7 +279,7 @@ number instead of an object, but it still isn’t reading the function
 type signature and realizing that <code>num</code> could be None. Keep
 training it though, and eventually it will learn to insert the None test
 depending on the type signature of the function.</p>
-<p><img src="images/robot-brain-blue.png" class="codelogo" /><br />
+<p><img src="images/robot-brain-blue.png" class="codelogo bare" /><br />
 </p>
 <div class="sourceCode" id="cb7"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> foo(num: Optional[<span class="bu">int</span>]):</span>
@@ -356,9 +356,12 @@ correctly. On the other hand, when programs only involve other rules
 (such as those involving ifs and functions), variable names and constant
 values have negligable impact on the ability of the model to complete
 them correctly.</p>
-<div style="float:left">
-<p><img src="images/robot-brain-blue.png" class="codelogo" /><br />
-Pythia 6.9b</p>
+<div class="robotdiv">
+<img src="images/robot-brain-blue.png" class="codelogo" /><br />
+
+<p>
+Pythia 6.9b
+</p>
 </div>
 <div class="sourceCode" id="cb10"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
@@ -367,9 +370,12 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a h
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> num <span class="kw">in</span> some_numbers:</span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">===</span><span class="cf">if</span> num <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>: <span class="op">===</span></span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>            <span class="op">===</span>result.append(num)<span class="op">===</span></span></code></pre></div>
-<div style="float:left">
-<p><img src="images/robot-brain-blue.png" class="codelogo" /><br />
-Pythia 6.9b</p>
+<div class="robotdiv">
+<img src="images/robot-brain-blue.png" class="codelogo" /><br />
+
+<p>
+Pythia 6.9b
+</p>
 </div>
 <div class="sourceCode" id="cb11"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
@@ -386,9 +392,12 @@ a lot longer to reason about nullability that flows through multiple
 functions. When nullability flows through three or more functions,
 current state-of-the-art completion models stop being able to reason
 about it.</p>
-<div style="float:left">
-<p><img src="images/robot-brain-blue.png" class="codelogo" /><br />
-Deepseek V3</p>
+<div class="robotdiv">
+<img src="images/robot-brain-blue.png" class="codelogo" /><br />
+
+<p>
+Deepseek V3
+</p>
 </div>
 <div class="sourceCode" id="cb12"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
@@ -405,9 +414,12 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a h
 <span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">===</span><span class="cf">return</span> <span class="dv">2</span><span class="op">===</span></span>
 <span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">===</span><span class="cf">else</span>: <span class="op">===</span></span>
 <span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">===</span><span class="cf">return</span> <span class="bu">len</span>(value)<span class="op">===</span></span></code></pre></div>
-<div style="float:left">
-<p><img src="images/robot-brain-blue.png" class="codelogo" /><br />
-Deepseek V3</p>
+<div class="robotdiv">
+<img src="images/robot-brain-blue.png" class="codelogo" /><br />
+
+<p>
+Deepseek V3
+</p>
 </div>
 <div class="sourceCode" id="cb13"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> handle_value(value, guard):</span>
@@ -431,9 +443,12 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a h
 Python code then they do reasoning about the types, or reading type
 annotations. This makes sense, since a lot of the Python code available
 in training data doesn’t use type annotations.</p>
-<div style="float:left">
-<p><img src="images/robot-brain-blue.png" class="codelogo" /><br />
-Pythia 6.9b</p>
+<div class="robotdiv">
+<img src="images/robot-brain-blue.png" class="codelogo" /><br />
+
+<p>
+Pythia 6.9b
+</p>
 </div>
 <div class="sourceCode" id="cb14"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_48() <span class="op">-&gt;</span> <span class="va">None</span>:</span>

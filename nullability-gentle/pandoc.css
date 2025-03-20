@@ -277,6 +277,7 @@ div.csl-indent {
     margin-left: auto;
     margin-right: auto;
     height: 16em;
+    width: auto;
 }
 
 p:has(> .codelogo){

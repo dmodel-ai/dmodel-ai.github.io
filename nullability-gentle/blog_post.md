@@ -1,5 +1,5 @@
 ---
-title: "Inside the CodeBot: How LLMs Understand Nullability"
+title: "Inside the CodeBot: A Gentle Introduction to How LLMs Understand Nullability"
 author: '[Alex Sanchez-Stern](https://www.alexsanchezstern.com) and [Anish Tondwalkar](https://ani.sh)'
 date: '$d_{model}$'
 bibliography: all.bib
@@ -9,11 +9,10 @@ linkReferences: true
 ![A line drawing of a robot with a brain on their antenna](images/robot-brain.png){.smallimage}\
 
 The last five years have shown us that large language models, like
-ChatGPT, Claude, and DeepSeek, can effectively write code in many
-domains. The excitement around these developments has been huge, with
-many people claiming that these models can write entire web servers
-and apps from scratch. Whats certainly true is that these tools have
-opened up programming to a whole new class of people who consider
+ChatGPT, Claude, and DeepSeek, can write code in many
+domains, to huge excitement: many claim to be using these models to write
+entire web servers and apps from scratch. These
+tools have opened up programming to a whole new class of people who consider
 themselves non-technical.
 
 ![A gif of github copilot completing a phone number validating
@@ -21,13 +20,15 @@ themselves non-technical.
  types](https://github.blog/wp-content/uploads/2022/09/unexpectedcopilot3.gif?w=1024&resize=1024%2C576)\
 
 But there are still many unanswered questions about this
-capability. How often, and in what situations, can LLM's write correct
-code entirely on their own? And maybe more importantly, but harder to
+capability! How often, and in what situations, can LLM's write correct
+code entirely on their own? And, maybe more importantly, but harder to
 answer: Do LLM's "understand" the code they are writing?
 
-Understanding is a tricky concept to measure. Some would say that
-LLM's can't have understanding, because they aren't biological
-organisms with sentience. But they certainly have something akin to
+\AT{ this paragraph sounds like we're talking about CoT, not activations}
+Understanding is a tricky concept to measure. Some would argue that
+sentience precedes understanding, and so that LLM's can't have understanding,
+because they aren't biological organisms with sentience. But they certainly
+have something akin to
 "thought processes": chains of predictions that determine their final
 outputs. Recently, it's become possible to study these processes more
 deeply, measuring internal "beliefs" of the model as they think. This
@@ -36,15 +37,15 @@ falter on, when they'll succceed, and when they are "thinking through"
 problems more fully versus just guessing at a solution.
 
 So far, these techniques for measuring internal model state have been
-mostly applied to chatbots writing normal text, what we call "natural
-language" (as opposed to computer languages). This makes sense, since
+mostly applied to chatbots writing text for human consumption, what we call "natural
+language" (to be contrasted with "programming language"s). This makes sense, since
 some of the most critical LLM tasks involve chatting with a user, and
 some of the most interesting concepts to measure, such as honesty or
-power-seeking, apply most readily to these conversations. But it's
-pretty hard to say quantitative things about natural language
+power-seeking, apply most readily to these conversations. But it's hard to say
+quantitative or precise things about natural language
 concepts, so our ability to rigorously study internal representations
-is limited to smaller scales, where we can read over chatbots output
-as humans and determine whether their level of "honesty" (or some
+is limited to smaller scales, where we can read over chatbots' output
+as humans \AT{acutally, these are often graded by AI...} and determine whether their level of "honesty" (or some
 other interesting concept) matches the internal thing we're measuring.
 
 ![A diagram from Zou showing probes that read hallucination, honesty,
@@ -55,11 +56,11 @@ Code, on the other hand, is another matter. Humans have been studying
 properties of code for a long time, and there are many abstract
 properties that can now be determined using static analysis. If we
 pick the right properties, we don't need to worry about our ability to
-label data; static analysis can do that for us, so we can easily scale
+label data; static analysis can do that for us, and so we can easily scale
 up and train on thousands of examples generated from scratch.
 
 In that spirit, we wanted to start with a simple property that comes
-up in every programming language, nullability. Nullable values are
+up in nearly every programming language, nullability. Nullable values are
 represented differently across languages; as null pointers in C or
 C++, with explicit Option types in Rust, and with special nil or None
 values in dynamic languages like Javascript, Lisp, or Python. In every
@@ -79,15 +80,15 @@ there.].
 
 ---
 
-Before we get into the nitty-gritty details, lets take a step back. To
+Before we get into the nitty-gritty details, let's take a step back. To
 set up this work, we'll first want to talk about what nullability
-actually is, and how we can define it formally and reason about
-it. Then we can start to measure what situations models are good at
-reasoning about nullability. Next, we'll introduce techniques that
+actually is, and then about how we can define it formally to reason about
+it. Then, we can run experiments to answer the question: what situations models are good at
+reasoning about nullability? Next, we'll introduce techniques that
 have been used to "probe" the internals of a model for different
-concepts. Finally we'll put it all together into a nullability probe,
-that can tell you at any variable location in the program, whether the
-model thinks the value there could be null.
+concepts. Finally we'll put it all together into a "nullability probe",
+which asks the question: Given a location in the program, does the
+model think that the variable there could be null?
 
 What is Nullability?
 --------------------

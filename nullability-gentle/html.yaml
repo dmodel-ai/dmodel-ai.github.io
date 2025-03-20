@@ -9,7 +9,7 @@ css:
   - sidenote.css
   - highlights-box.css
 filters:
-  # - todo_filter.py
+  - todo_filter.py
   - pandoc-crossref
   - citeproc
 variables:

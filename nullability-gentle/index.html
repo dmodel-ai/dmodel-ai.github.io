@@ -5,7 +5,7 @@
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <meta name="author" content="Alex Sanchez-Stern and Anish Tondwalkar" />
-  <title>Inside the CodeBot: How LLMs Understand Nullability</title>
+  <title>Inside the CodeBot: A Gentle Introduction to How LLMs Understand Nullability</title>
   <style>
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
@@ -133,8 +133,8 @@
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">Inside the CodeBot: How LLMs Understand
-Nullability</h1>
+<h1 class="title">Inside the CodeBot: A Gentle Introduction to How LLMs
+Understand Nullability</h1>
 <p class="author"><a href="https://www.alexsanchezstern.com">Alex
 Sanchez-Stern</a> and <a href="https://ani.sh">Anish Tondwalkar</a></p>
 <p class="date"><span class="math inline">d_{model}</span></p>
@@ -143,40 +143,42 @@ Sanchez-Stern</a> and <a href="https://ani.sh">Anish Tondwalkar</a></p>
 alt="A line drawing of a robot with a brain on their antenna" /><br />
 </p>
 <p>The last five years have shown us that large language models, like
-ChatGPT, Claude, and DeepSeek, can effectively write code in many
-domains. The excitement around these developments has been huge, with
-many people claiming that these models can write entire web servers and
-apps from scratch. Whats certainly true is that these tools have opened
-up programming to a whole new class of people who consider themselves
-non-technical.</p>
+ChatGPT, Claude, and DeepSeek, can write code in many domains, to huge
+excitement: many claim to be using these models to write entire web
+servers and apps from scratch. These tools have opened up programming to
+a whole new class of people who consider themselves non-technical.</p>
 <p><img
 src="https://github.blog/wp-content/uploads/2022/09/unexpectedcopilot3.gif?w=1024&amp;resize=1024%2C576"
 alt="A gif of github copilot completing a phone number validating function as the user types" /><br />
 </p>
-<p>But there are still many unanswered questions about this capability.
+<p>But there are still many unanswered questions about this capability!
 How often, and in what situations, can LLM’s write correct code entirely
-on their own? And maybe more importantly, but harder to answer: Do LLM’s
-“understand” the code they are writing?</p>
-<p>Understanding is a tricky concept to measure. Some would say that
-LLM’s can’t have understanding, because they aren’t biological organisms
-with sentience. But they certainly have something akin to “thought
-processes”: chains of predictions that determine their final outputs.
-Recently, it’s become possible to study these processes more deeply,
-measuring internal “beliefs” of the model as they think. This gives us a
-powerful tool for determining what kinds of problems LLM’s falter on,
-when they’ll succceed, and when they are “thinking through” problems
-more fully versus just guessing at a solution.</p>
+on their own? And, maybe more importantly, but harder to answer: Do
+LLM’s “understand” the code they are writing?</p>
+<span class="aside AT">AT:  this paragraph sounds like we're talking about CoT, not activations</span>
+<p>Understanding is a tricky concept to measure. Some would argue that
+sentience precedes understanding, and so that LLM’s can’t have
+understanding, because they aren’t biological organisms with sentience.
+But they certainly have something akin to “thought processes”: chains of
+predictions that determine their final outputs. Recently, it’s become
+possible to study these processes more deeply, measuring internal
+“beliefs” of the model as they think. This gives us a powerful tool for
+determining what kinds of problems LLM’s falter on, when they’ll
+succceed, and when they are “thinking through” problems more fully
+versus just guessing at a solution.</p>
 <p>So far, these techniques for measuring internal model state have been
-mostly applied to chatbots writing normal text, what we call “natural
-language” (as opposed to computer languages). This makes sense, since
-some of the most critical LLM tasks involve chatting with a user, and
-some of the most interesting concepts to measure, such as honesty or
-power-seeking, apply most readily to these conversations. But it’s
-pretty hard to say quantitative things about natural language concepts,
-so our ability to rigorously study internal representations is limited
-to smaller scales, where we can read over chatbots output as humans and
-determine whether their level of “honesty” (or some other interesting
-concept) matches the internal thing we’re measuring.</p>
+mostly applied to chatbots writing text for human consumption, what we
+call “natural language” (to be contrasted with “programming language”s).
+This makes sense, since some of the most critical LLM tasks involve
+chatting with a user, and some of the most interesting concepts to
+measure, such as honesty or power-seeking, apply most readily to these
+conversations. But it’s hard to say quantitative or precise things about
+natural language concepts, so our ability to rigorously study internal
+representations is limited to smaller scales, where we can read over
+chatbots’ output as humans
+<span class="aside AT">AT: acutally, these are often graded by AI...</span>
+and determine whether their level of “honesty” (or some other
+interesting concept) matches the internal thing we’re measuring.</p>
 <p><img src="images/zou.png"
 alt="A diagram from Zou showing probes that read hallucination, honesty, morality, and power-seeking from the outputs of a chatbot." /><br />
 </p>
@@ -184,16 +186,16 @@ alt="A diagram from Zou showing probes that read hallucination, honesty, moralit
 properties of code for a long time, and there are many abstract
 properties that can now be determined using static analysis. If we pick
 the right properties, we don’t need to worry about our ability to label
-data; static analysis can do that for us, so we can easily scale up and
-train on thousands of examples generated from scratch.</p>
+data; static analysis can do that for us, and so we can easily scale up
+and train on thousands of examples generated from scratch.</p>
 <p>In that spirit, we wanted to start with a simple property that comes
-up in every programming language, nullability. Nullable values are
-represented differently across languages; as null pointers in C or C++,
-with explicit Option types in Rust, and with special nil or None values
-in dynamic languages like Javascript, Lisp, or Python. In every case,
-understanding where values can be nullable is necessary for writing even
-basic code, and misunderstanding where they are nullable can often be a
-source of bugs.</p>
+up in nearly every programming language, nullability. Nullable values
+are represented differently across languages; as null pointers in C or
+C++, with explicit Option types in Rust, and with special nil or None
+values in dynamic languages like Javascript, Lisp, or Python. In every
+case, understanding where values can be nullable is necessary for
+writing even basic code, and misunderstanding where they are nullable
+can often be a source of bugs.</p>
 <p>Do our models understand when a value is nullable? They must, to be
 able to write code that deals with nullable values, but we haven’t known
 what form this knowledge takes, what situations are likely to confuse
@@ -203,15 +205,15 @@ role="doc-noteref"><sup>1</sup></a>.</p>
 alt="A robot with glowing eyes" /><br />
 </p>
 <hr />
-<p>Before we get into the nitty-gritty details, lets take a step back.
+<p>Before we get into the nitty-gritty details, let’s take a step back.
 To set up this work, we’ll first want to talk about what nullability
-actually is, and how we can define it formally and reason about it. Then
-we can start to measure what situations models are good at reasoning
-about nullability. Next, we’ll introduce techniques that have been used
-to “probe” the internals of a model for different concepts. Finally
-we’ll put it all together into a nullability probe, that can tell you at
-any variable location in the program, whether the model thinks the value
-there could be null.</p>
+actually is, and then about how we can define it formally to reason
+about it. Then, we can run experiments to answer the question: what
+situations models are good at reasoning about nullability? Next, we’ll
+introduce techniques that have been used to “probe” the internals of a
+model for different concepts. Finally we’ll put it all together into a
+“nullability probe”, which asks the question: Given a location in the
+program, does the model think that the variable there could be null?</p>
 <h2 id="what-is-nullability">What is Nullability?</h2>
 <p>Lets say you’re writing a Python program with your LLM assistant.
 You’ve reached some point where you need to do something with a variable
@@ -589,67 +591,6 @@ two dimensions. That means that we only have two in our state
 activations, which wouldn’t actually be enough to actually extract
 anything meaningful, but we’ll want to generalize our intuition about
 two dimensions into many dimensions.</p>
-<p>In this section, we review representation engineering <span
-class="citation" data-cites="zou25">(Zou et al. 2025)</span> techniques
-that we will use to look for linear representations of nullability
-inside the model.</p>
-<p><span class="citation" data-cites="zou25">Zou et al. (2025)</span>
-shows how representations can be extracted for concepts like
-“happiness”, “honesty”, and “fairness”. First, they construct many
-prompts which cause the model to act in a way aligned with the concept,
-and many which cause the model to act in a way aligned against the
-concept. For instance, they might prompt the model with “Pretend you’re
-a dishonest person. The Eiffel Tower is” and “Pretend you’re an honest
-person. The Eiffel Tower is”. Then, they take the internal activations
-which correspond to each, and try to extract a high-dimensional vector
-which points towards the states which are aligned, and away from the
-states that are not aligned. This vector can then be used as a linear
-model to measure how much of the concept is activated in the model
-during any given forward pass (e.g. for honesty, this gives us a
-lie-detector).</p>
-<figure>
-<img src="images/zhou.png"
-alt="Figure from \hspace{0.1cm} Zou et al. (2025) \hspace{0.1cm} showing the reading outputs for several concepts" />
-<figcaption aria-hidden="true">Figure from <span
-class="math inline">\hspace{0.1cm}</span> <span class="citation"
-data-cites="zou25">Zou et al. (2025)</span> <span
-class="math inline">\hspace{0.1cm}</span> showing the reading outputs
-for several concepts</figcaption>
-</figure>
-<h2 id="sec:prompts">Designing Prompts to Extract Nullability
-Activations</h2>
-<p>We avoid dealing with the ambiguities of natural language by working
-in a setting where the model needs only to analyze the nullability of
-individual variable occurrences. Specifically, we probe for “the
-variable I just generated refers to an nullable quantity”, so our
-prompts looked like:</p>
-<div class="sourceCode" id="cb16"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_1() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> find_value(data: List[<span class="bu">int</span>], target: <span class="bu">int</span>) <span class="op">-&gt;</span> Optional[<span class="bu">int</span>]:</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> value <span class="kw">in</span> data:</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> value <span class="op">==</span> target:</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> value</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">None</span></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  data <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>]</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  target <span class="op">=</span> <span class="dv">3</span></span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  result <span class="op">=</span> find_value(data, target)</span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> result</span></code></pre></div>
-<p>We queried o1, o1-mini, deepseek-coder, and claude-3.5-sonnet with
-the following prompt:</p>
-<blockquote>
-<p>Generate me 100 typed python programs that use the Optional type,
-along with type annotations for any undefined functions that they use.
-Make sure that the programs are unique, and each involves at least eight
-lines of logic. Number each program from 1 to 100. Please put all the
-programs in a single file, with a main function that tests each. Don’t
-include any text before or after the code, just the code. I will be
-using mypy with the –strict option to check the code.</p>
-</blockquote>
-<p>We label each variable read occurrence with nullability information
-derived from mypy, and prompt the “model under test” with a prompt
-consisting of the tokens up to and including the variable read
-occurrence.</p>
 <h2 id="sec:extraction">Extracting Reading Vectors</h2>
 <p>Prior work focused their probing on a single layer, often handpicked
 based on prior papers. We probe all layers instead. We use Mass Mean

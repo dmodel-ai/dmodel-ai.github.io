@@ -10,7 +10,7 @@
                 let cur_contents = [];
                 let newChildren = []
                 for (const child of line.childNodes) {
-                    if (child.nodeName == "SPAN" && child.className == "op" && child.textContent == "==") {
+                    if (child.nodeName == "SPAN" && child.className == "op" && child.textContent == "===") {
                         if (in_block) {
                             let newMark = document.createElement("mark");
                             for (const innerChild of cur_contents) {

@@ -150,11 +150,11 @@ by analyzing millions of programs.
 If we ask an LLM early in it's pre-training process to complete the
 program above, it produces:
 
-```python
+![](images/robot-brain-blue.png){.codelogo}\
+```python {.llm}
 def foo(num: Optional[int]):
     positive_nums: list[int] = []
-    if num.is_a():
-        ...
+    if num==.is_a(): ==
 ```
 
 This is correct Python syntax, but it only works if `num` is an object
@@ -162,11 +162,11 @@ with a `is_a()` method, instead of an optional integer.
 
 Train the LLM for a little longer, and it'll produce:
 
+![](images/robot-brain-blue.png){.codelogo}\
 ```python
 def foo(num: Optional[int]):
     positive_nums: list[int] = []
-    if num > 0:
-        ...
+    if num== > 0: ==
 ```
 
 This is closer, in that its figured out that `num` is a number instead
@@ -175,10 +175,20 @@ and realizing that `num` could be None. Keep training it though, and
 eventually it will learn to insert the None test depending on the type
 signature of the function.
 
-This rule is pretty simple alone, so relatively small models can learn
-it, relatively early in their pre-training process. Other, more
-complicated rules can take a little longer to learn. For instance, if
-your program is:
+![](images/robot-brain-blue.png){.codelogo}\
+```python
+def foo(num: Optional[int]):
+    positive_nums: list[int] = []
+    if num== != None and num > 0: ==
+```
+
+
+This rule about function parameter type annotations is pretty simple
+alone, so relatively small models can learn it, relatively early in
+their pre-training process. Other, more complicated rules can take a
+little longer to learn.
+
+For instance, if your program is:
 
 ```python
 if condition():
@@ -211,6 +221,9 @@ experiments show that as these rules get more and more complex, it
 takes LLMs longer and longer to learn them, and it also takes LLMs of
 more and more parameters to learn them at all.
 
+Internal vs. External Measurement
+----
+
 We can measure whether LLMs understand these rules by just asking for
 completions, what we call an "external" measurement of the models
 understanding. But there are many places where variables appear where a
@@ -233,7 +246,7 @@ read corresponds to a nullable variable, and show that internal
 knowledge like so:
 
 ![A diagram showing a simple program, and the probes nullability
- predictions for each variable load.](images/reading_diagram.svg){#fig:reading1 .inlinefig}
+ predictions for each variable load.](images/reading_diagram.svg){#fig:reading1 .inlinefig}\
 
 # Measuring Nullability Understanding Externally {#sec:testing}
 

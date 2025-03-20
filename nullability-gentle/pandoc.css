@@ -118,6 +118,9 @@ pre.sourceCode {
     min-width: 24em;
     margin-left: 1.5em;
 }
+mark {
+    background: lavender;
+}
 .sourceCode {
  background-color: transparent;
  overflow: visible;
@@ -273,4 +276,12 @@ div.csl-indent {
     margin-left: auto;
     margin-right: auto;
     height: 16em;
+}
+
+p:has(> .codelogo){
+    float: left;
+    margin:0;
+}
+.codelogo {
+    width: 5em;
 }

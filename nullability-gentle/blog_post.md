@@ -350,7 +350,7 @@ def main(x: int) -> None:
     x = handle_value(value, x < 10)
     print(x)
 
-def process_value(value): -> int:
+def process_value(value): === -> int: ===
     ===return len(value or "")===
 ```
 ### Generating Type Annotations

@@ -169,7 +169,7 @@ Train the LLM for a little longer, and it'll produce:
 ```python
 def foo(num: Optional[int]):
     positive_nums: list[int] = []
-    if num== > 0: ==
+    if num=== > 0: ===
 ```
 
 This is closer, in that its figured out that `num` is a number instead
@@ -182,7 +182,7 @@ signature of the function.
 ```python
 def foo(num: Optional[int]):
     positive_nums: list[int] = []
-    if num== != None and num > 0: ==
+    if num=== != None and num > 0: ===
 ```
 
 ---

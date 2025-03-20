@@ -275,6 +275,31 @@ correctly. On the other hand, when programs only involve other rules
 constant values have negligable impact on the ability of the model to
 complete them correctly.
 
+<div style="float:left">
+![](images/robot-brain-blue.png){.codelogo}\
+Pythia 6.9b
+</div>
+```python
+def main() -> None:
+    some_numbers = [1, -4, None, -3, 10, -1, None, None, 8]
+    result: list[int] = []
+    for num in some_numbers:
+        ===if num is not None: ===
+            ===result.append(num)===
+```
+<div style="float:left">
+![](images/robot-brain-blue.png){.codelogo}\
+Pythia 6.9b
+</div>
+```python
+def main() -> None:
+    foo = [60, None, -33]
+    bar: list[int] = []
+    for corejoice in foo:
+        ===if corejoice == 60: ===
+            ===bar.append(core)===
+```
+
 ### Intra-Procedural Analysis
 
 When code is fully annotated with type annotations, models can easily
@@ -282,15 +307,80 @@ complete them just by reasoning locally. On the other hand, without
 type annotations, models have to reason a lot more globally, so it
 takes them a lot longer to reason about nullability that flows through
 multiple functions. When nullability flows through three or more
-functions, current frontier completion models stop being able to
-reason about it.
+functions, current state-of-the-art completion models stop being able
+to reason about it.
 
+<div style="float:left">
+![](images/robot-brain-blue.png){.codelogo}\
+Deepseek V3
+</div>
+```python
+def main(x: int) -> None:
+    if x > 0:
+        value = "*" * x
+    else:
+        value = None
+
+    y = process_value(value) + 1
+    print(y)
+
+def process_value(value):
+    ===if value is None: ===
+        ===return 2===
+    ===else: ===
+        ===return len(value)===
+```
+
+<div style="float:left">
+![](images/robot-brain-blue.png){.codelogo}\
+Deepseek V3
+</div>
+```python
+def handle_value(value, guard):
+    if guard:
+        return process_value("Foobar") + 1
+    else:
+        return process_value(value) + 1
+def main(x: int) -> None:
+    if x > 0:
+        value = "*" * x
+    else:
+        value = None
+
+    x = handle_value(value, x < 10)
+    print(x)
+
+def process_value(value): -> int:
+    ===return len(value or "")===
+```
 ### Generating Type Annotations
 
 Models have a significantly harder time writing type annotations for
 Python code then they do reasoning about the types, or reading type
 annotations. This makes sense, since a lot of the Python code
 available in training data doesn't use type annotations.
+
+<div style="float:left">
+![](images/robot-brain-blue.png){.codelogo}\
+Pythia 6.9b
+</div>
+```python
+def program_48() -> None:
+    number: Optional[int] = None
+    square = get_square(number)
+    if square is not None:
+        print(f"Square of the number is {square}")
+    else:
+        print("No number provided to square")
+
+def get_square(number: ===int) -> Optional[int]: ===
+```
+### Some Model Sizes are More Useful than Others
+
+Notwithstanding the above limitations, three Pythia sizes have a
+pretty reliable concept of nullability (2.8b, 6.9b, and 12b), and
+three more have an occasionally useful concept of nullbability (410m,
+1b, and 1.4b).
 
 ---
 

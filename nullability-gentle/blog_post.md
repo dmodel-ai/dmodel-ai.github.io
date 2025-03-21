@@ -363,7 +363,7 @@ available in training data doesn't use type annotations.
 <div class="robotdiv">
 ![](images/robot-brain-blue.png){.codelogo}\
 <p>Pythia 6.9b</p>
-</div
+</div>
 ```python
 def program_48() -> None:
     number: Optional[int] = None

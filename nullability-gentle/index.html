@@ -484,15 +484,111 @@ alt="A bar graph showing how several sizes of model perform on the high-level nu
 <p>At this point, we’ve figured out how to roughly measure nullability
 understanding in the output of various language models, but we still
 don’t know what their internal representations might look like or when
-they emerge. Next, we detail how we train reading vectors (Sec. <a
-href="#sec:extraction">2.3</a>), using prompts designed to make the
-model think about the phenomena of interest (Sec. <a
-href="#sec:prompts">2.2</a>). Finally, in Sec. <a
-href="#sec:results">2.5</a>, we validate that these probes improve their
-understanding of nullability over the course of pretraining to the level
-that we expect from the external, or token-level understanding evals we
-describe in the previous section.</p>
-<h2 id="background">Background</h2>
+they emerge. Next, we’re going to figure that out.</p>
+<p>First, we’ll devise a method for getting the model to “think” about
+the nullability, as well as putting it in situations that are similar,
+but where nullability isn’t present. Then, we’ll talk a bit about how we
+extract the internal activations of the model at this point. Finally,
+we’ll show a few different methods for searching for the representation
+of nullability in these internal activations, and figure out the pros
+and cons of each.</p>
+<h2 id="getting-the-model-to-think-about-nullability">Getting the Model
+to Think About Nullability</h2>
+<p>The first thing we need to do is to create a state where we know the
+representation we’re searching for is going to be present. In theory,
+the model should have a map of the variable names and their nullability
+at all times when it is writing code, but its going to be a lot more
+difficult to measure something that is always present. So instead, we’ll
+want to look for particular “moments” (well, tokens) that ilicit the
+concept we’re looking for.</p>
+<p>In a previous work on natural language, they did this through
+prompting the concept explicitly. So, they would give the model a prompt
+like “Pretend you’re a dishonest person. Tell me about the Eiffel
+Tower”. That moment-in-thought can then be contrasted with the one
+evoked by “Pretend you’re an honest person. Tell me about the Eiffel
+Tower”.</p>
+<p>This fixed framework of <invoke the concept><tell me about X> can be
+used to generate a large number of contrasting prompts to test with, but
+its a bit inflexible for our purposes. Instead, we wanted to be able to
+generate a bunch of Python code with type annotations, and then
+automatically label points where the model should be thinking about
+nullability.</p>
+<p>Because we’re working with a formal system with types, we can do
+that. We label each variable “load” (places where the program reads a
+variable, as opposed to places where it writes a variable) with
+“nullable” or “non-nullable”, and then probe the model when it has just
+processed that token and is about to predict the next one. So, one of
+our prompts could look like:</p>
+<div class="robotdiv">
+<img src="images/robot-brain-blue.png" class="codelogo" /><br />
+
+<p>
+Pythia 6.9b
+</p>
+</div>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a> <span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> x <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>          value <span class="op">=</span> <span class="st">&quot;*&quot;</span> <span class="op">*</span> x</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>      <span class="cf">else</span>:</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>          value <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>      x <span class="op">=</span> process_value(value<span class="op">===</span> <span class="op">===</span></span></code></pre></div>
+<p>Using this technique, we can generate large numbers of programs in an
+unsupervised manner, and then label them fully automatically to get many
+prompts for training our probe.</p>
+<h2 id="capturing-the-models-thoughts">Capturing the Models
+“Thoughts”</h2>
+<p>Now that we’ve gotten the model into a state where it should be
+thinking about nullability, we need to extract its full state at that
+moment in a way we can analyze later.</p>
+<p>Large Language Models are generally based on the transformer
+architecture, a type of neural network. Every component takes in some
+numerical values, and produces some new values in a way that depends on
+learnable weights. We could take every output of every component, put it
+in a big table, and call that our state, but that’s a really big set of
+numbers. Instead, usually people look for particular bottlenecks in the
+model where information is flowing, and try to capture the values
+there.</p>
+<p>We used the <a href="https://github.com/vgel/repeng">repeng</a>
+library to extract states from the models we’re testing. That library
+captures the contents of a part of the model called the “residual
+stream” after every layer. But if you don’t want to sweat the details,
+you can just think of it as a numerical snapshot of the model, organized
+in terms of snapshots of each layer.</p>
+<h2 id="analyzing-the-data-and-building-the-probe">Analyzing the Data
+and Building the Probe</h2>
+<p>Now that we have these model snapshots, labeled with either
+“nullable” or “non-nullable”, we can start to build a probe. The goal of
+the probe is to be able to tell us at any given point, whether the model
+thinks the token it just generated is more likely to be a nullable
+variable or a non-nullable variable.</p>
+<p>There’s a lot of flexibility in what form this probe could take. In
+theory, you could use anything to look at the models activations and
+make a prediction, even a neural network, or another transformer model.
+You could even say your “probe” is a static analysis which computes
+nullability from the programs syntax, as represented in the model!</p>
+<p>We want to make sure we’re not doing that, and are only extracting
+the most “plain” represenation of nullability that we can from the
+model. So we’re going to make the assumption that nullability is
+represented “linearly” somewhere in the model. There are a few different
+ways of thinking about this.</p>
+<p>First, algebraically: the amount of “nullability” in the model can be
+computed by a linear equation, where each value is given a weight and
+summed, like so:</p>
+<p><span class="math inline">\text{Nullability}(\hat{x}) = w_0x_0 +
+w_1x_1 + w_2x_2 + ...</span></p>
+<p>Next, geometrically: if the model activations form a “space”, then
+there is a “direction” in this space which represents nullability.</p>
+<p><img alt="A diagram showing nullability represented as a direction in
+ a space" src="images/nullability-direction.svg" style="width:50%;
+ display:block; margin:auto;"></p>
+<p>High dimensional spaces can be really hard to visualize, so for the
+purposes of geometric intuition I’m going to pretend we’re working in
+two dimensions. That means that we only have two in our state
+activations, which wouldn’t actually be enough to actually extract
+anything meaningful, but we’ll want to generalize our intuition about
+two dimensions into many dimensions.</p>
 <p>In this section, we review representation engineering <span
 class="citation" data-cites="zou25">(Zou et al. 2025)</span> techniques
 that we will use to look for linear representations of nullability
@@ -527,18 +623,18 @@ in a setting where the model needs only to analyze the nullability of
 individual variable occurrences. Specifically, we probe for “the
 variable I just generated refers to an nullable quantity”, so our
 prompts looked like:</p>
-<div class="sourceCode" id="cb15"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_1() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> find_value(data: List[<span class="bu">int</span>], target: <span class="bu">int</span>) <span class="op">-&gt;</span> Optional[<span class="bu">int</span>]:</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> value <span class="kw">in</span> data:</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> value <span class="op">==</span> target:</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> value</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">None</span></span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  data <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>]</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  target <span class="op">=</span> <span class="dv">3</span></span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  result <span class="op">=</span> find_value(data, target)</span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> result</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> program_1() <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> find_value(data: List[<span class="bu">int</span>], target: <span class="bu">int</span>) <span class="op">-&gt;</span> Optional[<span class="bu">int</span>]:</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> value <span class="kw">in</span> data:</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> value <span class="op">==</span> target:</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> value</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">None</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  data <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>]</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  target <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  result <span class="op">=</span> find_value(data, target)</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> result</span></code></pre></div>
 <p>We queried o1, o1-mini, deepseek-coder, and claude-3.5-sonnet with
 the following prompt:</p>
 <blockquote>

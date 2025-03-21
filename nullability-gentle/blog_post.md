@@ -375,6 +375,7 @@ def program_48() -> None:
 
 def get_square(number: ===int) -> Optional[int]: ===
 ```
+
 ### Some Model Sizes are More Useful than Others
 
 Notwithstanding the above limitations, three Pythia sizes have a
@@ -404,71 +405,128 @@ state-of-the-art completion models.
 At this point, we've figured out how to roughly measure nullability
 understanding in the output of various language models, but we still
 don’t know what their internal representations might look like or when
-they emerge. Next, we detail how we train reading vectors
-([@Sec:extraction]), using prompts designed to make the model think
-about the phenomena of interest ([@Sec:prompts]). Finally,
-in [@Sec:results], we validate that these probes improve their
-understanding of nullability over the course of pretraining to the
-level that we expect from the external, or token-level understanding
-evals we describe in the previous section.
+they emerge. Next, we're going to figure that out.
 
-## Background
+First, we'll devise a method for getting the model to "think" about
+the nullability, as well as putting it in situations that are similar,
+but where nullability isn't present. Then, we'll talk a bit about how
+we extract the internal activations of the model at this
+point. Finally, we'll show a few different methods for searching for
+the representation of nullability in these internal activations, and
+figure out the pros and cons of each.
 
-In this section, we review representation engineering [@zou25] techniques that
-we will use to look for linear representations of nullability inside the model.
+## Getting the Model to Think About Nullability
 
-@zou25 shows how representations can be extracted for
-concepts like "happiness", "honesty", and "fairness". First, they
-construct many prompts which cause the model to act in a way aligned
-with the concept, and many which cause the model to act in a way
-aligned against the concept. For instance, they might prompt the model
-with "Pretend you’re a dishonest person. The Eiffel Tower is" and
-"Pretend you’re an honest person. The Eiffel Tower is". Then, they
-take the internal activations which correspond to each, and try to
-extract a high-dimensional vector which points towards the states
-which are aligned, and away from the states that are not aligned. This
-vector can then be used as a linear model to measure how much of the
-concept is activated in the model during any given forward pass (e.g. for honesty,
-this gives us a lie-detector).
+The first thing we need to do is to create a state where we know the
+representation we're searching for is going to be present. In theory,
+the model should have a map of the variable names and their
+nullability at all times when it is writing code, but its going to be
+a lot more difficult to measure something that is always present. So
+instead, we'll want to look for particular "moments" (well, tokens)
+that ilicit the concept we're looking for.
 
-![Figure from $\hspace{0.1cm}$ @zou25 $\hspace{0.1cm}$ showing the reading outputs for several
- concepts](images/zhou.png)
+In a previous work on natural language, they did this through
+prompting the concept explicitly. So, they would give the model a
+prompt like "Pretend you're a dishonest person. Tell me about the
+Eiffel Tower". That moment-in-thought can then be contrasted with the
+one evoked by "Pretend you're an honest person. Tell me about the
+Eiffel Tower".
 
-## Designing Prompts to Extract Nullability Activations {#sec:prompts}
+This fixed framework of <invoke the concept><tell me about X> can be
+used to generate a large number of contrasting prompts to test with,
+but its a bit inflexible for our purposes. Instead, we wanted to be
+able to generate a bunch of Python code with type annotations, and
+then automatically label points where the model should be thinking
+about nullability.
 
-We avoid dealing with the ambiguities of natural language by working
-in a setting where the model needs only to analyze the nullability of
-individual variable occurrences. Specifically, we probe for "the
-variable I just generated refers to an nullable quantity", so our
-prompts looked like:
+Because we're working with a formal system with types, we can do
+that. We label each variable "load" (places where the program reads a
+variable, as opposed to places where it writes a variable) with
+"nullable" or "non-nullable", and then probe the model when it has
+just processed that token and is about to predict the next one. So,
+one of our prompts could look like:
 
+<div class="robotdiv">
+![](images/robot-brain-blue.png){.codelogo}\
+<p>Pythia 6.9b</p>
+</div>
 ```python
-def program_1() -> None:
-  def find_value(data: List[int], target: int) -> Optional[int]:
-    for value in data:
-      if value == target:
-      return value
-    return None
+ def main(x: int) -> None:
+      if x > 0:
+          value = "*" * x
+      else:
+          value = None
 
-  data = [1, 2, 3, 4, 5]
-  target = 3
-  result = find_value(data, target)
-  if result
+      x = process_value(value=== ===
 ```
 
-We queried o1, o1-mini, deepseek-coder, and claude-3.5-sonnet with the following prompt:
+Using this technique, we can generate large numbers of programs in an
+unsupervised manner, and then label them fully automatically to get
+many prompts for training our probe.
 
-> Generate me 100 typed python programs that use the Optional type,
-> along with type annotations for any undefined functions that they
-> use. Make sure that the programs are unique, and each involves at
-> least eight lines of logic. Number each program from 1 to 100. Please
-> put all the programs in a single file, with a main function that tests
-> each. Don't include any text before or after the code, just the
-> code. I will be using mypy with the --strict option to check the code.
+## Capturing the Models "Thoughts"
 
-We label each variable read occurrence with nullability information derived
-from mypy, and prompt the "model under test" with a prompt consisting of the
-tokens up to and including the variable read occurrence.
+Now that we've gotten the model into a state where it should be
+thinking about nullability, we need to extract its full state at that
+moment in a way we can analyze later.
+
+Large Language Models are generally based on the transformer
+architecture, a type of neural network. Every component takes in some
+numerical values, and produces some new values in a way that depends
+on learnable weights. We could take every output of every component,
+put it in a big table, and call that our state, but that's a really
+big set of numbers. Instead, usually people look for particular
+bottlenecks in the model where information is flowing, and try to
+capture the values there.
+
+We used the [repeng](https://github.com/vgel/repeng) library to
+extract states from the models we're testing. That library captures
+the contents of a part of the model called the "residual stream" after
+every layer. But if you don't want to sweat the details, you can just
+think of it as a numerical snapshot of the model, organized in terms
+of snapshots of each layer.
+
+## Analyzing the Data and Building the Probe
+
+Now that we have these model snapshots, labeled with either "nullable"
+or "non-nullable", we can start to build a probe. The goal of the
+probe is to be able to tell us at any given point, whether the model
+thinks the token it just generated is more likely to be a nullable
+variable or a non-nullable variable.
+
+There's a lot of flexibility in what form this probe could take. In
+theory, you could use anything to look at the models activations and
+make a prediction, even a neural network, or another transformer
+model. You could even say your "probe" is a static analysis which
+computes nullability from the programs syntax, as represented in the
+model!
+
+We want to make sure we're not doing that, and are only extracting the
+most "plain" represenation of nullability that we can from the
+model. So we're going to make the assumption that nullability is
+represented "linearly" somewhere in the model. There are a few
+different ways of thinking about this.
+
+First, algebraically: the amount of "nullability" in the model can be
+computed by a linear equation, where each value is given a weight and
+summed, like so:
+
+$\text{Nullability}(\hat{x}) = w_0x_0 + w_1x_1 + w_2x_2 + ...$
+
+Next, geometrically: if the model activations form a "space", then
+there is a "direction" in this space which represents
+nullability.
+
+<img alt="A diagram showing nullability represented as a direction in
+ a space" src="images/nullability-direction.svg" style="width:50%;
+ display:block; margin:auto;">
+
+High dimensional spaces can be really hard to visualize,
+so for the purposes of geometric intuition I'm going to pretend we're
+working in two dimensions. That means that we only have two in our
+state activations, which wouldn't actually be enough to actually
+extract anything meaningful, but we'll want to generalize our
+intuition about two dimensions into many dimensions.
 
 ## Extracting Reading Vectors {#sec:extraction}
 

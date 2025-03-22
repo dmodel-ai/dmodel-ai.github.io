@@ -248,7 +248,7 @@ nullability from that type. So, if your context is:</p>
 class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> foo(num: <span class="bu">int</span>):</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    positive_nums: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> num...</span></code></pre></div>
-<p>then you know you don’t need to check for None, whereas if it’s:</p>
+<p>then, you know you don’t need to check for None, whereas if it’s:</p>
 <div class="sourceCode" id="cb4"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> foo(num: Optional[<span class="bu">int</span>]):</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    positive_nums: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
@@ -256,8 +256,8 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a hr
 <p>then you know you <em>do</em> need a None check.</p>
 <p>You could instead just ask your LLM assistant to complete the line.
 But how does your assistant know if <code>num</code> is nullable? Our
-experiments show that LLMs learn to approximate the same typing rules,
-by analyzing millions of programs.</p>
+experiments show that, after analyzing millions of programs, LLMs learn
+to approximate the same typing rules,</p>
 <p>If we ask an LLM early in it’s pre-training process to complete the
 program above, it produces:</p>
 <p><img src="images/robot-brain-blue.png" class="codelogo bare" /><br />
@@ -276,11 +276,12 @@ integer.</p>
 class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> foo(num: Optional[<span class="bu">int</span>]):</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    positive_nums: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> num<span class="op">===</span> <span class="op">&gt;</span> <span class="dv">0</span>: <span class="op">===</span></span></code></pre></div>
-<p>This is closer, in that its figured out that <code>num</code> is a
+<p>This is closer, in that it has figured out that <code>num</code> is a
 number instead of an object, but it still isn’t reading the function
 type signature and realizing that <code>num</code> could be None. Keep
-training it though, and eventually it will learn to insert the None test
-depending on the type signature of the function.</p>
+training it, though, and eventually it will learn to insert the
+<code>None</code> test depending on the type signature of the
+function.</p>
 <p><img src="images/robot-brain-blue.png" class="codelogo bare" /><br />
 </p>
 <div class="sourceCode" id="cb7"><pre
@@ -340,11 +341,11 @@ class="inlinefig"
 alt="A diagram showing a simple program, and the probes nullability predictions for each variable load." /><br />
 </p>
 <h1 id="sec:testing">Measuring Nullability Understanding Externally</h1>
-<p>Before we start looking inside the mind of the models for the
-nullability concept, we want to make sure we’re looking at models that
-actually have this concept. This will allow us to look at models of
-various sizes and training levels without worrying about trying to
-conjure a concept from nothing.</p>
+<p>Before we start looking for the nullability concept inside the mind
+of the model, we want to make sure we’re looking at models that actually
+have this concept. This will allow us to look at models of various sizes
+and training steps without worrying that we’re trying to draw blood from
+a stone.</p>
 <p>To do so, we wrote fifteen partial-program tests which exercised a
 variety of type inference concepts, and checked if models could complete
 them. We go into a lot of detail on this process in our <a
@@ -352,12 +353,12 @@ href="../nullability/index.html">technical post</a>, so we’re just going
 to show the highlights here.</p>
 <h3 id="impact-of-variable-names-and-arbitrary-constants">Impact of
 Variable Names and Arbitrary Constants</h3>
-<p>For programs involving lists and for loops, the variable names and
-constant values heavily influence how able a model is to complete them
-correctly. On the other hand, when programs only involve other rules
-(such as those involving ifs and functions), variable names and constant
-values have negligable impact on the ability of the model to complete
-them correctly.</p>
+<p>For programs involving lists and <code>for</code> loops, variable
+names and constant values heavily influence how able a model is to
+complete these programs correctly. On the other hand, when programs only
+involve other rules (such as those involving <code>if</code>s and
+functions), variable names and constants have negligible impact on the
+ability of the model to complete them correctly.</p>
 <div class="robotdiv">
 <img src="images/robot-brain-blue.png" class="codelogo" /><br />
 
@@ -390,10 +391,11 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a h
 <p>When code is fully annotated with type annotations, models can easily
 complete them just by reasoning locally. On the other hand, without type
 annotations, models have to reason a lot more globally, so it takes them
-a lot longer to reason about nullability that flows through multiple
-functions. When nullability flows through three or more functions,
-current state-of-the-art completion models stop being able to reason
-about it.</p>
+a lot longer to learn how to reason about nullability information that
+flows through multiple functions. When nullability flows through three
+or more functions, current state-of-the-art completion models stop being
+able to reason about it.
+<span class="aside AT">AT: can't raelly make this claim without testing on 4.5. I think we can say "top" which is vauger?</span></p>
 <div class="robotdiv">
 <img src="images/robot-brain-blue.png" class="codelogo" /><br />
 
@@ -442,7 +444,7 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a h
 <span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">===</span><span class="cf">return</span> <span class="bu">len</span>(value <span class="kw">or</span> <span class="st">&quot;&quot;</span>)<span class="op">===</span></span></code></pre></div>
 <h3 id="generating-type-annotations">Generating Type Annotations</h3>
 <p>Models have a significantly harder time writing type annotations for
-Python code then they do reasoning about the types, or reading type
+Python code than they do just reasoning about the types, or reading type
 annotations. This makes sense, since a lot of the Python code available
 in training data doesn’t use type annotations.</p>
 <div class="robotdiv">
@@ -464,17 +466,18 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb14-1"><a h
 <span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_square(number: <span class="op">===</span><span class="bu">int</span>) <span class="op">-&gt;</span> Optional[<span class="bu">int</span>]: <span class="op">===</span></span></code></pre></div>
 <h3 id="some-model-sizes-are-more-useful-than-others">Some Model Sizes
 are More Useful than Others</h3>
-<p>Notwithstanding the above limitations, three Pythia sizes have a
+<p>Nonwithstanding the above limitations, three Pythia sizes have a
 pretty reliable concept of nullability (2.8b, 6.9b, and 12b), and three
 more have an occasionally useful concept of nullbability (410m, 1b, and
 1.4b).</p>
 <hr />
 <p>For these experiments, and for our probing results later, we mostly
-tested on the Pythia model series. This is a nice series of models from
+tested on the Pythia model suite. This is a nice series of models from
 EleutherAI with a variety of sizes. But what really makes Pythia useful
-is that they publish 154 different “revisions” of each model, where each
-is pretrained for a different number of steps. This lets us investigate
-how concepts evolve in the model during pre-training.</p>
+is that they publish 154 different “revisions” or “checkpoints” of each
+model, where each is pretrained for a different number of steps. This
+lets us investigate how concepts evolve in the model during
+pre-training.</p>
 <p>To help understand how these results apply to larger more capable
 models, here’s a graph showing how the Pythia models of different sizes
 perform on the external tests, compared with a few state-of-the-art

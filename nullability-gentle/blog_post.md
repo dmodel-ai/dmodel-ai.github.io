@@ -136,7 +136,7 @@ def foo(num: int):
     if num...
 ```
 
-then you know you don't need to check for None, whereas if it's:
+then, you know you don't need to check for None, whereas if it's:
 
 ```python
 def foo(num: Optional[int]):
@@ -148,8 +148,8 @@ then you know you *do* need a None check.
 
 You could instead just ask your LLM assistant to complete the
 line. But how does your assistant know if `num` is nullable? Our
-experiments show that LLMs learn to approximate the same typing rules,
-by analyzing millions of programs.
+experiments show that, after analyzing millions of programs,
+LLMs learn to approximate the same typing rules,
 
 If we ask an LLM early in it's pre-training process to complete the
 program above, it produces:
@@ -173,10 +173,10 @@ def foo(num: Optional[int]):
     if num=== > 0: ===
 ```
 
-This is closer, in that its figured out that `num` is a number instead
+This is closer, in that it has figured out that `num` is a number instead
 of an object, but it still isn't reading the function type signature
-and realizing that `num` could be None. Keep training it though, and
-eventually it will learn to insert the None test depending on the type
+and realizing that `num` could be None. Keep training it, though, and
+eventually it will learn to insert the `None` test depending on the type
 signature of the function.
 
 ![](images/robot-brain-blue.png){.codelogo .bare}\
@@ -255,11 +255,11 @@ knowledge like so:
 
 # Measuring Nullability Understanding Externally {#sec:testing}
 
-Before we start looking inside the mind of the models for the
-nullability concept, we want to make sure we're looking at models that
-actually have this concept. This will allow us to look at models of
-various sizes and training levels without worrying about trying to
-conjure a concept from nothing.
+Before we start looking for the nullability concept inside the mind of the
+model, we want to make sure we're looking at models that actually have this
+concept. This will allow us to look at models of
+various sizes and training steps without worrying that we're trying to
+draw blood from a stone.
 
 To do so, we wrote fifteen partial-program tests which exercised a
 variety of type inference concepts, and checked if models could
@@ -269,11 +269,11 @@ show the highlights here.
 
 ### Impact of Variable Names and Arbitrary Constants
 
-For programs involving lists and for loops, the variable names and
-constant values heavily influence how able a model is to complete them
+For programs involving lists and `for` loops, variable names and
+constant values heavily influence how able a model is to complete these programs
 correctly. On the other hand, when programs only involve other rules
-(such as those involving ifs and functions), variable names and
-constant values have negligable impact on the ability of the model to
+(such as those involving `if`s and functions), variable names and
+constants  have negligible impact on the ability of the model to
 complete them correctly.
 
 <div class="robotdiv">
@@ -306,10 +306,11 @@ def main() -> None:
 When code is fully annotated with type annotations, models can easily
 complete them just by reasoning locally. On the other hand, without
 type annotations, models have to reason a lot more globally, so it
-takes them a lot longer to reason about nullability that flows through
+takes them a lot longer to learn how to reason about nullability information that flows through
 multiple functions. When nullability flows through three or more
 functions, current state-of-the-art completion models stop being able
 to reason about it.
+\AT{can't raelly make this claim without testing on 4.5. I think we can say "top" which is vauger?}
 
 <div class="robotdiv">
 ![](images/robot-brain-blue.png){.codelogo}\
@@ -357,7 +358,7 @@ def process_value(value): === -> int: ===
 ### Generating Type Annotations
 
 Models have a significantly harder time writing type annotations for
-Python code then they do reasoning about the types, or reading type
+Python code than they do just reasoning about the types, or reading type
 annotations. This makes sense, since a lot of the Python code
 available in training data doesn't use type annotations.
 
@@ -379,7 +380,7 @@ def get_square(number: ===int) -> Optional[int]: ===
 
 ### Some Model Sizes are More Useful than Others
 
-Notwithstanding the above limitations, three Pythia sizes have a
+Nonwithstanding the above limitations, three Pythia sizes have a
 pretty reliable concept of nullability (2.8b, 6.9b, and 12b), and
 three more have an occasionally useful concept of nullbability (410m,
 1b, and 1.4b).
@@ -387,9 +388,9 @@ three more have an occasionally useful concept of nullbability (410m,
 ---
 
 For these experiments, and for our probing results later, we mostly
-tested on the Pythia model series. This is a nice series of models
+tested on the Pythia model suite. This is a nice series of models
 from EleutherAI with a variety of sizes. But what really makes Pythia
-useful is that they publish 154 different "revisions" of each model,
+useful is that they publish 154 different "revisions" or "checkpoints" of each model,
 where each is pretrained for a different number of steps. This lets us
 investigate how concepts evolve in the model during pre-training.
 

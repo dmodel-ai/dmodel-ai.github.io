@@ -380,7 +380,7 @@ def get_square(number: ===int) -> Optional[int]: ===
 
 ### Some Model Sizes are More Useful than Others
 
-Nonwithstanding the above limitations, three Pythia sizes have a
+Notwithstanding the above limitations, three Pythia sizes have a
 pretty reliable concept of nullability (2.8b, 6.9b, and 12b), and
 three more have an occasionally useful concept of nullbability (410m,
 1b, and 1.4b).
@@ -523,100 +523,176 @@ nullability.
  a space" src="images/nullability-direction.svg" style="width:50%;
  display:block; margin:auto;">
 
-High dimensional spaces can be really hard to visualize,
-so for the purposes of geometric intuition I'm going to pretend we're
-working in two dimensions. That means that we only have two in our
-state activations, which wouldn't actually be enough to actually
+High dimensional spaces can be really hard to visualize, so for the
+purposes of geometric intuition I'm going to pretend we're working in
+two dimensions for the diagrams. That means that we only have two in
+our state activations, which wouldn't actually be enough to actually
 extract anything meaningful, but we'll want to generalize our
 intuition about two dimensions into many dimensions.
 
-## Extracting Reading Vectors {#sec:extraction}
+There are different ways we can compute a "direction" of
+nullability. The simplest is just to measure the difference between
+the average state when the model is thinking about nullable variables,
+and the average state when it's thinking about non-nullable
+variables. This gives us a "direction" pointing from non-nullable to
+nullable in our space, which we can use to project any new state onto,
+to determine how "nullable" it is.
 
-Prior work focused their probing on a single layer, often handpicked
-based on prior papers. We probe all layers instead. We use Mass Mean
-Shift probing^[That is, we set the reading vector to the
-difference between the mean activation for positive class and the mean
-activation for the negative class.]
-for each layer, because it's been shown empirically
-[@li24] to generalize better in high dimensional spaces than logistic
-regression.
+![A diagram showing two blobs of points, with a line connecting their
+ centers](images/mass-means.svg)\
 
-We then tested two methods for determining the relative importance of
-the different layers --- either allowing the magnitude of the
-difference of means vector to determine the importance of the layer in
-the final probe (MM), or to learn coefficients for each layer using
-linear regression (MM-LR). We found that which method is more accurate
-on test data varies over both model size and number of training steps.
+This technique is called "mass means shift", because we're taking the
+difference between the means (average values) of each "mass" of
+points. You can think of it as drawing a line from the center of the
+"non-nullable" cluster to the center of the "nullable" cluster.
 
-![The performance of pure mass means shift vs mass means shift
- with linear regression for different Pythia model sizes. Lower is
- better.](images/mm-vs-mmlr.svg){#fig:mm-vs-mmlr-sizes}
+It might be surprising that this works, given that we know there are
+better ways to fit linear functions, like logistic regression. And in
+fact, we can easily see scenarios where this returns a direction that
+doesn't split the training data as well as possible.
 
-In [@Fig:mm-vs-mmlr-sizes], we can see that pure mass means probing
-gives lower loss for smaller models (those with less than 410 million
-parameters), but that for larger models weighting layers using linear
-regression gives lower loss consistently.
+![A diagram showing the difference between a mass means and linear
+ regression classification](images/lr-vs-mm-intuition.svg)\
 
-## Visualizing Probe Outputs {#sec:viz}
+However, the method that splits the training data best doesn't always
+generalize best to splitting the test data well. And it turns out that
+in high-dimensions, at least within a single layer, mass means
+generalizes better than logistic regression.
 
-Let us return to the reading diagram from the introduction, reproduced
-below.
+This isn't always the case *across* layers though. In practice, we
+found that some of the layers in the model are better at representing
+nullability than others, and that there are some dependencies between
+layers that change the best direction on each layer. So instead of
+using mass-means probing across all layers simultaniously, we do it
+for each individual layer. Then, we weight the contribution of
+individual layers to the final prediction using linear regression. We
+found this gave us better results for larger models, though for
+smaller models the simpler mass means approach worked better.
 
-This diagram is adapted from the style of reading diagram from @zou25, but only
-show the activations on tokens that represent variable loads^[This is, of course, where we trained our probes, but there is also a practical
-reason: right after the model has generated a variable that will be
-written to, it often does not have access to the assigning expression
-or type annotation, giving it no way to determine if the value will be
-optional or now.]. For each position of interest, we prompt the model with the
-partial program that consists of all tokens up to (preceding) and including
-that position. We then probe the model at the following token. We color the box above that position
-based on the output of the probe, and a scoring threshold inferred at
-train-time^[Red tokens are significantly below the threshold, and
-green tokens are significantly above it; tokens that scored near the
-threshold would have a near-white color, but no such tokens appear in
-this example.].
+## Visualizing Our Results
 
-![A diagram showing a simple program, and the probes nullability
- predictions for each variable load.](images/reading_diagram.svg){#fig:reading2 .inlinefig}
+Now that we've built our probe, we can use it to visualize how the
+model "thinks" about nullability as it processes a program. Remember
+that reading diagram from earlier? Let's look at it again and explain
+what it shows:
 
-In this program, there are sixteen tokens that correspond to variable loads,
-and (correctly) all but one are marked as non-optional.
-The only nullable variable in this program is `result`,
-since it comes from `find_value` which returns `Optional[int]`.^[When this variable appears for the first time, it is in the `if` statement
-that checks if it's `None`. Then, the model knows it is nullable, and the results
-of the probe reflect that understanding. But when it appears a second
-time on the next line, in the format string of `print`, the body of this if statement only
-runs if it is *not* `None`. The model understand this as well, and the probe accurately reflects this.]
+![A diagram showing a simple program, and the probe's nullability
+ predictions for each variable load.](images/reading_diagram.svg)\
 
-## Probing Results Across Training and Scale {#sec:results}
+In this diagram, we're showing a simple Python program with type
+annotations. Whenever a variable is read in the code (what we call a
+"variable load"), we've highlighted it in either green or red. Green
+means our probe detected that the model thinks this variable is not
+nullable, while red means the model thinks it is nullable.^[We can
+also query our probe at non-variable tokens, but its not clear what
+the output would mean, since we only train on and label variables.]
 
-In this section, we study the performance of our nullability probes across time
-and scale [@tigges24].
-We use mass-means shift probing [@li24] on all layers,
-and a linear regression to determine the weights of each layer.^[
-@li24 and @zou25 suggest that mass means probes are best for reading,
-while the direction perpendicular to the separating hyperplane is best for
-intervention.
-However, previous work leaves open the question of cross-layer weights. We use
-LR on the cross-layer weights, thanks to our investigations above.]
+The most interesting case is the variable `result`. When it first
+appears in the `if` statement, it's highlighted in red because it
+comes from `find_value`, which returns an `Optional[int]`. But when it
+appears again in the `print` statement inside the `if` block, it's
+highlighted in green! This shows that the model understands that
+inside the `if result` block, `result` can't be `None` anymore.
 
-![The performance (probe test loss) of each Pythia
- model size during pretraining. Lower is
- better.](images/accuracy_during_pretraining.svg){#fig:models-and-steps}
+\AS{Unedited model outputs beyond this point}
 
-In [@fig:models-and-steps], we plot loss against scale and time.
-While we measured accuracy for every available Pythia model size, we exclude
-the smallest (14m) from this plot since it would
-exist entirely above the top of the plot.
+## How Does Understanding Develop During Training?
 
-One thing that is interesting to note is that models up to 1b reach
-a minimum loss before loss for this task climbing again. Charitably, this may be because the
-features beyond this point become more complex --- less linear, or the represented
-features themselves represent more subtle concepts. Cynically, this reflects
-that models---small models in particular---do not uniformly improve at this task over training.
+One of the most interesting things we found is how the model's
+understanding of nullability develops over time during training. Using
+the Pythia model suite, which has checkpoints at various stages of
+training, we could track how our probe's performance improved as the
+models learned more and more.
 
-Our suspicion is that this
-pattern would continue even for the larger models if we continued to overtrain them for longer.
+![The performance of each Pythia model size during
+ pretraining](images/accuracy_during_pretraining.svg)\
+
+This graph shows the probe's test loss over training steps for models
+of different sizes. Lower means better, so we can see that all models
+generally get better at understanding nullability as they train
+longer, and larger models learn faster and reach better performance
+overall.
+
+Interestingly, for models up to 1 billion parameters, the loss
+actually starts to increase again after reaching a minimum. This might
+be because as training continues, the model develops more complex,
+non-linear representations that our simple linear probe can't capture
+as well. Or it might be that the model's understanding becomes more
+nuanced, focusing on subtler aspects of nullability that our probe
+isn't designed to extract.
+
+## What Does This All Mean?
+
+So what have we learned from all this probing and testing? A few key insights stand out:
+
+1. **LLMs really do understand nullability**: Even relatively small
+models (2.8B parameters) develop a concept of nullability during
+training, and this understanding is reflected in both their outputs
+and internal states.
+
+2. **Understanding develops in stages**: Models first learn simple,
+local nullability patterns (like checking function parameters) before
+learning more complex patterns that require tracking nullability
+across multiple functions.
+
+3. **Nullability is linearly represented**: The concept of nullability
+appears to be represented in a relatively simple, linear way within
+the model's activations, which is why our probe works so well.
+
+4. **Variable names matter**: For some patterns, especially those
+involving lists and loops, models rely heavily on conventional
+variable names and familiar-looking data structures to correctly
+reason about nullability.
+
+5. **Size helps**: As models get larger, their understanding of
+nullability becomes more robust and generalizable, allowing them to
+handle more complex patterns and edge cases.
+
+These findings aren't just interesting for understanding LLMs - they
+have practical implications for how we use these models to write
+code. If you're working with an LLM coding assistant, you might want
+to be extra careful when:
+
+- Your code involves nullability flowing through multiple functions
+- You're using unconventional variable names or data structures
+- You're asking the model to write type annotations (rather than just reading them)
+
+In these cases, the model might need a bit more guidance to get things
+right.
+
+## What's Next?
+
+This work is just a first step in understanding how LLMs think about
+programming concepts. There are many other aspects of programming
+language semantics that would be fascinating to study using similar
+techniques:
+
+- How do models understand mutability and ownership (especially
+  relevant for languages like Rust)?
+
+- How do they track variable scope and lifetime?
+
+- What about concurrency and threading?
+
+- How do they understand more complex type systems with generics or dependent types?
+
+Each of these concepts could potentially be probed in a similar way,
+giving us a window into the "mind" of the model as it writes code.
+
+![A robot thinking deeply about code](images/robot-thinking.png)
+
+## The Bottom Line
+
+So do LLMs "understand" programming concepts like nullability? The answer seems to be a qualified yes. They've developed internal representations that track nullability in surprisingly sophisticated ways, allowing them to handle most common patterns correctly. But their understanding isn't perfect - it's biased by training patterns, limited by context window size, and sometimes brittle when faced with unfamiliar situations.
+
+This mirrors our experience using these models in practice: they're incredibly powerful tools that can help us write code faster and more efficiently, but they're not yet perfect replacements for human programmers with a deep understanding of programming language semantics.
+
+As these models continue to improve, it will be fascinating to see how their understanding of programming concepts evolves, and whether they develop even more sophisticated representations that can handle increasingly complex patterns and edge cases.
+
+# Acknowledgements
+
+We thank Leo Gao, Chelsea Voss, and Zhanna Kaufman for their comments
+and suggestions during the drafting process.
 
 # References {.unnumbered}
 ::: {#refs}

@@ -24,17 +24,17 @@ capability! How often, and in what situations, can LLM's write correct
 code entirely on their own? And, maybe more importantly, but harder to
 answer: Do LLM's "understand" the code they are writing?
 
-\AT{ this paragraph sounds like we're talking about CoT, not activations}
 Understanding is a tricky concept to measure. Some would argue that
-sentience precedes understanding, and so that LLM's can't have understanding,
-because they aren't biological organisms with sentience. But they certainly
-have something akin to
-"thought processes": chains of predictions that determine their final
-outputs. Recently, it's become possible to study these processes more
-deeply, measuring internal "beliefs" of the model as they think. This
-gives us a powerful tool for determining what kinds of problems LLM's
-falter on, when they'll succceed, and when they are "thinking through"
-problems more fully versus just guessing at a solution.
+sentience precedes understanding, and so that LLM's can't have
+understanding, because they aren't biological organisms with
+sentience. But they certainly have something akin to "thought
+processes": a series of internal representations that determine their
+final outputs. Recently, it's become possible to study these processes
+more deeply, measuring internal "beliefs" of the model as they
+think. This gives us a powerful tool for determining what kinds of
+problems LLM's falter on, when they'll succceed, and when they are
+"thinking through" problems more fully versus just guessing at a
+solution.
 
 So far, these techniques for measuring internal model state have been
 mostly applied to chatbots writing text for human consumption, what we call "natural
@@ -48,9 +48,9 @@ is limited to smaller scales, where we can read over chatbots' output
 as humans \AT{acutally, these are often graded by AI...} and determine whether their level of "honesty" (or some
 other interesting concept) matches the internal thing we're measuring.
 
-![A diagram from Zou showing probes that read hallucination, honesty,
+![A diagram from Zou et al showing probes that read hallucination, honesty,
  morality, and power-seeking from the outputs of a
- chatbot.](images/zou.png)\
+ chatbot.](images/zou.png)
 
 Code, on the other hand, is another matter. Humans have been studying
 properties of code for a long time, and there are many abstract
@@ -308,9 +308,8 @@ complete them just by reasoning locally. On the other hand, without
 type annotations, models have to reason a lot more globally, so it
 takes them a lot longer to learn how to reason about nullability information that flows through
 multiple functions. When nullability flows through three or more
-functions, current state-of-the-art completion models stop being able
+functions, current top completion models stop being able
 to reason about it.
-\AT{can't raelly make this claim without testing on 4.5. I think we can say "top" which is vauger?}
 
 <div class="robotdiv">
 ![](images/robot-brain-blue.png){.codelogo}\
@@ -417,6 +416,9 @@ point. Finally, we'll show a few different methods for searching for
 the representation of nullability in these internal activations, and
 figure out the pros and cons of each.
 
+<img alt="A brain in a jar hooked up to wires" src="images/brain-jar.png" style="width:50%;
+ display:block; margin:auto;">
+
 ## Getting the Model to Think About Nullability
 
 The first thing we need to do is to create a state where we know the
@@ -426,6 +428,9 @@ nullability at all times when it is writing code, but its going to be
 a lot more difficult to measure something that is always present. So
 instead, we'll want to look for particular "moments" (well, tokens)
 that ilicit the concept we're looking for.
+
+<img alt="A diagram showing an LLM processing tokens" src="images/llm-token-processing.svg" style="width:75%;
+ display:block; margin:auto;">
 
 In a previous work on natural language, they did this through
 prompting the concept explicitly. So, they would give the model a
@@ -487,6 +492,9 @@ the contents of a part of the model called the "residual stream" after
 every layer. But if you don't want to sweat the details, you can just
 think of it as a numerical snapshot of the model, organized in terms
 of snapshots of each layer.
+
+<img alt="A diagram of the residual stream of a transformer being measured after each layer" src="images/llm-residual-stream.svg" style="width:75%;
+ display:block; margin:auto;">
 
 ## Analyzing the Data and Building the Probe
 
@@ -594,15 +602,13 @@ appears again in the `print` statement inside the `if` block, it's
 highlighted in green! This shows that the model understands that
 inside the `if result` block, `result` can't be `None` anymore.
 
-\AS{Unedited model outputs beyond this point}
 
 ## How Does Understanding Develop During Training?
 
 One of the most interesting things we found is how the model's
 understanding of nullability develops over time during training. Using
-the Pythia model suite, which has checkpoints at various stages of
-training, we could track how our probe's performance improved as the
-models learned more and more.
+the checkpoints in the Pythia model suite, we can track how our
+probe's performance improves as the models pretrained for longer.
 
 ![The performance of each Pythia model size during
  pretraining](images/accuracy_during_pretraining.svg)\
@@ -617,77 +623,29 @@ Interestingly, for models up to 1 billion parameters, the loss
 actually starts to increase again after reaching a minimum. This might
 be because as training continues, the model develops more complex,
 non-linear representations that our simple linear probe can't capture
-as well. Or it might be that the model's understanding becomes more
-nuanced, focusing on subtler aspects of nullability that our probe
-isn't designed to extract.
+as well. Or it might be that the model starts to overfit on the
+training data and loses its more general concept of nullability.
 
-## What Does This All Mean?
+![A robot thinking deeply about code](images/robot-thinking.png)\
 
-So what have we learned from all this probing and testing? A few key insights stand out:
-
-1. **LLMs really do understand nullability**: Even relatively small
-models (2.8B parameters) develop a concept of nullability during
-training, and this understanding is reflected in both their outputs
-and internal states.
-
-2. **Understanding develops in stages**: Models first learn simple,
-local nullability patterns (like checking function parameters) before
-learning more complex patterns that require tracking nullability
-across multiple functions.
-
-3. **Nullability is linearly represented**: The concept of nullability
-appears to be represented in a relatively simple, linear way within
-the model's activations, which is why our probe works so well.
-
-4. **Variable names matter**: For some patterns, especially those
-involving lists and loops, models rely heavily on conventional
-variable names and familiar-looking data structures to correctly
-reason about nullability.
-
-5. **Size helps**: As models get larger, their understanding of
-nullability becomes more robust and generalizable, allowing them to
-handle more complex patterns and edge cases.
-
-These findings aren't just interesting for understanding LLMs - they
-have practical implications for how we use these models to write
-code. If you're working with an LLM coding assistant, you might want
-to be extra careful when:
-
-- Your code involves nullability flowing through multiple functions
-- You're using unconventional variable names or data structures
-- You're asking the model to write type annotations (rather than just reading them)
-
-In these cases, the model might need a bit more guidance to get things
-right.
+---
 
 ## What's Next?
 
-This work is just a first step in understanding how LLMs think about
-programming concepts. There are many other aspects of programming
-language semantics that would be fascinating to study using similar
-techniques:
+This is just a first step in understanding the internal thought
+processes of LLM's as they think about code. There are still richer
+types, program invariants, and all sorts of high-level concepts that
+are necessary for writing working code, but extracting them from LLM's
+might not be so easy.
 
-- How do models understand mutability and ownership (especially
-  relevant for languages like Rust)?
+But we've already shown several important things about looking into
+the "mind" of a model as it writes code. We can say definitively that
+LLMs have an internal concept of nullability, even if it doesn't
+always trigger when it should.
 
-- How do they track variable scope and lifetime?
-
-- What about concurrency and threading?
-
-- How do they understand more complex type systems with generics or dependent types?
-
-Each of these concepts could potentially be probed in a similar way,
-giving us a window into the "mind" of the model as it writes code.
-
-![A robot thinking deeply about code](images/robot-thinking.png)
-
-## The Bottom Line
-
-So do LLMs "understand" programming concepts like nullability? The answer seems to be a qualified yes. They've developed internal representations that track nullability in surprisingly sophisticated ways, allowing them to handle most common patterns correctly. But their understanding isn't perfect - it's biased by training patterns, limited by context window size, and sometimes brittle when faced with unfamiliar situations.
-
-This mirrors our experience using these models in practice: they're incredibly powerful tools that can help us write code faster and more efficiently, but they're not yet perfect replacements for human programmers with a deep understanding of programming language semantics.
-
-As these models continue to improve, it will be fascinating to see how their understanding of programming concepts evolves, and whether they develop even more sophisticated representations that can handle increasingly complex patterns and edge cases.
+As these models continue to improve, it will be interesting to see how
+their understanding of programming concepts evolves. And we'll be here
+to study them as they do.
 
 # Acknowledgements
 

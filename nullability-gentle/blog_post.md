@@ -44,9 +44,7 @@ some of the most interesting concepts to measure, such as honesty or
 power-seeking, apply most readily to these conversations. But it's hard to say
 quantitative or precise things about natural language
 concepts, so our ability to rigorously study internal representations
-is limited to smaller scales, where we can read over chatbots' output
-as humans \AT{acutally, these are often graded by AI...} and determine whether their level of "honesty" (or some
-other interesting concept) matches the internal thing we're measuring.
+is limited.
 
 ![A diagram from Zou et al showing probes that read hallucination, honesty,
  morality, and power-seeking from the outputs of a

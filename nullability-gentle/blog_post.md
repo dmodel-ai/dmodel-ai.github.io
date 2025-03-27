@@ -19,9 +19,9 @@ themselves non-technical.
  function as the user
  types](https://github.blog/wp-content/uploads/2022/09/unexpectedcopilot3.gif?w=1024&resize=1024%2C576)\
 
-But there are still many unanswered questions about this
-capability! How often, and in what situations, can LLM's write correct
-code entirely on their own? And, maybe more importantly, but harder to
+But there are still many unanswered questions about this capability.
+How often, and in what situations, can LLM's write correct code
+entirely on their own? And, maybe more importantly, but harder to
 answer: Do LLM's "understand" the code they are writing?
 
 Understanding is a tricky concept to measure. Some would argue that
@@ -97,7 +97,7 @@ called `num`. Maybe you're building a list of numbers called
 `positive_nums`. How do you proceed?
 
 The answer often depends on the context in which you're working. If
-`num` and `positive_nums` are the things in scope, then you might
+`num` and `positive_nums` are the only things in scope, then you might
 guess that you should write the lines:
 
 ```python
@@ -108,7 +108,9 @@ if num > 0:
 And if `num` is always a concrete number, as its name would suggest,
 then this is probably the correct code. But variable names don't alway
 convey everything important about them, and it might be the case that
-`num` could be None. If so, you'll instead want to write:
+`num` could be None. If that happened in the above code, you would get
+a runtime type error because you can't check if `None` is greater than
+zero. So, you would instead want to write:
 
 ```python
 if num is not None and num > 0:
@@ -147,7 +149,7 @@ then you know you *do* need a None check.
 You could instead just ask your LLM assistant to complete the
 line. But how does your assistant know if `num` is nullable? Our
 experiments show that, after analyzing millions of programs,
-LLMs learn to approximate the same typing rules,
+LLMs learn to approximate the same typing rules.
 
 If we ask an LLM early in it's pre-training process to complete the
 program above, it produces:
@@ -237,11 +239,12 @@ an "internal" measurement of the models understanding.
 
 We do so by looking at the activations of the model, meaning the
 values of each perceptron in the hidden layers. Together, these values
-give the entire internal state of the model at each token, and they
-can tell us what the model is "thinking" when processing that
-token. With the right tests, we can tell if the model is "thinking"
-that the current token is an optional variable, or a non-optional
-variable.
+give the entire internal state of the model at each piece of text
+(what we call a "token", which could be a word, part of a word, or a
+symbol). And they can tell us what the model is "thinking" when
+processing that token. With the right tests, we can tell if the model
+is "thinking" that the current token is an optional variable, or a
+non-optional variable.
 
 By the end of this post, we'll be able to build a probe that uses the
 models activations to determine whether the model thinks a variable
@@ -544,13 +547,13 @@ variables. This gives us a "direction" pointing from non-nullable to
 nullable in our space, which we can use to project any new state onto,
 to determine how "nullable" it is.
 
-![A diagram showing two blobs of points, with a line connecting their
- centers](images/mass-means.svg)\
-
 This technique is called "mass means shift", because we're taking the
 difference between the means (average values) of each "mass" of
 points. You can think of it as drawing a line from the center of the
 "non-nullable" cluster to the center of the "nullable" cluster.
+
+![A diagram showing two blobs of points, with a line connecting their
+ centers](images/mass-means.svg)\
 
 It might be surprising that this works, given that we know there are
 better ways to fit linear functions, like logistic regression. And in

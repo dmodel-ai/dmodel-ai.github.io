@@ -150,7 +150,7 @@ a whole new class of people who consider themselves non-technical.</p>
 src="https://github.blog/wp-content/uploads/2022/09/unexpectedcopilot3.gif?w=1024&amp;resize=1024%2C576"
 alt="A gif of github copilot completing a phone number validating function as the user types" /><br />
 </p>
-<p>But there are still many unanswered questions about this capability!
+<p>But there are still many unanswered questions about this capability.
 How often, and in what situations, can LLM’s write correct code entirely
 on their own? And, maybe more importantly, but harder to answer: Do
 LLM’s “understand” the code they are writing?</p>
@@ -218,16 +218,18 @@ You’ve reached some point where you need to do something with a variable
 called <code>num</code>. Maybe you’re building a list of numbers called
 <code>positive_nums</code>. How do you proceed?</p>
 <p>The answer often depends on the context in which you’re working. If
-<code>num</code> and <code>positive_nums</code> are the things in scope,
-then you might guess that you should write the lines:</p>
+<code>num</code> and <code>positive_nums</code> are the only things in
+scope, then you might guess that you should write the lines:</p>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> num <span class="op">&gt;</span> <span class="dv">0</span>:</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  positive_nums.append(num)</span></code></pre></div>
 <p>And if <code>num</code> is always a concrete number, as its name
 would suggest, then this is probably the correct code. But variable
 names don’t alway convey everything important about them, and it might
-be the case that <code>num</code> could be None. If so, you’ll instead
-want to write:</p>
+be the case that <code>num</code> could be None. If that happened in the
+above code, you would get a runtime type error because you can’t check
+if <code>None</code> is greater than zero. So, you would instead want to
+write:</p>
 <div class="sourceCode" id="cb2"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> num <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> num <span class="op">&gt;</span> <span class="dv">0</span>:</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  positive_nums.append(num)</span></code></pre></div>
@@ -255,7 +257,7 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a hr
 <p>You could instead just ask your LLM assistant to complete the line.
 But how does your assistant know if <code>num</code> is nullable? Our
 experiments show that, after analyzing millions of programs, LLMs learn
-to approximate the same typing rules,</p>
+to approximate the same typing rules.</p>
 <p>If we ask an LLM early in it’s pre-training process to complete the
 program above, it produces:</p>
 <p><img src="images/robot-brain-blue.png" class="codelogo bare" /><br />
@@ -326,10 +328,12 @@ nullable at those locations, so we can instead look for an “internal”
 measurement of the models understanding.</p>
 <p>We do so by looking at the activations of the model, meaning the
 values of each perceptron in the hidden layers. Together, these values
-give the entire internal state of the model at each token, and they can
-tell us what the model is “thinking” when processing that token. With
-the right tests, we can tell if the model is “thinking” that the current
-token is an optional variable, or a non-optional variable.</p>
+give the entire internal state of the model at each piece of text (what
+we call a “token”, which could be a word, part of a word, or a symbol).
+And they can tell us what the model is “thinking” when processing that
+token. With the right tests, we can tell if the model is “thinking” that
+the current token is an optional variable, or a non-optional
+variable.</p>
 <p>By the end of this post, we’ll be able to build a probe that uses the
 models activations to determine whether the model thinks a variable read
 corresponds to a nullable variable, and show that internal knowledge
@@ -604,13 +608,13 @@ state when it’s thinking about non-nullable variables. This gives us a
 “direction” pointing from non-nullable to nullable in our space, which
 we can use to project any new state onto, to determine how “nullable” it
 is.</p>
-<p><img src="images/mass-means.svg"
-alt="A diagram showing two blobs of points, with a line connecting their centers" /><br />
-</p>
 <p>This technique is called “mass means shift”, because we’re taking the
 difference between the means (average values) of each “mass” of points.
 You can think of it as drawing a line from the center of the
 “non-nullable” cluster to the center of the “nullable” cluster.</p>
+<p><img src="images/mass-means.svg"
+alt="A diagram showing two blobs of points, with a line connecting their centers" /><br />
+</p>
 <p>It might be surprising that this works, given that we know there are
 better ways to fit linear functions, like logistic regression. And in
 fact, we can easily see scenarios where this returns a direction that

@@ -9,11 +9,10 @@ linkReferences: true
 ![A line drawing of a robot with a brain on their antenna](images/robot-brain.png){.smallimage}\
 
 The last five years have shown us that large language models, like
-ChatGPT, Claude, and DeepSeek, can write code in many
-domains, to huge excitement: many claim to be using these models to write
-entire web servers and apps from scratch. These
-tools have opened up programming to a whole new class of people who consider
-themselves non-technical.
+ChatGPT, Claude, and DeepSeek, can write code in many domains, to huge
+excitement: many claim to be using these models to write entire web
+servers and apps from scratch. These tools have opened up programming
+to a whole new class of people who consider themselves non-technical.
 
 ![A gif of github copilot completing a phone number validating
  function as the user

@@ -1,6 +1,5 @@
 input-file:
   - blog_post.md
-  - appendicies.md
 number-sections: true
 standalone: true
 output-file: post.pdf

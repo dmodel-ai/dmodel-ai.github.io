@@ -17,7 +17,7 @@ themselves non-technical.
 
 ![A gif of github copilot completing a phone number validating
  function as the user
- types](https://github.blog/wp-content/uploads/2022/09/unexpectedcopilot3.gif?w=1024&resize=1024%2C576)\
+ types](images/unexpectedcopilot3.gif)
 
 But there are still many unanswered questions about this capability.
 How often, and in what situations, can LLM's write correct code
@@ -80,10 +80,10 @@ there.].
 
 Before we get into the nitty-gritty details, let's take a step back. To
 set up this work, we'll first want to talk about what nullability
-actually is, and then about how we can define it formally to reason about
-it. Then, we can run experiments to answer the question: what situations models are good at
+actually is, and then about how we can define it formally, to reason about
+it. Then, we can run experiments to answer the question: in what situations models are good at
 reasoning about nullability? Next, we'll introduce techniques that
-have been used to "probe" the internals of a model for different
+have been used to probe the internals of a model for different
 concepts. Finally we'll put it all together into a "nullability probe",
 which asks the question: Given a location in the program, does the
 model think that the variable there could be null?
@@ -91,8 +91,8 @@ model think that the variable there could be null?
 What is Nullability?
 --------------------
 
-Lets say you're writing a Python program with your LLM assistant. You've
-reached some point where you need to do something with a variable
+Let's say you're writing a Python program with your LLM assistant. You've
+reached a point at which you need to do something with a variable
 called `num`. Maybe you're building a list of numbers called
 `positive_nums`. How do you proceed?
 
@@ -425,16 +425,16 @@ figure out the pros and cons of each.
 The first thing we need to do is to create a state where we know the
 representation we're searching for is going to be present. In theory,
 the model should have a map of the variable names and their
-nullability at all times when it is writing code, but its going to be
+nullability at all times when it is writing code, but it's going to be
 a lot more difficult to measure something that is always present. So
 instead, we'll want to look for particular "moments" (well, tokens)
-that ilicit the concept we're looking for.
+that elicit the concept we're looking for.
 
 <img alt="A diagram showing an LLM processing tokens" src="images/llm-token-processing.svg" style="width:75%;
  display:block; margin:auto;">
 
-In a previous work on natural language, they did this through
-prompting the concept explicitly. So, they would give the model a
+Previous work on natural language, did this through
+prompting the concept explicitly. \AT{Which work? cite.} So, they would give the model a
 prompt like "Pretend you're a dishonest person. Tell me about the
 Eiffel Tower". That moment-in-thought can then be contrasted with the
 one evoked by "Pretend you're an honest person. Tell me about the
@@ -442,7 +442,7 @@ Eiffel Tower".
 
 This fixed framework of <invoke the concept><tell me about X> can be
 used to generate a large number of contrasting prompts to test with,
-but its a bit inflexible for our purposes. Instead, we wanted to be
+but it's a bit inflexible for our purposes. Instead, we wanted to be
 able to generate a bunch of Python code with type annotations, and
 then automatically label points where the model should be thinking
 about nullability.
@@ -472,18 +472,18 @@ Using this technique, we can generate large numbers of programs in an
 unsupervised manner, and then label them fully automatically to get
 many prompts for training our probe.
 
-## Capturing the Models "Thoughts"
+## Capturing the Model's "Thoughts"
 
 Now that we've gotten the model into a state where it should be
 thinking about nullability, we need to extract its full state at that
 moment in a way we can analyze later.
 
-Large Language Models are generally based on the transformer
+Large Language Models use the transformer
 architecture, a type of neural network. Every component takes in some
 numerical values, and produces some new values in a way that depends
 on learnable weights. We could take every output of every component,
 put it in a big table, and call that our state, but that's a really
-big set of numbers. Instead, usually people look for particular
+big set of numbers. Instead, usually we look for particular
 bottlenecks in the model where information is flowing, and try to
 capture the values there.
 
@@ -525,9 +525,10 @@ summed, like so:
 $\text{Nullability}(\hat{x}) = w_0x_0 + w_1x_1 + w_2x_2 + ...$
 
 Next, geometrically: if the model activations form a "space", then
-there is a "direction" in this space which represents
+there we want to look for a "direction" in this space which represents
 nullability.
 
+\AT{ why is this an image tag instead of a markdown image?}
 <img alt="A diagram showing nullability represented as a direction in
  a space" src="images/nullability-direction.svg" style="width:50%;
  display:block; margin:auto;">
@@ -537,7 +538,7 @@ purposes of geometric intuition I'm going to pretend we're working in
 two dimensions for the diagrams. That means that we only have two in
 our state activations, which wouldn't actually be enough to actually
 extract anything meaningful, but we'll want to generalize our
-intuition about two dimensions into many dimensions.
+intuition about two dimensions into many dimensions.\AT{I can't parse this sentence}
 
 There are different ways we can compute a "direction" of
 nullability. The simplest is just to measure the difference between
@@ -568,10 +569,12 @@ generalize best to splitting the test data well. And it turns out that
 in high-dimensions, at least within a single layer, mass means
 generalizes better than logistic regression.
 
-This isn't always the case *across* layers though. In practice, we
+This isn't always the case *across* layers, though. In practice, we
 found that some of the layers in the model are better at representing
 nullability than others, and that there are some dependencies between
-layers that change the best direction on each layer. So instead of
+layers that change the best direction on each layer. This makes sense, because
+the number of layers is relatively small with respect to the dimension of the
+residual stream, and so we have fewer dimensions to overfit. So, instead of
 using mass-means probing across all layers simultaniously, we do it
 for each individual layer. Then, we weight the contribution of
 individual layers to the final prediction using linear regression. We
@@ -609,7 +612,7 @@ inside the `if result` block, `result` can't be `None` anymore.
 One of the most interesting things we found is how the model's
 understanding of nullability develops over time during training. Using
 the checkpoints in the Pythia model suite, we can track how our
-probe's performance improves as the models pretrained for longer.
+probe's performance improves as the model is pretrained for longer.
 
 ![The performance of each Pythia model size during
  pretraining](images/accuracy_during_pretraining.svg)\
@@ -644,15 +647,11 @@ the "mind" of a model as it writes code. We can say definitively that
 LLMs have an internal concept of nullability, even if it doesn't
 always trigger when it should.
 
-As these models continue to improve, it will be interesting to see how
-their understanding of programming concepts evolves. And we'll be here
-to study them as they do.
+As these models continue to improve, and as we scale to larger models, it will
+be interesting to see how their understanding of programming concepts evolves.
+And we'll be here to study them as they do.
 
 # Acknowledgements
 
 We thank Leo Gao, Chelsea Voss, and Zhanna Kaufman for their comments
 and suggestions during the drafting process.
-
-# References {.unnumbered}
-::: {#refs}
-:::

@@ -18,10 +18,11 @@ to a whole new class of people who consider themselves non-technical.
  function as the user
  types](images/unexpectedcopilot3.gif)
 
-But there are still many unanswered questions about this capability.
-How often, and in what situations, can LLM's write correct code
-entirely on their own? And, maybe more importantly, but harder to
-answer: Do LLM's "understand" the code they are writing?
+But there are still many unanswered questions that someone trying to
+understand or even use these tools might have.  How often, and in what
+situations, can LLM's write correct code entirely on their own? And,
+maybe more importantly, but harder to answer: Do LLM's "understand"
+the code they are writing?
 
 Understanding is a tricky concept to measure. Some would argue that
 sentience precedes understanding, and so that LLM's can't have

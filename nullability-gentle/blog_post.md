@@ -417,8 +417,7 @@ point. Finally, we'll show a few different methods for searching for
 the representation of nullability in these internal activations, and
 figure out the pros and cons of each.
 
-<img alt="A brain in a jar hooked up to wires" src="images/brain-jar.png" style="width:50%;
- display:block; margin:auto;">
+![A brain in a jar hooked up to wires](images/brain-jar.png){.centered width=50%}\
 
 ## Getting the Model to Think About Nullability
 
@@ -430,8 +429,7 @@ a lot more difficult to measure something that is always present. So
 instead, we'll want to look for particular "moments" (well, tokens)
 that elicit the concept we're looking for.
 
-<img alt="A diagram showing an LLM processing tokens" src="images/llm-token-processing.svg" style="width:75%;
- display:block; margin:auto;">
+![A diagram showing an LLM processing tokens](images/llm-token-processing.svg){.centered width=75%}\
 
 Previous work on natural language, did this through
 prompting the concept explicitly. \AT{Which work? cite.} So, they would give the model a
@@ -494,8 +492,7 @@ every layer. But if you don't want to sweat the details, you can just
 think of it as a numerical snapshot of the model, organized in terms
 of snapshots of each layer.
 
-<img alt="A diagram of the residual stream of a transformer being measured after each layer" src="images/llm-residual-stream.svg" style="width:75%;
- display:block; margin:auto;">
+![A diagram of the residual stream of a transformer being measured after each layer]{.centered width=75%}\
 
 ## Analyzing the Data and Building the Probe
 
@@ -528,10 +525,7 @@ Next, geometrically: if the model activations form a "space", then
 there we want to look for a "direction" in this space which represents
 nullability.
 
-\AT{ why is this an image tag instead of a markdown image?}
-<img alt="A diagram showing nullability represented as a direction in
- a space" src="images/nullability-direction.png" style="width:50%;
- display:block; margin:auto;">
+![A diagram showing nullability represented as a direction in space](images/nullability-direction.png){.centered width=50%}\
 
 High dimensional spaces can be really hard to visualize, so for the
 purposes of geometric intuition I'm going to pretend we're working in

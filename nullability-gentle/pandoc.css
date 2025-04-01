@@ -54,6 +54,10 @@ img {
     width: 100%;
   max-width: 100%;
 }
+img.centered {
+    display: block;
+    margin: auto;
+}
 svg {
   height: auto;
   max-width: 100%;

@@ -482,8 +482,9 @@ extract the internal activations of the model at this point. Finally,
 we’ll show a few different methods for searching for the representation
 of nullability in these internal activations, and figure out the pros
 and cons of each.</p>
-<p><img alt="A brain in a jar hooked up to wires" src="images/brain-jar.png" style="width:50%;
- display:block; margin:auto;"></p>
+<p><img src="images/brain-jar.png" class="centered" style="width:50.0%"
+alt="A brain in a jar hooked up to wires" /><br />
+</p>
 <h2 id="getting-the-model-to-think-about-nullability">Getting the Model
 to Think About Nullability</h2>
 <p>The first thing we need to do is to create a state where we know the
@@ -493,8 +494,10 @@ at all times when it is writing code, but it’s going to be a lot more
 difficult to measure something that is always present. So instead, we’ll
 want to look for particular “moments” (well, tokens) that elicit the
 concept we’re looking for.</p>
-<p><img alt="A diagram showing an LLM processing tokens" src="images/llm-token-processing.svg" style="width:75%;
- display:block; margin:auto;"></p>
+<p><img src="images/llm-token-processing.svg" class="centered"
+style="width:75.0%"
+alt="A diagram showing an LLM processing tokens" /><br />
+</p>
 <p>Previous work on natural language, did this through prompting the
 concept explicitly. <span class="aside AT">AT: Which work? cite.</span>
 So, they would give the model a prompt like “Pretend you’re a dishonest
@@ -549,8 +552,9 @@ captures the contents of a part of the model called the “residual
 stream” after every layer. But if you don’t want to sweat the details,
 you can just think of it as a numerical snapshot of the model, organized
 in terms of snapshots of each layer.</p>
-<p><img alt="A diagram of the residual stream of a transformer being measured after each layer" src="images/llm-residual-stream.svg" style="width:75%;
- display:block; margin:auto;"></p>
+<p>![A diagram of the residual stream of a transformer being measured
+after each layer]<br />
+</p>
 <h2 id="analyzing-the-data-and-building-the-probe">Analyzing the Data
 and Building the Probe</h2>
 <p>Now that we have these model snapshots, labeled with either
@@ -576,10 +580,10 @@ w_1x_1 + w_2x_2 + ...</span></p>
 <p>Next, geometrically: if the model activations form a “space”, then
 there we want to look for a “direction” in this space which represents
 nullability.</p>
-<span class="aside AT">AT:  why is this an image tag instead of a markdown image?</span>
-<p><img alt="A diagram showing nullability represented as a direction in
- a space" src="images/nullability-direction.png" style="width:50%;
- display:block; margin:auto;"></p>
+<p><img src="images/nullability-direction.png" class="centered"
+style="width:50.0%"
+alt="A diagram showing nullability represented as a direction in space" /><br />
+</p>
 <p>High dimensional spaces can be really hard to visualize, so for the
 purposes of geometric intuition I’m going to pretend we’re working in
 two dimensions for the diagrams. That means that we only have two in our

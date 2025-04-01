@@ -431,12 +431,12 @@ that elicit the concept we're looking for.
 
 ![A diagram showing an LLM processing tokens](images/llm-token-processing.svg){.centered width=75%}\
 
-Previous work on natural language, did this through
-prompting the concept explicitly. \AT{Which work? cite.} So, they would give the model a
-prompt like "Pretend you're a dishonest person. Tell me about the
-Eiffel Tower". That moment-in-thought can then be contrasted with the
-one evoked by "Pretend you're an honest person. Tell me about the
-Eiffel Tower".
+Previous work on natural language [@zou25], did this through prompting
+the concept explicitly. So, they would give the model a prompt like
+"Pretend you're a dishonest person. Tell me about the Eiffel
+Tower". That moment-in-thought can then be contrasted with the one
+evoked by "Pretend you're an honest person. Tell me about the Eiffel
+Tower".
 
 This fixed framework of <invoke the concept><tell me about X> can be
 used to generate a large number of contrasting prompts to test with,

@@ -86,7 +86,27 @@
     code span.va { color: #19177c; } /* Variable */
     code span.vs { color: #4070a0; } /* VerbatimString */
     code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-  </style>
+    /* CSS for citations */
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+      margin-bottom: 0em;
+    }
+    .hanging-indent div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
+    }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
+    }
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
+    }  </style>
   <link rel="stylesheet" href="pandoc.css" />
   <link rel="stylesheet" href="sidenote.css" />
   <link rel="stylesheet" href="highlights-box.css" />
@@ -498,12 +518,14 @@ concept we’re looking for.</p>
 style="width:75.0%"
 alt="A diagram showing an LLM processing tokens" /><br />
 </p>
-<p>Previous work on natural language, did this through prompting the
-concept explicitly. <span class="aside AT">AT: Which work? cite.</span>
-So, they would give the model a prompt like “Pretend you’re a dishonest
-person. Tell me about the Eiffel Tower”. That moment-in-thought can then
-be contrasted with the one evoked by “Pretend you’re an honest person.
-Tell me about the Eiffel Tower”.</p>
+<p>Previous work on natural language <span class="citation"
+data-cites="zou25">(Zou et al. 2025)</span>, did this through prompting
+the concept explicitly.
+<span class="aside AT">AT: Which work? cite.</span> So, they would give
+the model a prompt like “Pretend you’re a dishonest person. Tell me
+about the Eiffel Tower”. That moment-in-thought can then be contrasted
+with the one evoked by “Pretend you’re an honest person. Tell me about
+the Eiffel Tower”.</p>
 <p>This fixed framework of <invoke the concept><tell me about X> can be
 used to generate a large number of contrasting prompts to test with, but
 it’s a bit inflexible for our purposes. Instead, we wanted to be able to
@@ -690,6 +712,16 @@ do.</p>
 <h1 id="acknowledgements">Acknowledgements</h1>
 <p>We thank Leo Gao, Chelsea Voss, and Zhanna Kaufman for their comments
 and suggestions during the drafting process.</p>
+<div id="refs" class="references csl-bib-body hanging-indent"
+data-entry-spacing="0" role="list">
+<div id="ref-zou25" class="csl-entry" role="listitem">
+Zou, Andy, Long Phan, Sarah Chen, James Campbell, Phillip Guo, Richard
+Ren, Alexander Pan, et al. 2025. <span>“Representation
+<span>Engineering</span>: <span>A Top-Down Approach</span> to <span>AI
+Transparency</span>.”</span> arXiv. <a
+href="https://doi.org/10.48550/arXiv.2310.01405">https://doi.org/10.48550/arXiv.2310.01405</a>.
+</div>
+</div>
 <section id="footnotes" class="footnotes footnotes-end-of-document"
 role="doc-endnotes">
 <hr />

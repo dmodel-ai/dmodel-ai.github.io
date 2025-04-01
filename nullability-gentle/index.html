@@ -520,12 +520,10 @@ alt="A diagram showing an LLM processing tokens" /><br />
 </p>
 <p>Previous work on natural language <span class="citation"
 data-cites="zou25">(Zou et al. 2025)</span>, did this through prompting
-the concept explicitly.
-<span class="aside AT">AT: Which work? cite.</span> So, they would give
-the model a prompt like “Pretend you’re a dishonest person. Tell me
-about the Eiffel Tower”. That moment-in-thought can then be contrasted
-with the one evoked by “Pretend you’re an honest person. Tell me about
-the Eiffel Tower”.</p>
+the concept explicitly. So, they would give the model a prompt like
+“Pretend you’re a dishonest person. Tell me about the Eiffel Tower”.
+That moment-in-thought can then be contrasted with the one evoked by
+“Pretend you’re an honest person. Tell me about the Eiffel Tower”.</p>
 <p>This fixed framework of <invoke the concept><tell me about X> can be
 used to generate a large number of contrasting prompts to test with, but
 it’s a bit inflexible for our purposes. Instead, we wanted to be able to
@@ -601,18 +599,12 @@ summed, like so:</p>
 w_1x_1 + w_2x_2 + ...</span></p>
 <p>Next, geometrically: if the model activations form a “space”, then
 there we want to look for a “direction” in this space which represents
-nullability.</p>
+nullability.<a href="#fn2" class="footnote-ref" id="fnref2"
+role="doc-noteref"><sup>2</sup></a></p>
 <p><img src="images/nullability-direction.png" class="centered"
 style="width:50.0%"
 alt="A diagram showing nullability represented as a direction in space" /><br />
 </p>
-<p>High dimensional spaces can be really hard to visualize, so for the
-purposes of geometric intuition I’m going to pretend we’re working in
-two dimensions for the diagrams. That means that we only have two in our
-state activations, which wouldn’t actually be enough to actually extract
-anything meaningful, but we’ll want to generalize our intuition about
-two dimensions into many
-dimensions.<span class="aside AT">AT: I can't parse this sentence</span></p>
 <p>There are different ways we can compute a “direction” of nullability.
 The simplest is just to measure the difference between the average state
 when the model is thinking about nullable variables, and the average
@@ -662,8 +654,8 @@ alt="A diagram showing a simple program, and the probe’s nullability predictio
 annotations. Whenever a variable is read in the code (what we call a
 “variable load”), we’ve highlighted it in either green or red. Green
 means our probe detected that the model thinks this variable is not
-nullable, while red means the model thinks it is nullable.<a href="#fn2"
-class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+nullable, while red means the model thinks it is nullable.<a href="#fn3"
+class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
 <p>The most interesting case is the variable <code>result</code>. When
 it first appears in the <code>if</code> statement, it’s highlighted in
 red because it comes from <code>find_value</code>, which returns an
@@ -730,9 +722,13 @@ role="doc-endnotes">
 our <a href="../nullability/index.html">technical post</a> on the same
 work. If you’re looking for more numbers and science, look there.<a
 href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>We can also query our probe at non-variable tokens, but
+<li id="fn2"><p>High dimensional spaces can be really hard to visualize,
+so for the purposes of geometric intuition I’m going to pretend we’re
+working in two dimensions for the diagrams.<a href="#fnref2"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>We can also query our probe at non-variable tokens, but
 its not clear what the output would mean, since we only train on and
-label variables.<a href="#fnref2" class="footnote-back"
+label variables.<a href="#fnref3" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>

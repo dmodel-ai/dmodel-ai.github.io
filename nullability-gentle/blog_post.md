@@ -530,7 +530,7 @@ nullability.
 
 \AT{ why is this an image tag instead of a markdown image?}
 <img alt="A diagram showing nullability represented as a direction in
- a space" src="images/nullability-direction.svg" style="width:50%;
+ a space" src="images/nullability-direction.png" style="width:50%;
  display:block; margin:auto;">
 
 High dimensional spaces can be really hard to visualize, so for the

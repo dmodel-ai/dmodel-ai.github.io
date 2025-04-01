@@ -523,16 +523,11 @@ $\text{Nullability}(\hat{x}) = w_0x_0 + w_1x_1 + w_2x_2 + ...$
 
 Next, geometrically: if the model activations form a "space", then
 there we want to look for a "direction" in this space which represents
-nullability.
+nullability.^[High dimensional spaces can be really hard to visualize,
+so for the purposes of geometric intuition I'm going to pretend we're
+working in two dimensions for the diagrams.]
 
 ![A diagram showing nullability represented as a direction in space](images/nullability-direction.png){.centered width=50%}\
-
-High dimensional spaces can be really hard to visualize, so for the
-purposes of geometric intuition I'm going to pretend we're working in
-two dimensions for the diagrams. That means that we only have two in
-our state activations, which wouldn't actually be enough to actually
-extract anything meaningful, but we'll want to generalize our
-intuition about two dimensions into many dimensions.\AT{I can't parse this sentence}
 
 There are different ways we can compute a "direction" of
 nullability. The simplest is just to measure the difference between

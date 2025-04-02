@@ -1,0 +1,13 @@
+# Vim temporary files
+*.swp
+*.swo
+*~
+.netrwhist
+*.un~
+
+# VSCode files
+.vscode/
+.vscode-test/
+*.code-workspace
+.history/
+

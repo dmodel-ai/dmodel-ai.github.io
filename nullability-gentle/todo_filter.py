@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import panflute as pf
 
 def latex_todo_to_html(elem, doc):

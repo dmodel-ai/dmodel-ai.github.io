@@ -113,7 +113,7 @@
   <script src="sidenotes.js"></script>
   <script src="highlight_code_portions.js"></script>
   <script defer=""
-  src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
+  src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
   <script>document.addEventListener("DOMContentLoaded", function () {
  var mathElements = document.getElementsByClassName("math");
  var macros = [];
@@ -129,7 +129,7 @@
 }}});
   </script>
   <link rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css" />
+  href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css" />
 </head>
 <body>
 <header id="title-block-header">
@@ -154,29 +154,29 @@ alt="A gif of github copilot completing a phone number validating function as th
 phone number validating function as the user types</figcaption>
 </figure>
 <p>But there are still many unanswered questions that someone trying to
-understand or even use these tools might have. How often, and in what
-situations, can LLM’s write correct code entirely on their own? And,
-maybe more importantly, but harder to answer: Do LLM’s “understand” the
-code they are writing?</p>
+understand or even use these tools might have. For example, how often,
+and in what situations, can LLMs write correct code entirely on their
+own? And, maybe more importantly, but harder to answer: Do LLMs
+“understand” the code they are writing?</p>
 <p>Understanding is a tricky concept to measure. Some would argue that
-sentience precedes understanding, and so that LLM’s can’t have
+sentience precedes understanding, and so that LLMs can’t have
 understanding, because they aren’t biological organisms with sentience.
 But they certainly have something akin to “thought processes”: a series
 of internal representations that determine their final outputs.
 Recently, it’s become possible to study these processes more deeply,
 measuring internal “beliefs” of the model as they think. This gives us a
-powerful tool for determining what kinds of problems LLM’s falter on,
+powerful tool for determining what kinds of problems LLMs falter on,
 when they’ll succceed, and when they are “thinking through” problems
 more fully versus just guessing at a solution.</p>
-<p>So far, these techniques for measuring internal model state have been
-mostly applied to chatbots writing text for human consumption, what we
-call “natural language” (to be contrasted with “programming language”s).
-This makes sense, since some of the most critical LLM tasks involve
-chatting with a user, and some of the most interesting concepts to
-measure, such as honesty or power-seeking, apply most readily to these
-conversations. But it’s hard to say quantitative or precise things about
-natural language concepts, so our ability to rigorously study internal
-representations is limited.</p>
+<p>So far, these techniques for measuring internal model state have
+mostly been applied to chatbots writing text for human consumption,
+using what we call “natural language” (to be contrasted with
+“programming language”s). This makes sense, since some of the most
+critical LLM tasks involve chatting with a user, and some of the most
+interesting concepts to measure, such as honesty or power-seeking, apply
+most readily to these conversations. But it’s hard to say quantitative
+or precise things about natural language concepts, so our ability to
+rigorously study internal representations is limited.</p>
 <figure>
 <img src="images/zou.png"
 alt="A diagram from Zou et al showing probes that read hallucination, honesty, morality, and power-seeking from the outputs of a chatbot." />
@@ -186,22 +186,24 @@ outputs of a chatbot.</figcaption>
 </figure>
 <p>Code, on the other hand, is another matter. Humans have been studying
 properties of code for a long time, and there are many abstract
-properties that can now be determined using static analysis. If we pick
-the right properties, we don’t need to worry about our ability to label
-data; static analysis can do that for us, and so we can easily scale up
-and train on thousands of examples generated from scratch.</p>
+properties of a given program that can now be determined using static
+analysis. If we pick the right properties, we don’t need to worry about
+our ability to label data— static analysis can do that for us, and so we
+can easily scale up and train on thousands of examples generated from
+scratch.</p>
 <p>In that spirit, we wanted to start with a simple property that comes
-up in nearly every programming language, nullability. Nullable values
-are represented differently across languages; as null pointers in C or
+up in nearly every programming language: nullability. Nullable values
+are represented differently across languages— as null pointers in C or
 C++, with explicit Option types in Rust, and with special nil or None
 values in dynamic languages like Javascript, Lisp, or Python. In every
 case, understanding where values can be nullable is necessary for
 writing even basic code, and misunderstanding where they are nullable
 can often be a source of bugs.</p>
-<p>Do our models understand when a value is nullable? They must, to be
-able to write code that deals with nullable values, but we haven’t known
-what form this knowledge takes, what situations are likely to confuse
-the model. Until now<a href="#fn1" class="footnote-ref" id="fnref1"
+<p>Do our models understand when a value is nullable? They must, in
+order to be able to write code that deals with nullable values, but we
+haven’t known what form this understanding takes, or what situations are
+likely to confuse the model, until now<a href="#fn1"
+class="footnote-ref" id="fnref1"
 role="doc-noteref"><sup>1</sup></a>.</p>
 <p><img src="images/robot-glow.png"
 alt="A robot with glowing eyes" /><br />
@@ -211,11 +213,12 @@ alt="A robot with glowing eyes" /><br />
 To set up this work, we’ll first want to talk about what nullability
 actually is, and then about how we can define it formally, to reason
 about it. Then, we can run experiments to answer the question: in what
-situations models are good at reasoning about nullability? Next, we’ll
+situations are models good at reasoning about nullability? Next, we’ll
 introduce techniques that have been used to probe the internals of a
 model for different concepts. Finally we’ll put it all together into a
-“nullability probe”, which asks the question: Given a location in the
-program, does the model think that the variable there could be null?</p>
+“nullability probe”, a tool for answering the question: Given a location
+in the program, does the model think that the variable there could be
+null?</p>
 <h2 id="what-is-nullability">What is Nullability?</h2>
 <p>Let’s say you’re writing a Python program with your LLM assistant.
 You’ve reached a point at which you need to do something with a variable
@@ -258,11 +261,11 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a hr
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    positive_nums: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> num...</span></code></pre></div>
 <p>then you know you <em>do</em> need a None check.</p>
-<p>You could instead just ask your LLM assistant to complete the line.
-But how does your assistant know if <code>num</code> is nullable? Our
+<p>Now, suppose you asked your LLM assistant to complete the line. How
+does your assistant know if <code>num</code> is nullable? Our
 experiments show that, after analyzing millions of programs, LLMs learn
 to approximate the same typing rules.</p>
-<p>If we ask an LLM early in it’s pre-training process to complete the
+<p>If we ask an LLM early in its pre-training process to complete the
 program above, it produces:</p>
 <p><img src="images/robot-brain-blue.png" class="codelogo bare" /><br />
 </p>
@@ -324,12 +327,12 @@ more parameters to learn them at all.</p>
 <h2 id="internal-vs.-external-measurement">Internal vs. External
 Measurement</h2>
 <p>We can measure whether LLMs understand these rules by just asking for
-completions, what we call an “external” measurement of the models
+completions— what we call an “external” measurement of a model’s
 understanding. But there are many places where variables appear where a
 completion won’t tell you what type the model thinks the variable has.
 We would still like to know whether the model thinks these variables are
 nullable at those locations, so we can instead look for an “internal”
-measurement of the models understanding.</p>
+measurement of the model’s understanding.</p>
 <p>We do so by looking at the activations of the model, meaning the
 values of each perceptron in the hidden layers. Together, these values
 give the entire internal state of the model at each piece of text (what
@@ -338,8 +341,8 @@ And they can tell us what the model is “thinking” when processing that
 token. With the right tests, we can tell if the model is “thinking” that
 the current token is an optional variable, or a non-optional
 variable.</p>
-<p>By the end of this post, we’ll be able to build a probe that uses the
-models activations to determine whether the model thinks a variable read
+<p>By the end of this post, we’ll be able to build a probe that uses a
+model’s activations to determine whether it thinks a variable read
 corresponds to a nullable variable, and show that internal knowledge
 like so:</p>
 <p><img src="images/reading_diagram.svg" id="fig:reading1"
@@ -572,21 +575,22 @@ captures the contents of a part of the model called the “residual
 stream” after every layer. But if you don’t want to sweat the details,
 you can just think of it as a numerical snapshot of the model, organized
 in terms of snapshots of each layer.</p>
-<p>![A diagram of the residual stream of a transformer being measured
-after each layer]<br />
+<p><img src="images/llm-residual-stream.svg" class="centered"
+style="width:75.0%"
+alt="A diagram of the residual stream of a transformer being measured after each layer" /><br />
 </p>
 <h2 id="analyzing-the-data-and-building-the-probe">Analyzing the Data
 and Building the Probe</h2>
 <p>Now that we have these model snapshots, labeled with either
 “nullable” or “non-nullable”, we can start to build a probe. The goal of
-the probe is to be able to tell us at any given point, whether the model
-thinks the token it just generated is more likely to be a nullable
+the probe is to be able to tell us, at any given point, whether the
+model thinks the token it just generated is more likely to be a nullable
 variable or a non-nullable variable.</p>
 <p>There’s a lot of flexibility in what form this probe could take. In
-theory, you could use anything to look at the models activations and
+theory, you could use anything to look at the model’s activations and
 make a prediction, even a neural network, or another transformer model.
 You could even say your “probe” is a static analysis which computes
-nullability from the programs syntax, as represented in the model!</p>
+nullability from the program’s syntax, as represented in the model!</p>
 <p>We want to make sure we’re not doing that, and are only extracting
 the most “plain” represenation of nullability that we can from the
 model. So we’re going to make the assumption that nullability is
@@ -637,7 +641,7 @@ dependencies between layers that change the best direction on each
 layer. This makes sense, because the number of layers is relatively
 small with respect to the dimension of the residual stream, and so we
 have fewer dimensions to overfit. So, instead of using mass-means
-probing across all layers simultaniously, we do it for each individual
+probing across all layers simultaneously, we do it for each individual
 layer. Then, we weight the contribution of individual layers to the
 final prediction using linear regression. We found this gave us better
 results for larger models, though for smaller models the simpler mass
@@ -658,10 +662,10 @@ nullable, while red means the model thinks it is nullable.<a href="#fn3"
 class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
 <p>The most interesting case is the variable <code>result</code>. When
 it first appears in the <code>if</code> statement, it’s highlighted in
-red because it comes from <code>find_value</code>, which returns an
+green because it comes from <code>find_value</code>, which returns an
 <code>Optional[int]</code>. But when it appears again in the
 <code>print</code> statement inside the <code>if</code> block, it’s
-highlighted in green! This shows that the model understands that inside
+highlighted in red! This shows that the model understands that inside
 the <code>if result</code> block, <code>result</code> can’t be
 <code>None</code> anymore.</p>
 <h2 id="how-does-understanding-develop-during-training">How Does
@@ -689,9 +693,9 @@ alt="A robot thinking deeply about code" /><br />
 <hr />
 <h2 id="whats-next">What’s Next?</h2>
 <p>This is just a first step in understanding the internal thought
-processes of LLM’s as they think about code. There are still richer
+processes of LLMs as they think about code. There are still richer
 types, program invariants, and all sorts of high-level concepts that are
-necessary for writing working code, but extracting them from LLM’s might
+necessary for writing working code, but extracting them from LLMs might
 not be so easy.</p>
 <p>But we’ve already shown several important things about looking into
 the “mind” of a model as it writes code. We can say definitively that
@@ -728,7 +732,7 @@ so for the purposes of geometric intuition I’m going to pretend we’re
 working in two dimensions for the diagrams.<a href="#fnref2"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn3"><p>We can also query our probe at non-variable tokens, but
-its not clear what the output would mean, since we only train on and
+it’s not clear what the output would mean, since we only train on and
 label variables.<a href="#fnref3" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
 </ol>

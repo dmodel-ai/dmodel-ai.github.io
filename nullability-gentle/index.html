@@ -192,17 +192,18 @@ our ability to label data— static analysis can do that for us, and so we
 can easily scale up and train on thousands of examples generated from
 scratch.</p>
 <p>In that spirit, we wanted to start with a simple property that comes
-up in nearly every programming language: nullability. Nullable values
-are represented differently across languages— as null pointers in C or
-C++, with explicit Option types in Rust, and with special nil or None
-values in dynamic languages like Javascript, Lisp, or Python. In every
-case, understanding where values can be nullable is necessary for
-writing even basic code, and misunderstanding where they are nullable
-can often be a source of bugs.</p>
-<p>Do our models understand when a value is nullable? They must, in
-order to be able to write code that deals with nullable values, but we
-haven’t known what form this understanding takes, or what situations are
-likely to confuse the model, until now<a href="#fn1"
+up in nearly every programming language: nullability. A variable is said
+to be of nullable type when it can possibly take on a null value. Null
+values are represented differently across languages— as null pointers in
+C or C++, with explicit Option types in Rust, and with special nil or
+None values in dynamic languages like Javascript, Lisp, or Python. In
+every case, understanding where values can be null is necessary for
+writing even basic code, and misunderstanding where they are null can
+often be a source of bugs.</p>
+<p>Do our models understand when a variable is of nullable type? They
+must, in order to be able to write code that deals with null values, but
+we haven’t known what form this understanding takes, or what situations
+are likely to confuse the model, until now<a href="#fn1"
 class="footnote-ref" id="fnref1"
 role="doc-noteref"><sup>1</sup></a>.</p>
 <p><img src="images/robot-glow.png"
@@ -210,16 +211,16 @@ alt="A robot with glowing eyes" /><br />
 </p>
 <hr />
 <p>Before we get into the nitty-gritty details, let’s take a step back.
-To set up this work, we’ll first want to talk about what nullability
-actually is, and then about how we can define it formally, to reason
-about it. Then, we can run experiments to answer the question: in what
-situations are models good at reasoning about nullability? Next, we’ll
-introduce techniques that have been used to probe the internals of a
-model for different concepts. Finally we’ll put it all together into a
+To set up this work, we’ll first start with a simple example, similar to
+our dataset, which illustrates the task of inferring nullability with
+concrete code. . Then, we can run experiments to answer the question: in
+what situations are models good at reasoning about nullability? Next,
+we’ll introduce techniques that have been used to probe the internals of
+a model for different concepts. Finally we’ll put it all together into a
 “nullability probe”, a tool for answering the question: Given a location
 in the program, does the model think that the variable there could be
 null?</p>
-<h2 id="what-is-nullability">What is Nullability?</h2>
+<h2 id="a-simple-example">A Simple Example</h2>
 <p>Let’s say you’re writing a Python program with your LLM assistant.
 You’ve reached a point at which you need to do something with a variable
 called <code>num</code>. Maybe you’re building a list of numbers called
@@ -232,7 +233,7 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a hr
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  positive_nums.append(num)</span></code></pre></div>
 <p>And if <code>num</code> is always a concrete number, as its name
 would suggest, then this is probably the correct code. But variable
-names don’t alway convey everything important about them, and it might
+names don’t always convey everything important about them, and it might
 be the case that <code>num</code> could be None. If that happened in the
 above code, you would get a runtime type error because you can’t check
 if <code>None</code> is greater than zero. So, you would instead want to
@@ -241,11 +242,12 @@ write:</p>
 class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> num <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> num <span class="op">&gt;</span> <span class="dv">0</span>:</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  positive_nums.append(num)</span></code></pre></div>
 <p>In this case, the way you want to use <code>num</code> depends on
-whether it could be None or not. That is, whether <code>num</code> is
-“nullable”. In Python that means having an Optional type
-(<code>Optional[int]</code> rather than <code>int</code>).</p>
-<p>Determining whether <code>num</code> is nullable in this context
-amounts to <em>type inference</em>, and it can be quite complicated in
+whether it is None, so the structure of your program is affected by
+whether <code>num</code> is “of nullable type”. In Python that means
+assigning it an Optional type (<code>Optional[int]</code> rather than
+<code>int</code>).</p>
+<p>Determining whether <code>num</code> is nullable in this context is a
+byproduct of <em>type inference</em>, which can be quite complicated in
 the worst case. Fortunately, in many cases it’s quite simple, involving
 applying just a few rules. For instance, if <code>num</code> is the
 parameter to a function you’re inside, and the function declares the
@@ -264,7 +266,7 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a hr
 <p>Now, suppose you asked your LLM assistant to complete the line. How
 does your assistant know if <code>num</code> is nullable? Our
 experiments show that, after analyzing millions of programs, LLMs learn
-to approximate the same typing rules.</p>
+to model the same typing rules.</p>
 <p>If we ask an LLM early in its pre-training process to complete the
 program above, it produces:</p>
 <p><img src="images/robot-brain-blue.png" class="codelogo bare" /><br />
@@ -308,8 +310,8 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a hr
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>   num <span class="op">=</span> <span class="dv">9</span></span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>...</span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> num...</span></code></pre></div>
-<p>then <code>num</code> is a non-nullable number, and you can complete
-the condition with <code>&lt; 0</code>.</p>
+<p>then <code>num</code> is a non-nullable variable, and you can
+complete the condition with <code>&lt; 0</code>.</p>
 <p>But if instead you’re dealing with</p>
 <div class="sourceCode" id="cb9"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> condition():</span>
@@ -594,17 +596,17 @@ nullability from the program’s syntax, as represented in the model!</p>
 <p>We want to make sure we’re not doing that, and are only extracting
 the most “plain” represenation of nullability that we can from the
 model. So we’re going to make the assumption that nullability is
-represented “linearly” somewhere in the model. There are a few different
-ways of thinking about this.</p>
-<p>First, algebraically: the amount of “nullability” in the model can be
-computed by a linear equation, where each value is given a weight and
-summed, like so:</p>
+represented “linearly” somewhere in the model<a href="#fn2"
+class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.
+Algebraically: the model represents the amount of “nullability” at a
+given token as a linear function of (some subset of) the activations,
+where each activation is given a weight and summed, like so:</p>
 <p><span class="math inline">\text{Nullability}(\hat{x}) = w_0x_0 +
 w_1x_1 + w_2x_2 + ...</span></p>
 <p>Next, geometrically: if the model activations form a “space”, then
 there we want to look for a “direction” in this space which represents
-nullability.<a href="#fn2" class="footnote-ref" id="fnref2"
-role="doc-noteref"><sup>2</sup></a></p>
+nullability.<a href="#fn3" class="footnote-ref" id="fnref3"
+role="doc-noteref"><sup>3</sup></a></p>
 <p><img src="images/nullability-direction.png" class="centered"
 style="width:50.0%"
 alt="A diagram showing nullability represented as a direction in space" /><br />
@@ -658,8 +660,8 @@ alt="A diagram showing a simple program, and the probe’s nullability predictio
 annotations. Whenever a variable is read in the code (what we call a
 “variable load”), we’ve highlighted it in either green or red. Green
 means our probe detected that the model thinks this variable is not
-nullable, while red means the model thinks it is nullable.<a href="#fn3"
-class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
+nullable, while red means the model thinks it is nullable.<a href="#fn4"
+class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
 <p>The most interesting case is the variable <code>result</code>. When
 it first appears in the <code>if</code> statement, it’s highlighted in
 green because it comes from <code>find_value</code>, which returns an
@@ -727,13 +729,16 @@ role="doc-endnotes">
 our <a href="../nullability/index.html">technical post</a> on the same
 work. If you’re looking for more numbers and science, look there.<a
 href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>High dimensional spaces can be really hard to visualize,
-so for the purposes of geometric intuition I’m going to pretend we’re
-working in two dimensions for the diagrams.<a href="#fnref2"
+<li id="fn2"><p>For more discussion of this assumption, it is often
+referred to as the Linear Representation Hypothesis<a href="#fnref2"
 class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>We can also query our probe at non-variable tokens, but
+<li id="fn3"><p>High dimensional spaces can be really hard to visualize,
+so for the purposes of geometric intuition I’m going to pretend we’re
+working in two dimensions for the diagrams.<a href="#fnref3"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>We can also query our probe at non-variable tokens, but
 it’s not clear what the output would mean, since we only train on and
-label variables.<a href="#fnref3" class="footnote-back"
+label variables.<a href="#fnref4" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>

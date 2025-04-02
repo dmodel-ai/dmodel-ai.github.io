@@ -58,16 +58,17 @@ label data— static analysis can do that for us, and so we can easily scale
 up and train on thousands of examples generated from scratch.
 
 In that spirit, we wanted to start with a simple property that comes
-up in nearly every programming language: nullability. Nullable values are
+up in nearly every programming language: nullability. A variable is said to be
+of nullable type when it can possibly take on a null value. Null values are
 represented differently across languages— as null pointers in C or
 C++, with explicit Option types in Rust, and with special nil or None
 values in dynamic languages like Javascript, Lisp, or Python. In every
-case, understanding where values can be nullable is necessary for
-writing even basic code, and misunderstanding where they are nullable
+case, understanding where values can be null is necessary for
+writing even basic code, and misunderstanding where they are null
 can often be a source of bugs.
 
-Do our models understand when a value is nullable? They must, in order to be
-able to write code that deals with nullable values, but we haven’t
+Do our models understand when a variable is of nullable type? They must, in order to be
+able to write code that deals with null values, but we haven’t
 known what form this understanding takes, or what situations are likely to
 confuse the model, until now^[This post is meant to be a more
 approachable version of our [technical post](../nullability/index.html) on the
@@ -79,16 +80,16 @@ there.].
 ---
 
 Before we get into the nitty-gritty details, let's take a step back. To
-set up this work, we'll first want to talk about what nullability
-actually is, and then about how we can define it formally, to reason about
-it. Then, we can run experiments to answer the question: in what situations are models good at
+set up this work, we'll first start with a simple example, similar to our dataset,
+which illustrates the task of inferring nullability with concrete code.
+. Then, we can run experiments to answer the question: in what situations are models good at
 reasoning about nullability? Next, we'll introduce techniques that
 have been used to probe the internals of a model for different
 concepts. Finally we'll put it all together into a "nullability probe",
 a tool for answering the question: Given a location in the program, does the
 model think that the variable there could be null?
 
-What is Nullability?
+A Simple Example
 --------------------
 
 Let's say you're writing a Python program with your LLM assistant. You've
@@ -106,7 +107,7 @@ if num > 0:
 ```
 
 And if `num` is always a concrete number, as its name would suggest,
-then this is probably the correct code. But variable names don't alway
+then this is probably the correct code. But variable names don't always
 convey everything important about them, and it might be the case that
 `num` could be None. If that happened in the above code, you would get
 a runtime type error because you can't check if `None` is greater than
@@ -118,12 +119,13 @@ if num is not None and num > 0:
 ```
 
 In this case, the way you want to use `num` depends on whether it
-could be None or not. That is, whether `num` is "nullable". In Python
-that means having an Optional type (`Optional[int]` rather than
+is None, so the structure of your program is affected by whether
+`num` is "of nullable type". In Python
+that means assigning it an Optional type (`Optional[int]` rather than
 `int`).
 
-Determining whether `num` is nullable in this context amounts to *type
-inference*, and it can be quite complicated in the worst
+Determining whether `num` is nullable in this context is a byproduct of *type
+inference*, which can be quite complicated in the worst
 case. Fortunately, in many cases it's quite simple, involving applying
 just a few rules. For instance, if `num` is the parameter to a
 function you're inside, and the function declares the type of `num` in
@@ -149,7 +151,7 @@ then you know you *do* need a None check.
 Now, suppose you asked your LLM assistant to complete the
 line. How does your assistant know if `num` is nullable? Our
 experiments show that, after analyzing millions of programs,
-LLMs learn to approximate the same typing rules.
+LLMs learn to model the same typing rules.
 
 If we ask an LLM early in its pre-training process to complete the
 program above, it produces:
@@ -204,7 +206,7 @@ else:
 if num...
 ```
 
-then `num` is a non-nullable number, and you can complete the
+then `num` is a non-nullable variable, and you can complete the
 condition with ` < 0`.
 
 But if instead you're dealing with
@@ -512,11 +514,11 @@ model!
 We want to make sure we're not doing that, and are only extracting the
 most "plain" represenation of nullability that we can from the
 model. So we're going to make the assumption that nullability is
-represented "linearly" somewhere in the model. There are a few
-different ways of thinking about this.
-
-First, algebraically: the amount of "nullability" in the model can be
-computed by a linear equation, where each value is given a weight and
+represented "linearly" somewhere in the model^[For more discussion of
+this assumption, it is often referred to as the Linear Representation
+Hypothesis]. Algebraically: the model represents the amount of "nullability"
+at a given token as a linear function of (some subset of)
+the activations, where each activation is given a weight and
 summed, like so:
 
 $\text{Nullability}(\hat{x}) = w_0x_0 + w_1x_1 + w_2x_2 + ...$

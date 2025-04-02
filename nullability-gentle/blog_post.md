@@ -19,25 +19,25 @@ to a whole new class of people who consider themselves non-technical.
  types](images/unexpectedcopilot3.gif)
 
 But there are still many unanswered questions that someone trying to
-understand or even use these tools might have.  How often, and in what
-situations, can LLM's write correct code entirely on their own? And,
-maybe more importantly, but harder to answer: Do LLM's "understand"
+understand or even use these tools might have. For example, how often, and in what
+situations, can LLMs write correct code entirely on their own? And,
+maybe more importantly, but harder to answer: Do LLMs "understand"
 the code they are writing?
 
 Understanding is a tricky concept to measure. Some would argue that
-sentience precedes understanding, and so that LLM's can't have
+sentience precedes understanding, and so that LLMs can't have
 understanding, because they aren't biological organisms with
 sentience. But they certainly have something akin to "thought
 processes": a series of internal representations that determine their
 final outputs. Recently, it's become possible to study these processes
 more deeply, measuring internal "beliefs" of the model as they
 think. This gives us a powerful tool for determining what kinds of
-problems LLM's falter on, when they'll succceed, and when they are
+problems LLMs falter on, when they'll succceed, and when they are
 "thinking through" problems more fully versus just guessing at a
 solution.
 
-So far, these techniques for measuring internal model state have been
-mostly applied to chatbots writing text for human consumption, what we call "natural
+So far, these techniques for measuring internal model state have mostly been
+applied to chatbots writing text for human consumption, using what we call "natural
 language" (to be contrasted with "programming language"s). This makes sense, since
 some of the most critical LLM tasks involve chatting with a user, and
 some of the most interesting concepts to measure, such as honesty or
@@ -52,24 +52,24 @@ is limited.
 
 Code, on the other hand, is another matter. Humans have been studying
 properties of code for a long time, and there are many abstract
-properties that can now be determined using static analysis. If we
+properties of a given program that can now be determined using static analysis. If we
 pick the right properties, we don't need to worry about our ability to
-label data; static analysis can do that for us, and so we can easily scale
+label data— static analysis can do that for us, and so we can easily scale
 up and train on thousands of examples generated from scratch.
 
 In that spirit, we wanted to start with a simple property that comes
-up in nearly every programming language, nullability. Nullable values are
-represented differently across languages; as null pointers in C or
+up in nearly every programming language: nullability. Nullable values are
+represented differently across languages— as null pointers in C or
 C++, with explicit Option types in Rust, and with special nil or None
 values in dynamic languages like Javascript, Lisp, or Python. In every
 case, understanding where values can be nullable is necessary for
 writing even basic code, and misunderstanding where they are nullable
 can often be a source of bugs.
 
-Do our models understand when a value is nullable? They must, to be
+Do our models understand when a value is nullable? They must, in order to be
 able to write code that deals with nullable values, but we haven’t
-known what form this knowledge takes, what situations are likely to
-confuse the model. Until now^[This post is meant to be a more
+known what form this understanding takes, or what situations are likely to
+confuse the model, until now^[This post is meant to be a more
 approachable version of our [technical post](../nullability/index.html) on the
 same work. If you're looking for more numbers and science, look
 there.].
@@ -81,11 +81,11 @@ there.].
 Before we get into the nitty-gritty details, let's take a step back. To
 set up this work, we'll first want to talk about what nullability
 actually is, and then about how we can define it formally, to reason about
-it. Then, we can run experiments to answer the question: in what situations models are good at
+it. Then, we can run experiments to answer the question: in what situations are models good at
 reasoning about nullability? Next, we'll introduce techniques that
 have been used to probe the internals of a model for different
 concepts. Finally we'll put it all together into a "nullability probe",
-which asks the question: Given a location in the program, does the
+a tool for answering the question: Given a location in the program, does the
 model think that the variable there could be null?
 
 What is Nullability?
@@ -146,12 +146,12 @@ def foo(num: Optional[int]):
 
 then you know you *do* need a None check.
 
-You could instead just ask your LLM assistant to complete the
-line. But how does your assistant know if `num` is nullable? Our
+Now, suppose you asked your LLM assistant to complete the
+line. How does your assistant know if `num` is nullable? Our
 experiments show that, after analyzing millions of programs,
 LLMs learn to approximate the same typing rules.
 
-If we ask an LLM early in it's pre-training process to complete the
+If we ask an LLM early in its pre-training process to complete the
 program above, it produces:
 
 ![](images/robot-brain-blue.png){.codelogo .bare}\
@@ -230,12 +230,12 @@ Internal vs. External Measurement
 ----
 
 We can measure whether LLMs understand these rules by just asking for
-completions, what we call an "external" measurement of the models
+completions— what we call an "external" measurement of a model's
 understanding. But there are many places where variables appear where a
 completion won't tell you what type the model thinks the variable
 has. We would still like to know whether the model thinks these
 variables are nullable at those locations, so we can instead look for
-an "internal" measurement of the models understanding.
+an "internal" measurement of the model's understanding.
 
 We do so by looking at the activations of the model, meaning the
 values of each perceptron in the hidden layers. Together, these values
@@ -246,8 +246,8 @@ processing that token. With the right tests, we can tell if the model
 is "thinking" that the current token is an optional variable, or a
 non-optional variable.
 
-By the end of this post, we'll be able to build a probe that uses the
-models activations to determine whether the model thinks a variable
+By the end of this post, we'll be able to build a probe that uses a model's
+activations to determine whether it thinks a variable
 read corresponds to a nullable variable, and show that internal
 knowledge like so:
 
@@ -492,21 +492,21 @@ every layer. But if you don't want to sweat the details, you can just
 think of it as a numerical snapshot of the model, organized in terms
 of snapshots of each layer.
 
-![A diagram of the residual stream of a transformer being measured after each layer]{.centered width=75%}\
+![A diagram of the residual stream of a transformer being measured after each layer](images/llm-residual-stream.svg){.centered width=75%}\
 
 ## Analyzing the Data and Building the Probe
 
 Now that we have these model snapshots, labeled with either "nullable"
 or "non-nullable", we can start to build a probe. The goal of the
-probe is to be able to tell us at any given point, whether the model
+probe is to be able to tell us, at any given point, whether the model
 thinks the token it just generated is more likely to be a nullable
 variable or a non-nullable variable.
 
 There's a lot of flexibility in what form this probe could take. In
-theory, you could use anything to look at the models activations and
+theory, you could use anything to look at the model's activations and
 make a prediction, even a neural network, or another transformer
 model. You could even say your "probe" is a static analysis which
-computes nullability from the programs syntax, as represented in the
+computes nullability from the program's syntax, as represented in the
 model!
 
 We want to make sure we're not doing that, and are only extracting the
@@ -564,7 +564,7 @@ nullability than others, and that there are some dependencies between
 layers that change the best direction on each layer. This makes sense, because
 the number of layers is relatively small with respect to the dimension of the
 residual stream, and so we have fewer dimensions to overfit. So, instead of
-using mass-means probing across all layers simultaniously, we do it
+using mass-means probing across all layers simultaneously, we do it
 for each individual layer. Then, we weight the contribution of
 individual layers to the final prediction using linear regression. We
 found this gave us better results for larger models, though for
@@ -585,14 +585,14 @@ annotations. Whenever a variable is read in the code (what we call a
 "variable load"), we've highlighted it in either green or red. Green
 means our probe detected that the model thinks this variable is not
 nullable, while red means the model thinks it is nullable.^[We can
-also query our probe at non-variable tokens, but its not clear what
+also query our probe at non-variable tokens, but it's not clear what
 the output would mean, since we only train on and label variables.]
 
 The most interesting case is the variable `result`. When it first
-appears in the `if` statement, it's highlighted in red because it
+appears in the `if` statement, it's highlighted in green because it
 comes from `find_value`, which returns an `Optional[int]`. But when it
 appears again in the `print` statement inside the `if` block, it's
-highlighted in green! This shows that the model understands that
+highlighted in red! This shows that the model understands that
 inside the `if result` block, `result` can't be `None` anymore.
 
 
@@ -626,9 +626,9 @@ training data and loses its more general concept of nullability.
 ## What's Next?
 
 This is just a first step in understanding the internal thought
-processes of LLM's as they think about code. There are still richer
+processes of LLMs as they think about code. There are still richer
 types, program invariants, and all sorts of high-level concepts that
-are necessary for writing working code, but extracting them from LLM's
+are necessary for writing working code, but extracting them from LLMs
 might not be so easy.
 
 But we've already shown several important things about looking into

@@ -548,7 +548,7 @@ at a given token as a linear function of (some subset of)
 the activations, where each activation is given a weight and
 summed, like so:
 
-$\text{Nullability}(\hat{x}) = w_0x_0 + w_1x_1 + w_2x_2 + ...$
+$\text{Nullability}(\hat{x}) = C + w_0x_0 + w_1x_1 + w_2x_2 + ...$
 
 Next, geometrically: if the model activations form a "space", then
 there we want to look for a "direction" in this space which represents

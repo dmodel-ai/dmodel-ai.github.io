@@ -480,11 +480,11 @@ variable, as opposed to places where it writes a variable) with
 just processed that token and is about to predict the next one. So,
 one of our prompts could look like:
 
+<div class="llm">
 <div class="robotdiv">
-![](images/robot-brain-blue.png){.codelogo}\
-<p>Pythia 6.9b</p>
+![](images/robot-brain-blue.png){.codelogo}
 </div>
-```python
+```python {.llm}
  def main(x: int) -> None:
       if x > 0:
           value = "*" * x
@@ -493,6 +493,7 @@ one of our prompts could look like:
 
       x = process_value(value=== ===
 ```
+</div>
 
 Using this technique, we can generate large numbers of programs in an
 unsupervised manner, and then label them fully automatically to get

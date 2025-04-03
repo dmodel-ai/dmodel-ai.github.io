@@ -156,24 +156,30 @@ LLMs learn to model the same typing rules.
 If we ask an LLM early in its pre-training process to complete the
 program above, it produces:
 
+<div class="llm">
 ![](images/robot-brain-blue.png){.codelogo .bare}\
 ```python {.llm}
 def foo(num: Optional[int]):
     positive_nums: list[int] = []
     if num===.is_a(): ===
 ```
+![](images/red-x.svg){.grade}\
+</div>
 
 This is correct Python syntax, but it only works if `num` is an object
 with a `is_a()` method, instead of an optional integer.
 
 Train the LLM for a little longer, and it'll produce:
 
+<div class="llm">
 ![](images/robot-brain-blue.png){.codelogo}\
-```python
+```python {.llm}
 def foo(num: Optional[int]):
     positive_nums: list[int] = []
     if num=== > 0: ===
 ```
+![](images/red-x.svg){.grade}\
+</div>
 
 This is closer, in that it has figured out that `num` is a number instead
 of an object, but it still isn't reading the function type signature
@@ -181,12 +187,15 @@ and realizing that `num` could be None. Keep training it, though, and
 eventually it will learn to insert the `None` test depending on the type
 signature of the function.
 
+<div class="llm">
 ![](images/robot-brain-blue.png){.codelogo .bare}\
-```python
+```python {.llm}
 def foo(num: Optional[int]):
     positive_nums: list[int] = []
     if num=== != None and num > 0: ===
 ```
+![](images/green-check.svg){.grade}\
+</div>
 
 ---
 
@@ -279,11 +288,12 @@ correctly. On the other hand, when programs only involve other rules
 constants  have negligible impact on the ability of the model to
 complete them correctly.
 
+<div class="llm">
 <div class="robotdiv">
-![](images/robot-brain-blue.png){.codelogo}\
-<p>Pythia 6.9b</p>
+![](images/robot-brain-blue.png){.codelogo}
+<p class="small">Pythia 6.9b</p>
 </div>
-```python
+```python {.llm}
 def main() -> None:
     some_numbers = [1, -4, None, -3, 10, -1, None, None, 8]
     result: list[int] = []
@@ -291,11 +301,15 @@ def main() -> None:
         ===if num is not None: ===
             ===result.append(num)===
 ```
+![](images/green-check.svg){.grade}
+</div>
+
+<div class="llm">
 <div class="robotdiv">
-![](images/robot-brain-blue.png){.codelogo}\
+![](images/robot-brain-blue.png){.codelogo}
 <p> Pythia 6.9b </p>
 </div>
-```python
+```python {.llm}
 def main() -> None:
     foo = [60, None, -33]
     bar: list[int] = []
@@ -303,6 +317,8 @@ def main() -> None:
         ===if corejoice == 60: ===
             ===bar.append(core)===
 ```
+![](images/red-x.svg){.grade}
+</div>
 
 ### Intra-Procedural Analysis
 
@@ -314,11 +330,12 @@ multiple functions. When nullability flows through three or more
 functions, current top completion models stop being able
 to reason about it.
 
+<div class="llm">
 <div class="robotdiv">
-![](images/robot-brain-blue.png){.codelogo}\
+![](images/robot-brain-blue.png){.codelogo}
 <p> Deepseek V3</p>
 </div>
-```python
+```python {.llm}
 def main(x: int) -> None:
     if x > 0:
         value = "*" * x
@@ -334,12 +351,15 @@ def process_value(value):
     ===else: ===
         ===return len(value)===
 ```
+![](images/green-check.svg){.grade}
+</div>
 
+<div class="llm">
 <div class="robotdiv">
-![](images/robot-brain-blue.png){.codelogo}\
+![](images/robot-brain-blue.png){.codelogo}
 <p>Deepseek V3</p>
 </div>
-```python
+```python {.llm}
 def handle_value(value, guard):
     if guard:
         return process_value("Foobar") + 1
@@ -357,6 +377,9 @@ def main(x: int) -> None:
 def process_value(value): === -> int: ===
     ===return len(value or "")===
 ```
+![](images/red-x.svg){.grade}
+</div>
+
 ### Generating Type Annotations
 
 Models have a significantly harder time writing type annotations for
@@ -364,11 +387,12 @@ Python code than they do just reasoning about the types, or reading type
 annotations. This makes sense, since a lot of the Python code
 available in training data doesn't use type annotations.
 
+<div class="llm">
 <div class="robotdiv">
-![](images/robot-brain-blue.png){.codelogo}\
+![](images/robot-brain-blue.png){.codelogo}
 <p>Pythia 6.9b</p>
 </div>
-```python
+```python {.llm}
 def program_48() -> None:
     number: Optional[int] = None
     square = get_square(number)
@@ -379,6 +403,8 @@ def program_48() -> None:
 
 def get_square(number: ===int) -> Optional[int]: ===
 ```
+![](images/red-x.svg){.grade}
+</div>
 
 ### Some Model Sizes are More Useful than Others
 

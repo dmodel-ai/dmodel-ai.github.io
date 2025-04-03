@@ -423,9 +423,9 @@ where each is pretrained for a different number of steps. This lets us
 investigate how concepts evolve in the model during pre-training.
 
 To help understand how these results apply to larger more capable
-models, here's a graph showing how the Pythia models of different
-sizes perform on the external tests, compared with a few
-state-of-the-art completion models.
+models, here's a graph showing how the Pythia models compare to a few
+leading models, on a set of 15 completion tasks similar to the above
+examples.
 
 ![A bar graph showing how several sizes of model perform on the
  high-level nullability tests](images/hl_model_results.svg)\

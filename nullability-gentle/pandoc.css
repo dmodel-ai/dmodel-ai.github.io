@@ -298,6 +298,7 @@ p:has(> .codelogo){
 }
 .robotdiv p {
     background: lavender;
+    margin: 0;
 }
 .robotdiv .codelogo {
     width: 5em;
@@ -305,4 +306,29 @@ p:has(> .codelogo){
     margin-left: auto;
     margin-right: auto;
     display: block;
+    margin-bottom: 0.5em;
+}
+
+div.llm {
+    display:flex;
+    align-items: center;
+}
+div.llm div{
+    overflow:visible;
+}
+div.llm div pre{
+    margin-left:0.5em;
+}
+
+div:has(> pre.llm){
+    margin:0;
+    margin-bottom: 0.5em;
+    margin-top: 0.5em;
+}
+img.grade {
+    margin-left: 1em;
+    width: 3em;
+}
+p.small {
+    font-size: small;
 }

@@ -283,10 +283,7 @@ show the highlights here.
 
 For programs involving lists and `for` loops, variable names and
 constant values heavily influence how able a model is to complete
-these programs correctly. On the other hand, when programs don't have
-for loops, but only involve other program constructs like `if` and
-`=`, variable names and constants have negligible impact on the
-ability of the model to complete them correctly.
+these programs correctly.
 
 <div class="llm">
 <div class="robotdiv">
@@ -319,6 +316,11 @@ def main() -> None:
 ```
 ![](images/red-x.svg){.grade}
 </div>
+
+On the other hand, when programs don't have for loops, but only
+involve other program constructs like `if` and `=`, variable names and
+constants have negligible impact on the ability of the model to
+complete them correctly.
 
 ### Intra-Procedural Analysis
 

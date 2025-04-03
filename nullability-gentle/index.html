@@ -563,21 +563,19 @@ variable, as opposed to places where it writes a variable) with
 “nullable” or “non-nullable”, and then probe the model when it has just
 processed that token and is about to predict the next one. So, one of
 our prompts could look like:</p>
+<div class="llm">
 <div class="robotdiv">
-<img src="images/robot-brain-blue.png" class="codelogo" /><br />
-
-<p>
-Pythia 6.9b
-</p>
+<p><img src="images/robot-brain-blue.png" class="codelogo" /></p>
 </div>
 <div class="sourceCode" id="cb15"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a> <span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+class="sourceCode python llm"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a> <span class="kw">def</span> main(x: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> x <span class="op">&gt;</span> <span class="dv">0</span>:</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>          value <span class="op">=</span> <span class="st">&quot;*&quot;</span> <span class="op">*</span> x</span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>      <span class="cf">else</span>:</span>
 <span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>          value <span class="op">=</span> <span class="va">None</span></span>
 <span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>      x <span class="op">=</span> process_value(value<span class="op">===</span> <span class="op">===</span></span></code></pre></div>
+</div>
 <p>Using this technique, we can generate large numbers of programs in an
 unsupervised manner, and then label them fully automatically to get many
 prompts for training our probe.</p>

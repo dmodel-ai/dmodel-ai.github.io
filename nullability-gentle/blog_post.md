@@ -148,10 +148,10 @@ def foo(num: Optional[int]):
 
 then you know you *do* need a None check.
 
-Now, suppose you asked your LLM assistant to complete the
-line. How does your assistant know if `num` is nullable? Our
-experiments show that, after analyzing millions of programs,
-LLMs learn to model the same typing rules.
+Now, suppose you asked your LLM assistant to complete the line. How
+does your assistant know if `num` is nullable? Our experiments show
+that, after analyzing large datasets of programs, LLMs learn to model
+the same typing rules.
 
 If we ask an LLM early in its pre-training process to complete the
 program above, it produces:

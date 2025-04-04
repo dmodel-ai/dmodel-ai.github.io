@@ -664,8 +664,9 @@ might not be so easy.
 
 But we've already shown several important things about looking into
 the "mind" of a model as it writes code. We can say definitively that
-LLMs have an internal concept of nullability, even if it doesn't
-always trigger when it should.
+LLMs have an internal concept of nullability, even if they aren't
+always able to do the neccessary program analysis to decide if
+variables are nullable.
 
 As these models continue to improve, and as we scale to larger models, it will
 be interesting to see how their understanding of programming concepts evolves.

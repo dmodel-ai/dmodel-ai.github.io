@@ -675,6 +675,7 @@ And we'll be here to study them as they do.
 # Acknowledgements
 
 We thank Leo Gao, Chelsea Voss, and Zhanna Kaufman for their comments
-and suggestions during the drafting process.
+and suggestions during the drafting process of the technical writeup
+of this work.
 
 # References

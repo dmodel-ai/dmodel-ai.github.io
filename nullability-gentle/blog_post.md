@@ -248,14 +248,14 @@ has. We would still like to know whether the model thinks these
 variables are nullable at those locations, so we can instead look for
 an "internal" measurement of the model's understanding.
 
-We do so by looking at the activations of the model, meaning the
-values of each perceptron in the hidden layers. Together, these values
-give the entire internal state of the model at each piece of text
-(what we call a "token", which could be a word, part of a word, or a
-symbol). And they can tell us what the model is "thinking" when
-processing that token. With the right tests, we can tell if the model
-is "thinking" that the current token is an optional variable, or a
-non-optional variable.
+We do so by looking at the activations of the model, meaning
+floating-point values the model computes internally when generating
+the text. Together, these values give the entire internal state of the
+model at each piece of text (what we call a "token", which could be a
+word, part of a word, or a symbol). And they can tell us what the
+model is "thinking" when processing that token. With the right tests,
+we can tell if the model is "thinking" that the current token is an
+optional variable, or a non-optional variable.
 
 By the end of this post, we'll be able to build a probe that uses a model's
 activations to determine whether it thinks a variable

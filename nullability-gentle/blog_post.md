@@ -5,6 +5,15 @@ date: '$d_{model}$'
 bibliography: all.bib
 linkReferences: true
 ---
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-7J9NR9273D"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-7J9NR9273D');
+</script>
 
 ![A line drawing of a robot with a brain on their antenna](images/robot-brain.png){.smallimage}\
 

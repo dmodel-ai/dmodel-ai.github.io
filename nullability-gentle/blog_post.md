@@ -623,8 +623,8 @@ what it shows:
 In this diagram, we're showing a simple Python program with type
 annotations. Whenever a variable is read in the code (what we call a
 "variable load"), we've highlighted it in either green or red. Green
-means our probe detected that the model thinks this variable is not
-nullable, while red means the model thinks it is nullable.^[We can
+means our probe detected that the model thinks this variable is
+nullable, while red means the model thinks it is not nullable.^[We can
 also query our probe at non-variable tokens, but it's not clear what
 the output would mean, since we only train on and label variables.]
 

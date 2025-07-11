@@ -1,17 +1,18 @@
 <!doctype html>
 <html>
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/bitmaks/cm-web-fonts@latest/fonts.css">
     <title>dmodel blog</title>
     <style type="text/css">
+        h1 {
+            margin-bottom: -5px;
+            font-family: "Computer Modern Serif";
+            font-style: italic;
+        }
 
-
-    h1{
-      margin-bottom: -5px;
-      font-family: "Computer Modern Serif";
-      font-style: italic;
-    }
         .container {
             font-size: 14px;
             line-height: 1.6em;
@@ -25,179 +26,191 @@
             -webkit-text-size-adjust: 100%;
         }
 
-    body {
-      margin: 50px auto;
-      max-width: 650px;
-    }
+        body {
+            margin: 50px auto;
+            max-width: 650px;
+        }
 
-.date {
-    padding-bottom: 2px;
-    text-transform: uppercase;
-    font-weight: bold;
-    font-size: 80%;
-    color: #333;
-    border-bottom: 1px solid #333;
-}
+        footer {
+            max-width: fit-content;
+            margin-left: auto;
+        }
 
-.date:not(.first-child) {
-    margin-top: 60px;
-}
+        .date {
+            padding-bottom: 2px;
+            text-transform: uppercase;
+            font-weight: bold;
+            font-size: 80%;
+            color: #333;
+            border-bottom: 1px solid #333;
+        }
 
-.note,
-.paper {
-    display: block;
-    text-decoration: none;
-    color: #000;
-    border-bottom: 1px solid #d8d8d8;
-}
+        .date:not(.first-child) {
+            margin-top: 60px;
+        }
 
-.note:hover,
-.paper:hover {
-    padding-left: calc(var(--indent) - 2px);
-    border-left: 2px solid black;
-}
+        .note,
+        .paper {
+            display: block;
+            text-decoration: none;
+            color: #000;
+            border-bottom: 1px solid #d8d8d8;
+        }
 
-.tags {
-    display: none;
-}
+        .note:hover,
+        .paper:hover {
+            padding-left: calc(var(--indent) - 2px);
+            border-left: 2px solid black;
+        }
 
-.paper {
-    background: hsla(120, 44%, 86%, 100%);
-    padding: 22px 16px 22px var(--indent);
-}
+        .tags {
+            display: none;
+        }
 
-.paper h3 {
-    font-size: 1.3em;
-    margin-top: 0px;
-    margin-bottom: 12px;
-    /* font-style: italic; */
-}
+        .paper {
+            background: hsla(120, 44%, 86%, 100%);
+            padding: 22px 16px 22px var(--indent);
+        }
 
-.paper .byline {
-    font-style: italic;
-    opacity: 0.6;
-    margin-bottom: 12px;
-}
+        .paper h3 {
+            font-size: 1.3em;
+            margin-top: 0px;
+            margin-bottom: 12px;
+            /* font-style: italic; */
+        }
 
-.note {
-    padding: 14px 16px 14px var(--indent);
-}
+        .paper .byline {
+            font-style: italic;
+            opacity: 0.6;
+            margin-bottom: 12px;
+        }
 
-.note {
-    background: #f9f8f8;
-}
+        .note {
+            padding: 14px 16px 14px var(--indent);
+        }
 
-.note h3,
-.note .description {
-    margin: 0px;
-    display: inline;
-}
+        .note {
+            background: #f9f8f8;
+        }
 
-.note h3 {
-    font-size: 100%;
-    margin-top: 0px;
-}
+        .note h3,
+        .note .description {
+            margin: 0px;
+            display: inline;
+        }
 
-.note .description::before {
-    content: " - ";
-    opacity: 0.5;
-    margin-left: 2px;
-    margin-right: 2px;
-}
+        .note h3 {
+            font-size: 100%;
+            margin-top: 0px;
+        }
 
-.container {
-    --indent: 16px;
-    font-size: 120%;
-    margin: 100px 0px 100px calc(0.2 * calc(100% - 700px));
-    max-width: 700px;
-}
+        .note .description::before {
+            content: " - ";
+            opacity: 0.5;
+            margin-left: 2px;
+            margin-right: 2px;
+        }
 
-.container h1 {
-    grid-row: 1;
-}
+        .container {
+            --indent: 16px;
+            font-size: 120%;
+            margin: 100px 0px 100px calc(0.2 * calc(100% - 700px));
+            max-width: 700px;
+        }
 
-.toc {
-    grid-row: 3;
-    grid-column: 1;
-}
+        .container h1 {
+            grid-row: 1;
+        }
 
-.info * {
-    margin: 0px;
-    --font-style: italic;
-    opacity: 0.8;
-}
+        .toc {
+            grid-row: 3;
+            grid-column: 1;
+        }
 
-.info *:not(:first-child) {
-    margin-top: 24px;
-}
+        .info * {
+            margin: 0px;
+            --font-style: italic;
+            opacity: 0.8;
+        }
 
-.info a {
-    --text-decoration: none;
-    font-weight: bold;
-    color: #000;
-}
+        .info *:not(:first-child) {
+            margin-top: 24px;
+        }
 
-h2 {
-    margin-top: 80px;
-    font-size: 170%;
-}
+        .info a {
+            --text-decoration: none;
+            font-weight: bold;
+            color: #000;
+        }
 
-@media only screen and (max-width: 750px) {
+        h2 {
+            margin-top: 80px;
+            font-size: 170%;
+        }
 
-    h2 {
-        margin-left: var(--indent);
-        margin-right: var(--indent);
-    }
+        @media only screen and (max-width: 750px) {
 
-    .info {
-        padding-left: var(--indent);
-        padding-right: var(--indent);
-    }
+            h2 {
+                margin-left: var(--indent);
+                margin-right: var(--indent);
+            }
 
-    .date {
-        padding-left: 20px;
-    }
+            .info {
+                padding-left: var(--indent);
+                padding-right: var(--indent);
+            }
 
-    body {
-        margin: 0px;
-    }
+            .date {
+                padding-left: 20px;
+            }
 
-    .container {
-        /* font-size: 100%; */
-        margin: 100px 0px 100px 0px;
-        --indent: 20px;
-        max-width: 100%;
-    }
+            body {
+                margin: 0px;
+            }
 
-    .toc {
-        width: 100%;
-    }
+            .container {
+                /* font-size: 100%; */
+                margin: 100px 0px 100px 0px;
+                --indent: 20px;
+                max-width: 100%;
+            }
 
-    .info {
-        width: calc(100% - calc(2 * var(--indent)));
-    }
+            .toc {
+                width: 100%;
+            }
 
-    .note>*,
-    .paper>* {
-        max-width: 700px;
-    }
-}
+            .info {
+                width: calc(100% - calc(2 * var(--indent)));
+            }
 
-.toc>p {
-    margin-top: 60px;
-    font-style: italic;
-    color: #333;
-}
+            .note>*,
+            .paper>* {
+                max-width: 700px;
+            }
+        }
 
-.toc>p a {
-    color: #222;
-}
+        .toc>p {
+            margin-top: 60px;
+            font-style: italic;
+            color: #333;
+        }
+
+        .toc>p a {
+            color: #222;
+        }
+
+        .home {
+            text-decoration: none;
+            color: #000;
+        }
     </style>
 </head>
 
 <body>
-      <h1>d<sub>model</sub> </h1>
-    <b>look inside the model</b>
+    <a href="/" class="home">
+        <h1>d<sub>model</sub> </h1>
+        <b>look inside the model</b>
+    </a>
     <div class="container">
         <div class="toc">
             <div class="date">April 2025</div>
@@ -210,7 +223,9 @@ h2 {
                 <h3>How Language Models Understand Nullability</h3>
                 <div class="byline">Sanchez-Stern and Tondwalkar, 2025</div>
                 <div class="description">
-We study how models represent the nullability of program values. We measure how well models of various sizes, at various training checkpoints, complete programs that use nullable values, and then extract an internal representation of nullability.
+                    We study how models represent the nullability of program values. We measure how well models of
+                    various sizes, at various training checkpoints, complete programs that use nullable values, and then
+                    extract an internal representation of nullability.
                 </div>
             </a>
 
@@ -219,12 +234,14 @@ We study how models represent the nullability of program values. We measure how 
                 <h3> Steering Characters with Interpretability
                 </h3>
                 <div class="description">
-                  We think you can make better characters with steering vectors.
-                  Try it out in our notebook, or check out some of the examples from the screenshots in the post below.
+                    We think you can make better characters with steering vectors.
+                    Try it out in our notebook, or check out some of the examples from the screenshots in the post
+                    below.
                 </div>
             </a>
         </div>
     </div>
+  <footer><a href="/" />home</a> | <a href="/team">team</a></footer>
 </body>
 
 </html>

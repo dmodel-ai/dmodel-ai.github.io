@@ -1,0 +1,10 @@
+h1.logo {
+    margin-bottom: -5px;
+    font-family: "Computer Modern Serif";
+    font-style: italic;
+}
+
+h1.logo sub {
+    font-style: normal;
+    font-size: 0.7em;
+}

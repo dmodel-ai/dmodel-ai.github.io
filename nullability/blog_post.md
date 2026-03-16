@@ -1,7 +1,7 @@
 ---
 title: How Language Models Understand Nullability
 author: '[Alex Sanchez-Stern](https://www.alexsanchezstern.com) and [Anish Tondwalkar](https://ani.sh)'
-date: '$d_{model}$'
+date: '$d_{\text{model}}$'
 bibliography: all.bib
 linkReferences: true
 abstract:
@@ -94,7 +94,7 @@ challenge their capabilities.
 Fortunately, recent work in model interpretability and representation
 engineering has produced promising results which give
 hope towards understanding more and more of the internal thought
-processes of LLMs. Here at $d_{model}$ , we can think of no better
+processes of LLMs. Here at $d_{\text{model}}$ , we can think of no better
 place to apply these new techniques than formal methods, where
 there are many abstract properties that can be extracted with static
 analysis. The vast work done in programming language theory over the

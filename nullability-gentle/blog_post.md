@@ -1,7 +1,7 @@
 ---
 title: "Inside the CodeBot: A Gentle Introduction to How LLMs Understand Nullability"
 author: '[Alex Sanchez-Stern](https://www.alexsanchezstern.com) and [Anish Tondwalkar](https://ani.sh)'
-date: '$d_{model}$'
+date: '$d_{\text{model}}$'
 bibliography: all.bib
 linkReferences: true
 ---

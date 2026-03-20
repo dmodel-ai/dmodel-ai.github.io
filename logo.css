@@ -2,9 +2,11 @@ h1.logo {
     margin-bottom: -5px;
     font-family: "Computer Modern Serif";
     font-style: italic;
+    font-weight: normal;
 }
 
 h1.logo sub {
     font-style: normal;
+    font-weight: normal;
     font-size: 0.7em;
 }

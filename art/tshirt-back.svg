@@ -1,14 +1,15 @@
 <?xml version="1.0" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
- "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
-<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
- width="691.000000pt" height="480.000000pt" viewBox="0 0 691.000000 480.000000"
- preserveAspectRatio="xMidYMid meet">
-<metadata>
-Created by potrace 1.16, written by Peter Selinger 2001-2019
-</metadata>
-<g transform="translate(0.000000,480.000000) scale(0.100000,-0.100000)"
-fill="#000000" stroke="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 691 480" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <filter id="writhe" x="-15%" y="-50%" width="130%" height="200%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.005 0.018" numOctaves="1" seed="3" result="noise"/>
+      <feOffset in="noise" dx="0" dy="0" result="moved">
+        <animate attributeName="dx" values="0;600" dur="3s" repeatCount="indefinite"/>
+      </feOffset>
+      <feDisplacementMap in="SourceGraphic" in2="moved" scale="70"/>
+    </filter>
+  </defs>
+  <g transform="translate(0,480) scale(0.1,-0.1)" fill="hsla(120, 44%, 86%, 1)" stroke="none" fill-rule="evenodd" filter="url(#writhe)">
 <path d="M6852 3566 c-85 -104 -251 -227 -555 -410 l-128 -77 -261 11 c-329
 13 -520 41 -813 120 -213 57 -277 64 -560 63 -178 0 -339 -7 -510 -22 -485
 -42 -603 -60 -721 -107 l-68 -27 -336 67 c-797 157 -922 167 -1358 106 -185
@@ -182,5 +183,5 @@ m894 -204 c158 -6 159 -6 125 -23 -30 -16 -47 -16 -139 -8 -143 13 -299 4
 -50 c94 -8 118 7 -255 -153 -351 -150 -442 -184 -570 -210 -282 -57 -813 -37
 -1200 46 -132 28 -328 83 -335 94 -2 4 21 10 53 14 31 4 125 20 207 36 249 48
 363 59 751 70 414 11 485 17 804 65 124 19 241 36 260 38 62 7 205 7 285 0z"/>
-</g>
+  </g>
 </svg>

@@ -3,6 +3,14 @@
 
 <head>
   <script type="module" src="/src/main.ts"></script>
+  <script>
+    (function () {
+      var saved = localStorage.getItem('theme');
+      if (saved === 'dark' || saved === 'light') {
+        document.documentElement.setAttribute('data-theme', saved);
+      }
+    })();
+  </script>
   <meta charset="UTF-8">
   <title>dmodel.ai</title>
   <meta name="description" content="dmodel: steerable and explainable AI">
@@ -31,6 +39,66 @@
       box-sizing: border-box;
     }
 
+    :root {
+      --bg: #fff;
+      --fg: #000;
+      --dim: #555;
+      --accent-bg: hsl(120, 44%, 86%);
+      --accent-fg: hsl(120, 44%, 30%);
+      --muted-bg: #f9f8f8;
+      --muted-border: #d8d8d8;
+      --rule: #333;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0b0f0c;
+        --fg: #e8e8e8;
+        --dim: #9a9a9a;
+        --accent-bg: hsl(120, 30%, 16%);
+        --accent-fg: hsl(120, 44%, 72%);
+        --muted-bg: #181c19;
+        --muted-border: #2a2f2b;
+        --rule: #b0b0b0;
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #0b0f0c;
+      --fg: #e8e8e8;
+      --dim: #9a9a9a;
+      --accent-bg: hsl(120, 30%, 16%);
+      --accent-fg: hsl(120, 44%, 72%);
+      --muted-bg: #181c19;
+      --muted-border: #2a2f2b;
+      --rule: #b0b0b0;
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+      background: var(--muted-bg);
+      color: var(--fg);
+      border: 1px solid var(--muted-border);
+      border-radius: 999px;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      font-family: inherit;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--rule);
+    }
+
     body {
       margin: 0;
       padding: 40px 20px;
@@ -38,20 +106,38 @@
       font-size: 14px;
       line-height: 1.6;
       position: relative;
+      background: var(--bg);
+      color: var(--fg);
     }
 
-    body::before {
-      content: "";
+    .bg-art {
       position: fixed;
       inset: 0;
-      background-color: hsla(120, 44%, 86%, 1);
-      -webkit-mask: url('/art/tshirt-back.svg') left top/100% auto repeat-y;
-      mask: url('/art/tshirt-back.svg') left top/100% auto repeat-y;
-      -webkit-mask-mode: alpha;
-      mask-mode: alpha;
-      opacity: 1;
       pointer-events: none;
       z-index: -1;
+      overflow: hidden;
+    }
+
+    .bg-art-track {
+      display: flex;
+      width: max-content;
+      height: 100%;
+      animation: marquee 120s linear infinite;
+    }
+
+    .bg-art-track img {
+      height: 100%;
+      width: auto;
+      display: block;
+    }
+
+    .bg-art-track img:nth-child(even) {
+      transform: scaleX(-1);
+    }
+
+    @keyframes marquee {
+      from { transform: translateX(-50%); }
+      to   { transform: translateX(0); }
     }
 
     .header {
@@ -88,7 +174,7 @@
       margin-top: 60px;
       margin-bottom: 0;
       padding-bottom: 8px;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid var(--rule);
       font-size: 14px;
       text-transform: uppercase;
       font-weight: bold;
@@ -100,7 +186,7 @@
     }
 
     .col-about p {
-      background: #f9f8f8;
+      background: var(--muted-bg);
       padding: 0 16px;
       margin: 0;
     }
@@ -115,7 +201,7 @@
 
     .col-about p:last-of-type {
       padding-bottom: 14px;
-      border-bottom: 1px solid #d8d8d8;
+      border-bottom: 1px solid var(--muted-border);
     }
 
     .cite {
@@ -123,7 +209,7 @@
       vertical-align: super;
       line-height: 0;
       text-decoration: none;
-      color: #06c;
+      color: var(--accent-fg);
     }
 
     .cite:hover {
@@ -140,8 +226,8 @@
       text-transform: uppercase;
       font-weight: bold;
       font-size: 80%;
-      color: #333;
-      border-bottom: 1px solid #333;
+      color: var(--rule);
+      border-bottom: 1px solid var(--rule);
       margin-top: 24px;
     }
 
@@ -153,18 +239,18 @@
     .paper {
       display: block;
       text-decoration: none;
-      color: #000;
-      border-bottom: 1px solid #d8d8d8;
+      color: var(--fg);
+      border-bottom: 1px solid var(--muted-border);
     }
 
     .note:hover,
     .paper:hover {
       padding-left: calc(var(--indent) - 2px);
-      border-left: 2px solid black;
+      border-left: 2px solid var(--fg);
     }
 
     .paper {
-      background: hsla(120, 44%, 86%, 100%);
+      background: var(--accent-bg);
       padding: 22px 16px 22px var(--indent);
     }
 
@@ -186,7 +272,7 @@
 
     .note {
       padding: 14px 16px 14px var(--indent);
-      background: #f9f8f8;
+      background: var(--muted-bg);
     }
 
     .note h3,
@@ -214,7 +300,7 @@
 
     .team-section h2 {
       padding-bottom: 8px;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid var(--rule);
       font-size: 14px;
       text-transform: uppercase;
       font-weight: bold;
@@ -229,7 +315,7 @@
     }
 
     .member a {
-      color: #000;
+      color: var(--fg);
     }
 
     .member strong {
@@ -238,13 +324,13 @@
 
     .member i {
       font-size: 13px;
-      color: #555;
+      color: var(--dim);
     }
 
     .hiring {
       margin-top: 24px;
       font-size: 13px;
-      color: #555;
+      color: var(--dim);
     }
 
     @media (max-width: 1100px) {
@@ -271,16 +357,32 @@
       .team-section {
         max-width: 700px;
       }
-
-      body::before {
-        -webkit-mask-size: 100% auto;
-        mask-size: 100% auto;
-      }
     }
   </style>
 </head>
 
 <body>
+  <button class="theme-toggle" type="button" aria-label="Toggle dark mode" onclick="(function(b){var d=document.documentElement;var cur=d.getAttribute('data-theme');var sysDark=matchMedia('(prefers-color-scheme: dark)').matches;var isDark=cur?cur==='dark':sysDark;var next=isDark?'light':'dark';d.setAttribute('data-theme',next);localStorage.setItem('theme',next);b.textContent=next==='dark'?'☀':'☾';})(this)"></button>
+  <script>
+    (function () {
+      var btn = document.querySelector('.theme-toggle');
+      var d = document.documentElement;
+      var cur = d.getAttribute('data-theme');
+      var sysDark = matchMedia('(prefers-color-scheme: dark)').matches;
+      var isDark = cur ? cur === 'dark' : sysDark;
+      btn.textContent = isDark ? '☀' : '☾';
+    })();
+  </script>
+
+  <div class="bg-art" aria-hidden="true">
+    <div class="bg-art-track">
+      <img src="/art/tshirt-back.svg" alt="">
+      <img src="/art/tshirt-back.svg" alt="">
+      <img src="/art/tshirt-back.svg" alt="">
+      <img src="/art/tshirt-back.svg" alt="">
+    </div>
+  </div>
+
   <div class="header">
     <h1 class="logo">d<sub>model</sub></h1>
     <b>look inside the model</b>
@@ -330,12 +432,12 @@
         <a href="https://ani.sh/"><strong>anish</strong></a>
         <i>co-founder</i>
       </div>
-    </div>
-    <div class="team-row">
       <div class="member">
         <a href="https://www.linkedin.com/in/d-moon/"><strong>dmoon</strong></a>
         <i>co-founder</i>
       </div>
+    </div>
+    <div class="team-row">
       <div class="member">
         <a href="https://www.alexsanchezstern.com/"><strong>alex</strong></a>
         <i>research</i>

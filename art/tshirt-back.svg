@@ -4,7 +4,10 @@
     <filter id="writhe" x="-15%" y="-50%" width="130%" height="200%">
       <feTurbulence type="fractalNoise" baseFrequency="0.005 0.018" numOctaves="1" seed="3" result="noise"/>
       <feOffset in="noise" dx="0" dy="0" result="moved">
-        <animate attributeName="dx" values="0;600" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="dx" values="0;600"  dur="4.5s"    repeatCount="indefinite"/>
+        <animate attributeName="dx" values="0;300"  dur="7.281s"  repeatCount="indefinite" additive="sum"/>
+        <animate attributeName="dy" values="0;-120" dur="6.364s"  repeatCount="indefinite"/>
+        <animate attributeName="dy" values="0;-75"  dur="14.137s" repeatCount="indefinite" additive="sum"/>
       </feOffset>
       <feDisplacementMap in="SourceGraphic" in2="moved" scale="70"/>
     </filter>

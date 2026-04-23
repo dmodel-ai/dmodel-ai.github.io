@@ -27,28 +27,356 @@
   <meta name="twitter:description" content="steerable and explainable AI">
   <meta name="twitter:image" content="d_model.png">
   <style>
-    body {
-      margin: 50px auto;
-      max-width: 650px;
+    * {
+      box-sizing: border-box;
     }
 
-    footer {
-      max-width: fit-content;
-      margin-left: auto;
+    body {
+      margin: 0;
+      padding: 40px 20px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-color: hsla(120, 44%, 86%, 1);
+      -webkit-mask: url('/art/tshirt-back-cropped.png?v=2') left top/100% auto repeat-y;
+      mask: url('/art/tshirt-back-cropped.png?v=2') left top/100% auto repeat-y;
+      -webkit-mask-mode: alpha;
+      mask-mode: alpha;
+      opacity: 1;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .header {
+      text-align: center;
+      margin: 60px 0 80px;
+    }
+
+    .header .logo {
+      font-size: 3em;
+      margin-bottom: 0;
+    }
+
+
+    .columns {
+      display: flex;
+      gap: 40px;
+      max-width: 1040px;
+      margin: 0 auto;
+      align-items: flex-start;
+    }
+
+    .col {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .col-blog {
+      flex: 0 0 700px;
+      font-size: 120%;
+      line-height: 1.6em;
+    }
+
+    .col h2 {
+      margin-top: 60px;
+      margin-bottom: 0;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #333;
+      font-size: 14px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    /* About column */
+    .col-about {
+      flex: 0 0 300px;
+    }
+
+    .col-about p {
+      background: #f9f8f8;
+      padding: 0 16px;
+      margin: 0;
+    }
+
+    .col-about p + p {
+      padding-top: 1em;
+    }
+
+    .col-about p:first-of-type {
+      padding-top: 14px;
+    }
+
+    .col-about p:last-of-type {
+      padding-bottom: 14px;
+      border-bottom: 1px solid #d8d8d8;
+    }
+
+    .cite {
+      font-size: 0.7em;
+      vertical-align: super;
+      line-height: 0;
+      text-decoration: none;
+      color: #06c;
+    }
+
+    .cite:hover {
+      text-decoration: underline;
+    }
+
+    /* Blog column - matches blog/index.html exactly */
+    .col-blog {
+      --indent: 16px;
+    }
+
+    .col-blog .date {
+      padding-bottom: 2px;
+      text-transform: uppercase;
+      font-weight: bold;
+      font-size: 80%;
+      color: #333;
+      border-bottom: 1px solid #333;
+      margin-top: 24px;
+    }
+
+    .col-blog .date:first-of-type {
+      margin-top: 60px;
+    }
+
+    .note,
+    .paper {
+      display: block;
+      text-decoration: none;
+      color: #000;
+      border-bottom: 1px solid #d8d8d8;
+    }
+
+    .note:hover,
+    .paper:hover {
+      padding-left: calc(var(--indent) - 2px);
+      border-left: 2px solid black;
+    }
+
+    .paper {
+      background: hsla(120, 44%, 86%, 100%);
+      padding: 22px 16px 22px var(--indent);
+    }
+
+    .paper h3 {
+      font-size: 1.3em;
+      margin-top: 0;
+      margin-bottom: 12px;
+    }
+
+    .paper .byline {
+      font-style: italic;
+      opacity: 0.6;
+      margin-bottom: 12px;
+    }
+
+    .paper .description {
+      margin: 0;
+    }
+
+    .note {
+      padding: 14px 16px 14px var(--indent);
+      background: #f9f8f8;
+    }
+
+    .note h3,
+    .note .description {
+      margin: 0;
+      display: inline;
+    }
+
+    .note h3 {
+      font-size: 100%;
+    }
+
+    .note .description::before {
+      content: " - ";
+      opacity: 0.5;
+      margin-left: 2px;
+      margin-right: 2px;
+    }
+
+    /* Team section */
+    .team-section {
+      max-width: 1040px; /* 300 + 700 + 40 gap */
+      margin: 80px auto 0;
+    }
+
+    .team-section h2 {
+      padding-bottom: 8px;
+      border-bottom: 1px solid #333;
+      font-size: 14px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .team-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 32px;
+      margin-bottom: 24px;
+      justify-content: center;
+    }
+
+    .member a {
+      color: #000;
+    }
+
+    .member strong {
+      display: block;
+    }
+
+    .member i {
+      font-size: 13px;
+      color: #555;
+    }
+
+    .hiring {
+      margin-top: 24px;
+      font-size: 13px;
+      color: #555;
+    }
+
+    @media (max-width: 1100px) {
+      .columns {
+        flex-direction: column;
+        gap: 50px;
+        max-width: 700px;
+      }
+
+      .col {
+        max-width: 100%;
+      }
+
+      .col-about,
+      .col-blog {
+        flex: 1;
+        width: 100%;
+      }
+
+      .col-blog {
+        --indent: 20px;
+      }
+
+      .team-section {
+        max-width: 700px;
+      }
+
+      body::before {
+        -webkit-mask-size: 100% auto;
+        mask-size: 100% auto;
+      }
     }
   </style>
 </head>
 
 <body>
-  <h1 class="logo">d<sub>model</sub> </h1>
-  <b>look inside the model</b>
+  <div class="header">
+    <h1 class="logo">d<sub>model</sub></h1>
+    <b>look inside the model</b>
+  </div>
 
-  <p>Other vendors will sell you hackable environments for specific tools. We make your model more intelligent, more aligned, and more general.</p>
-  <p>If you're building AGI, you'll want to buy from us. Your competitors already are.</p>
-  <hr/>
-  <p>d_model is a fundamental AI research lab focused on RLVR, interpretability, and agents to automate the path to an aligned superintelligence. We also sell research and data in furtherance of those goals.</p>
-  <p>Our team consists of OpenAI, AMD/Xilinx, IAS, and Stanford alums.</p>
-  <footer><a href=blog />blog</a> | <a href="/team">team</a></footer>
+  <div class="columns">
+    <div class="col col-about">
+      <h2>About</h2>
+      <p>d_model is a fundamental AI research lab. We're focused on automating interpretability and, more broadly, the science of deep learning — building the tools that let humans actually understand and steer the systems they train.</p>
+      <p>Other vendors build hackable environments for specific tools. We work on models themselves — making them more understandable<a class="cite" href="https://en.wikipedia.org/wiki/Mechanistic_interpretability">[1]</a><a class="cite" href="https://arxiv.org/abs/2507.11473">[2]</a>, more cooperative<a class="cite" href="https://www.lesswrong.com/w/agent-foundations">[3]</a>, and more aligned.</p>
+      <p>We think alignment is a real and unsolved problem, but an empirical one. The path forward looks like serious experimental work, layers of inoculation, and automating the research itself<a class="cite" href="https://aligned.substack.com/p/alignment-mvp">[4]</a> — a marriage of science and philosophy.</p>
+      <p>If you want to work on the parts of the problem that matter the most, talk to us.</p>
+    </div>
+
+    <div class="col col-blog">
+      <div class="date">April 2025</div>
+      <a href="/nullability-gentle/" class="note">
+        <h3>Inside the CodeBot</h3>
+        <div class="description">A Gentle Introduction to How LLMs Understand Nullability</div>
+      </a>
+      <div class="date">March 2025</div>
+      <a href="/nullability/" class="paper">
+        <h3>How Language Models Understand Nullability</h3>
+        <div class="byline">Sanchez-Stern and Tondwalkar, 2025</div>
+        <div class="description">
+          We study how models represent the nullability of program values. We measure how well models of
+          various sizes, at various training checkpoints, complete programs that use nullable values, and then
+          extract an internal representation of nullability.
+        </div>
+      </a>
+      <div class="date">September 2024</div>
+      <a href="/steering_characters/" class="note">
+        <h3>Steering Characters with Interpretability</h3>
+        <div class="description">
+          We think you can make better characters with steering vectors.
+          Try it out in our notebook, or check out some of the examples from the screenshots in the post
+          below.
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <div class="team-section">
+    <h2>Team</h2>
+    <div class="team-row">
+      <div class="member">
+        <a href="https://ani.sh/"><strong>anish</strong></a>
+        <i>co-founder</i>
+      </div>
+    </div>
+    <div class="team-row">
+      <div class="member">
+        <a href="https://www.linkedin.com/in/d-moon/"><strong>dmoon</strong></a>
+        <i>co-founder</i>
+      </div>
+      <div class="member">
+        <a href="https://www.alexsanchezstern.com/"><strong>alex</strong></a>
+        <i>research</i>
+      </div>
+      <div class="member">
+        <a href="https://adam.scherlis.com/"><strong>adam</strong></a>
+        <i>research</i>
+      </div>
+      <div class="member">
+        <strong>autumn</strong>
+        <i>research</i>
+      </div>
+      <div class="member">
+        <strong>curry</strong>
+        <i>chief of staff</i>
+      </div>
+    </div>
+    <div class="team-row">
+      <div class="member">
+        <strong>jeff</strong>
+        <i>research</i>
+      </div>
+      <div class="member">
+        <strong>bishka</strong>
+        <i>research</i>
+      </div>
+      <div class="member">
+        <strong>ritesh</strong>
+        <i>research</i>
+      </div>
+      <div class="member">
+        <strong>tyra</strong>
+        <i>research</i>
+      </div>
+      <div class="member">
+        <strong>sharuya</strong>
+        <i>research</i>
+      </div>
+    </div>
+    <p class="hiring">If you're interested in joining our team, please reach out.</p>
+  </div>
 </body>
 
 </html>

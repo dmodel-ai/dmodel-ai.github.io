@@ -126,19 +126,14 @@
       animation: marquee 120s linear infinite;
     }
 
-    .bg-art-track video {
+    .bg-art-track img {
       height: 100%;
       width: auto;
       display: block;
     }
 
-    .bg-art-track video:nth-child(even) {
+    .bg-art-track img:nth-child(even) {
       transform: scaleX(-1);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .bg-art-track { animation: none; }
-      .bg-art-track video { display: none; }
     }
 
     @keyframes marquee {
@@ -382,10 +377,10 @@
 
   <div class="bg-art" aria-hidden="true">
     <div class="bg-art-track">
-      <video src="/art/tshirt-writhe.webm" autoplay loop muted playsinline disableremoteplayback></video>
-      <video src="/art/tshirt-writhe.webm" autoplay loop muted playsinline disableremoteplayback></video>
-      <video src="/art/tshirt-writhe.webm" autoplay loop muted playsinline disableremoteplayback></video>
-      <video src="/art/tshirt-writhe.webm" autoplay loop muted playsinline disableremoteplayback></video>
+      <img src="/art/tshirt-back.svg" alt="">
+      <img src="/art/tshirt-back.svg" alt="">
+      <img src="/art/tshirt-back.svg" alt="">
+      <img src="/art/tshirt-back.svg" alt="">
     </div>
   </div>
 

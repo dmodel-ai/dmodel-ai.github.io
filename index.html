@@ -312,12 +312,11 @@
       font-weight: bold;
     }
 
-    .team-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 32px;
-      margin-bottom: 24px;
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(4, max-content);
       justify-content: center;
+      gap: 24px 56px;
     }
 
     .member a {
@@ -362,6 +361,12 @@
 
       .team-section {
         max-width: 700px;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .team-grid {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
   </style>
@@ -434,7 +439,7 @@
 
   <div class="team-section">
     <h2>Team</h2>
-    <div class="team-row">
+    <div class="team-grid">
       <div class="member">
         <a href="https://ani.sh/"><strong>anish</strong></a>
         <i>co-founder</i>
@@ -443,8 +448,6 @@
         <a href="https://www.linkedin.com/in/d-moon/"><strong>dmoon</strong></a>
         <i>co-founder</i>
       </div>
-    </div>
-    <div class="team-row">
       <div class="member">
         <a href="https://www.alexsanchezstern.com/"><strong>alex</strong></a>
         <i>research</i>
@@ -461,8 +464,6 @@
         <strong>curry</strong>
         <i>chief of staff</i>
       </div>
-    </div>
-    <div class="team-row">
       <div class="member">
         <strong>jeff</strong>
         <i>research</i>
@@ -490,6 +491,18 @@
       <div class="member">
         <strong>dalton</strong>
         <i>product</i>
+      </div>
+      <div class="member">
+        <strong>ajit</strong>
+        <i>research</i>
+      </div>
+      <div class="member">
+        <strong>arjun</strong>
+        <i>research</i>
+      </div>
+      <div class="member">
+        <strong>david</strong>
+        <i>research</i>
       </div>
     </div>
     <p class="hiring">If you're interested in joining our team, please reach out to <a href="mailto:careers@dmodel.ai">careers@dmodel.ai</a></p>

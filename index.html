@@ -227,6 +227,15 @@
       --indent: 16px;
     }
 
+    .col-blog h2 {
+      margin-top: 0;
+    }
+
+    .col-blog .note:first-of-type,
+    .col-blog .paper:first-of-type {
+      margin-top: 0;
+    }
+
     .col-blog .date {
       padding-bottom: 2px;
       text-transform: uppercase;
@@ -298,6 +307,22 @@
       margin-right: 2px;
     }
 
+    /* Spacing between blog posts */
+    .col-blog .note,
+    .col-blog .paper {
+      margin-bottom: 16px;
+    }
+
+    /* Byline under note posts */
+    .note .byline {
+      display: block;
+      font-style: italic;
+      opacity: 0.6;
+      margin-top: 8px;
+    }
+
+    /* Team section */
+    .team-section {
     /* Team section */
     .team-section {
       max-width: 1040px; /* 300 + 700 + 40 gap */

@@ -1,6 +1,6 @@
 html {
-  color: #424242;
-  background-color: rgb(254, 241, 210);
+  color: #1a1a1a;
+  background-color: #fdfdfd;
 }
 body {
   margin: 0 auto;
@@ -13,7 +13,7 @@ body {
   overflow-wrap: break-word;
   text-rendering: optimizeLegibility;
   font-kerning: normal;
-  background-color: rgb(254, 241, 210);
+  background-color: #fdfdfd;
 }
 @media (max-width: 600px) {
   body {

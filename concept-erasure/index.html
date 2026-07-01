@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Adam Scherlis*, Alex Bishka*, Aditya Vasantharao, Ajit Sivakumar, Alex Sanchez-Stern, Alexana Dubois, Anish Tondwalkar, Arjun Pagidi, Autumn Sinclair, Curry Winter, Dalton Combs, Daniel Moon, David Cao, Felix Michalak, Jeff Coggshall, Kunal Bham, Mohit Tekriwal, Ritesh Bhalerao, Shaurya Jain, Tyra Burgess, Yueru Yan, Zhanna Kaufman * Core contributors" />
+  <title>Discovering Concept-Editing Algorithms With LLM Agents</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for citations */
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+      margin-bottom: 0em;
+    }
+    .hanging-indent div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
+    }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
+    }
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
+    }  </style>
+  <link rel="stylesheet" href="pandoc.css" />
+  <link rel="stylesheet" href="sidenote.css" />
+  <link rel="stylesheet" href="toc-styles.css" />
+  <link rel="stylesheet" href="highlights-box.css" />
+  <link rel="stylesheet" href="charts.css" />
+  <script src="toc-script.js"></script>
+  <script src="sidenotes.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+  <script defer=""
+  src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Discovering Concept-Editing Algorithms With LLM
+Agents</h1>
+<p class="author">Adam Scherlis<sup>*</sup>, Alex Bishka<sup>*</sup>,
+Aditya Vasantharao, Ajit Sivakumar, Alex Sanchez-Stern, Alexana Dubois,
+Anish Tondwalkar, Arjun Pagidi, Autumn Sinclair, Curry Winter, Dalton
+Combs, Daniel Moon, David Cao, Felix Michalak, Jeff Coggshall, Kunal
+Bham, Mohit Tekriwal, Ritesh Bhalerao, Shaurya Jain, Tyra Burgess, Yueru
+Yan, Zhanna Kaufman<br><span class="author-note">* Core
+contributors</span></p>
+<p class="date"><span class="math inline">d_{\text{model}}</span></p>
+<div class="abstract">
+<div class="abstract-title">Abstract</div>
+<p>Concept erasure is a technique that removes unwanted information from
+a model’s activations, but current erasure methods struggle to fully
+remove target concepts. In this study, we tasked LLM agents trained on
+our data with inventing concept erasure algorithms that outperform
+current methods under the same experimental constraints. We measure the
+performance of each algorithm family and explore the cause of why
+current methods fall short.</p>
+</div>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#introduction" id="toc-introduction"><span
+class="toc-section-number">1</span> Introduction</a></li>
+<li><a href="#the-experiment" id="toc-the-experiment"><span
+class="toc-section-number">2</span> The Experiment</a></li>
+<li><a href="#results" id="toc-results"><span
+class="toc-section-number">3</span> Results</a>
+<ul>
+<li><a href="#svm-accuracy" id="toc-svm-accuracy"><span
+class="toc-section-number">3.1</span> SVM Accuracy</a></li>
+<li><a href="#random-forest-accuracy"
+id="toc-random-forest-accuracy"><span
+class="toc-section-number">3.2</span> Random Forest Accuracy</a></li>
+</ul></li>
+<li><a href="#discovered-algorithm-families"
+id="toc-discovered-algorithm-families"><span
+class="toc-section-number">4</span> Discovered Algorithm Families</a>
+<ul>
+<li><a href="#gaussian-optimal-transport"
+id="toc-gaussian-optimal-transport"><span
+class="toc-section-number">4.1</span> Gaussian Optimal
+Transport</a></li>
+<li><a href="#mmd-optimized-affine-transform"
+id="toc-mmd-optimized-affine-transform"><span
+class="toc-section-number">4.2</span> MMD-Optimized Affine
+Transform</a></li>
+<li><a href="#neural-network-mmd-training"
+id="toc-neural-network-mmd-training"><span
+class="toc-section-number">4.3</span> Neural Network + MMD
+Training</a></li>
+<li><a href="#soft-prediction-moment-matching"
+id="toc-soft-prediction-moment-matching"><span
+class="toc-section-number">4.4</span> Soft Prediction + Moment
+Matching</a></li>
+<li><a href="#point-level-optimal-transport-hungarian-matching"
+id="toc-point-level-optimal-transport-hungarian-matching"><span
+class="toc-section-number">4.5</span> Point-Level Optimal Transport
+(Hungarian Matching)</a></li>
+<li><a href="#quantile-per-dimension-transport"
+id="toc-quantile-per-dimension-transport"><span
+class="toc-section-number">4.6</span> Quantile / Per-Dimension
+Transport</a></li>
+</ul></li>
+<li><a href="#key-finding-covariance-is-the-strongest-signal"
+id="toc-key-finding-covariance-is-the-strongest-signal"><span
+class="toc-section-number">5</span> Key Finding: Covariance Is the
+Strongest Signal</a></li>
+<li><a href="#implications-for-ai-safety-interpretability"
+id="toc-implications-for-ai-safety-interpretability"><span
+class="toc-section-number">6</span> Implications for AI Safety &amp;
+Interpretability</a></li>
+<li><a href="#llm-disclosure" id="toc-llm-disclosure"><span
+class="toc-section-number">7</span> LLM Disclosure</a></li>
+<li><a href="#appendix" id="toc-appendix"><span
+class="toc-section-number">8</span> Appendix</a></li>
+<li><a href="#references" id="toc-references"><span
+class="toc-section-number">9</span> References</a></li>
+</ul>
+</nav>
+<h1 data-number="1" id="introduction"><span
+class="header-section-number">1</span> Introduction</h1>
+<p>To create safe models, we must be able to control what they know and
+use. <em>Concept erasure</em> is one tool for modifying a model’s
+representations. Rather than retraining or fine-tuning, concept erasure
+reaches into a model’s activations and removes a target concept,
+rendering it unusable.</p>
+<p>The ability to erase concepts supports a range of AI-safety efforts.
+Concept erasure can help models unlearn knowledge needed to build
+bioweapons, remove sensitive attributes that enable discrimination, and
+ablate concepts that drive misalignment. But concepts are rarely
+isolated, detachable features, making perfect erasure difficult to
+achieve.</p>
+<p>One prevalent method, <em><a
+href="https://arxiv.org/abs/2306.03819">LEAst-squares Concept
+Erasure</a></em> (<em>LEACE</em>) <span class="citation"
+data-cites="belrose23">(Belrose et al. 2023)</span>, removes the linear
+component of concepts in closed form. Given activations labeled by a
+binary concept (e.g., “sarcastic” vs. “not sarcastic”) LEACE removes the
+target concept’s linear component with the smallest possible edit.
+Afterwards, a linear classifier should not be able to recover the target
+concept above chance, a property known as <em>Linear Guardedness</em>.
+LEACE’s successor, <em><a
+href="https://arxiv.org/abs/2502.02820">Quadratic LEAst-squares Concept
+Erasure</a></em> (<em>QLEACE</em>) <span class="citation"
+data-cites="quirke25">(Quirke and Belrose 2025)</span>, additionally
+equalizes the two classes’ covariances, so that no quadratic classifier
+can recover the target concept.</p>
+<p>However, as linear methods modifying nonlinear representations, LEACE
+and QLEACE cannot fully erase target concepts in the model. LEACE
+matches the two classes’ means, but not their covariances. QLEACE
+matches the means and covariances but preserves the higher-order
+structure. An RBF-kernel SVM trained on LEACE-erased activations still
+recovered target concepts with 70%–95% accuracy. Nonlinear erasure
+struggles to generalize: <em><a
+href="https://arxiv.org/abs/2201.12191">Kernelized Concept
+Erasure</a></em> <span class="citation"
+data-cites="ravfogel22">(Ravfogel et al. 2022)</span> showed that
+protecting against one nonlinear classifier can leave the concept fully
+readable by another.</p>
+<p>We tasked agents trained on our data with inventing algorithms that
+erase concepts from neural network activations that outperform LEACE and
+QLEACE. Given only a description of the task and an L2 edit-distance
+budget, our agents discovered six distinct families of erasure
+algorithms across 50 concepts. The best algorithm reduced the average
+accuracy of a nonlinear probe from 99% to 70%, whereas LEACE only
+reduced accuracy to 88%. Additionally, on a held out random forest
+classifier, the best algorithm reduced accuracy from 99% to 72%, whereas
+LEACE only reduced accuracy to 82%.</p>
+<div class="stat-grid">
+<div class="stat-card">
+<div class="stat-number">
+50
+</div>
+<div class="stat-label">
+Concepts tested
+</div>
+</div>
+<div class="stat-card">
+<div class="stat-number">
+6
+</div>
+<div class="stat-label">
+Algorithm families discovered
+</div>
+</div>
+<div class="stat-card">
+<div class="stat-number">
+50/50
+</div>
+<div class="stat-label">
+Best algorithm beats LEACE (SVM)
+</div>
+</div>
+<div class="stat-card">
+<div class="stat-number">
+70%
+</div>
+<div class="stat-label">
+Avg best SVM accuracy
+</div>
+</div>
+</div>
+<h1 data-number="2" id="the-experiment"><span
+class="header-section-number">2</span> The Experiment</h1>
+<p>Each agent was given a target concept, a small labeled sample, a
+Gemma-3 270M model, and was asked the following:<a href="#fn1"
+class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<blockquote>
+<p>Create a procedure that edits the model’s activations to remove a
+concept such that nonlinear classifiers cannot recover it. Your
+modification must stay within the L2 budget of LEACE.</p>
+</blockquote>
+<p>The agents did not receive an algorithm or a published solution. They
+were unable to view the grader, which evaluated their method on held-out
+activations, with a fresh nonlinear probe. Agents had to:</p>
+<ol type="1">
+<li>Analyze the activation geometry to understand why LEACE leaves a
+nonlinear signal.</li>
+<li>Devise an algorithm to remove it.</li>
+<li>Implement, debug, and optimize hyperparameters.</li>
+<li>Keep the edit within the specified L2 budget (same amount of
+modification LEACE uses).</li>
+</ol>
+<p>We ran 560 independent rollouts across 50 concepts, ranging from
+“sarcasm” and “humor” to “metacognition” and “hypotheticality.” We used
+two algorithms to evaluate performance compared to the LEACE baseline:
+<em>SVM Accuracy</em> and <em>Random Forest Accuracy</em>.</p>
+<h1 data-number="3" id="results"><span
+class="header-section-number">3</span> Results</h1>
+<h2 data-number="3.1" id="svm-accuracy"><span
+class="header-section-number">3.1</span> SVM Accuracy</h2>
+<p><em>SVM Accuracy</em> was our primary evaluation metric. An
+RBF-kernel SVM is trained on data the agent never saw and evaluated on a
+separate test set. An SVM Accuracy score of 50% is equal to random
+chance (i.e., perfect erasure). A score higher than 50% meant the target
+concept was recoverable.</p>
+<div class="chart-container short">
+<div class="chart-title">
+Average SVM accuracy — baseline vs. LEACE vs. agents (lower is better
+erasure)
+</div>
+<canvas id="svmAvgChart">
+</canvas>
+</div>
+<p>For every concept, the best agent solution beat LEACE on SVM
+accuracy. On average, LEACE reduces the SVM Accuracy to 88%, while our
+agents reduced it to 70.1%. The <a href="#appendix">Appendix</a> shows
+the per-concept SVM results for all 50 concepts.</p>
+<h2 data-number="3.2" id="random-forest-accuracy"><span
+class="header-section-number">3.2</span> Random Forest Accuracy</h2>
+<p>As a test of generalization, we also evaluated with a <em>Random
+Forest Classifier</em> (100 trees, max depth 10). This is a different
+nonlinear classifier family that the agents were not optimizing against.
+If a Random Forest also failed to recover the target concept, that
+indicated the agents found erasure that transfers beyond the specific
+SVM they were graded on. This result would suggest genuine
+distribution-matching rather than overfitting to one kernel.</p>
+<div class="chart-container short">
+<div class="chart-title">
+Average Random Forest accuracy — baseline vs. LEACE vs. agents (lower is
+better erasure)
+</div>
+<canvas id="rfAvgChart">
+</canvas>
+</div>
+<p>Random Forest recovered some concepts the SVM could not, but our best
+agent solutions generally beat LEACE. On average, LEACE reduces Random
+Forest accuracy to 82.6%, while our agents reduced it to 71.9%. See the
+<a href="#appendix">Appendix</a> for the matching per-concept Random
+Forest breakdown.</p>
+<h1 data-number="4" id="discovered-algorithm-families"><span
+class="header-section-number">4</span> Discovered Algorithm
+Families</h1>
+<p>Despite working independently, our agents converged on six algorithm
+families. We clustered the 50 best solutions (one per concept) by their
+core approach.</p>
+<h2 class="family-name" data-number="4.1"
+id="gaussian-optimal-transport"><span
+class="header-section-number">4.1</span> Gaussian Optimal Transport</h2>
+<div class="family-meta">
+<p>6 variants · avg SVM 71% · best: certainty (59%)</p>
+</div>
+<p>Fit a Gaussian to each class, then move both classes to a shared
+“average” shape, equalizing the means (as LEACE does) and the full
+covariances. This action removes the covariance difference read by RBF
+with a closed-form linear map - exactly QLEACE’s construction.</p>
+<h2 class="family-name" data-number="4.2"
+id="mmd-optimized-affine-transform"><span
+class="header-section-number">4.2</span> MMD-Optimized Affine
+Transform</h2>
+<div class="family-meta">
+<p>12 variants · avg SVM 63% · best: empathy (49%)</p>
+</div>
+<p>Instead of a closed-form solution, learn an affine edit by gradient
+descent that directly minimizes the Maximum Mean Discrepancy (MMD): a
+measure of how different the two classes still look, evaluated with the
+SVM’s own kernel. It targets exactly what that SVM sees; but erasing for
+one probe needn’t erase for another, which is part of why transfer to
+the Random Forest is imperfect.</p>
+<h2 class="family-name" data-number="4.3"
+id="neural-network-mmd-training"><span
+class="header-section-number">4.3</span> Neural Network + MMD
+Training</h2>
+<div class="family-meta">
+<p>6 variants · avg SVM 66% · best: humor (57%)</p>
+</div>
+<p>A small neural network learns its own adjustment for each point,
+trained until the two class distributions are indistinguishable to a
+kernel (MMD, or its relative HSIC). Because the map is nonlinear, it can
+match the full distribution rather than just the covariance. Scaling
+each adjustment to the point’s own norm, keeps every edit inside the L2
+budget.</p>
+<h2 class="family-name" data-number="4.4"
+id="soft-prediction-moment-matching"><span
+class="header-section-number">4.4</span> Soft Prediction + Moment
+Matching</h2>
+<div class="family-meta">
+<p>22 variants · avg SVM 74% · best: agreement (52%)</p>
+</div>
+<p>Train a soft classifier to score how strongly each point belongs to
+one class, then shift it in proportion to that score, pulling the class
+means together and equalizing their per-dimension spread. This removes
+the signal an RBF can detect: the difference in variance between the two
+classes. Blending by confidence makes the edit a smooth function of the
+input rather than a hard switch at the decision boundary.</p>
+<h2 class="family-name" data-number="4.5"
+id="point-level-optimal-transport-hungarian-matching"><span
+class="header-section-number">4.5</span> Point-Level Optimal Transport
+(Hungarian Matching)</h2>
+<div class="family-meta">
+<p>3 variants · avg SVM 72% · best: curiosity (60%)</p>
+</div>
+<p>Pair each point with an opposite-class point (via the Hungarian
+matching algorithm) and move the two together, collapsing the two clouds
+into one; new points follow their nearest neighbor. It assumes nothing
+about the shape of the data - by overlapping the clouds directly, it
+matches the entire distribution, not just the first two moments.</p>
+<h2 class="family-name" data-number="4.6"
+id="quantile-per-dimension-transport"><span
+class="header-section-number">4.6</span> Quantile / Per-Dimension
+Transport</h2>
+<div class="family-meta">
+<p>1 variant · avg SVM 69% · best: authority (69%)</p>
+</div>
+<p>Work one activation dimension at a time: reshape each class’s
+distribution along that axis onto a shared target by matching quantiles
+(1D optimal transport). This matches every per-dimension moment, not
+just the variance, but it ignores cross-dimension correlations. This
+makes it cheap and effective when the classes differ mainly dimension by
+dimension.</p>
+<div class="chart-container short">
+<div class="chart-title">
+Average SVM accuracy by algorithm family
+</div>
+<canvas id="clusterChart">
+</canvas>
+</div>
+<h1 data-number="5"
+id="key-finding-covariance-is-the-strongest-signal"><span
+class="header-section-number">5</span> Key Finding: Covariance Is the
+Strongest Signal</h1>
+<p>Almost all successful agents arrived at the same realization: LEACE
+removes the difference in two classes’ means, but a concept lives in the
+whole shape of each class’s distribution, with the most salient
+difference being the covariance. An RBF-kernel SVM works from pairwise
+distances between points, so it’s sensitive to how spread out each class
+is. If one class is more tightly clustered than the other, the SVM reads
+the concept straight off the difference in spread. This covariance
+difference is what QLEACE eliminates, but a kernel classifier can still
+exploit the remaining structure.</p>
+<figure class="wide" id="fig:moment-ladder">
+<img src="images/fig3_qleace.png" alt="Original vs. LEACE vs. QLEACE vs. Hungarian matching on two non-Gaussian classes." />
+<figcaption>
+Each erasure method matches one more piece of the distribution. On two
+non-Gaussian classes (a blob and two clusters), LEACE matches the means,
+QLEACE additionally matches the covariances — yet one class is still
+visibly two clusters — and only matching the full distribution
+(Hungarian matching) collapses the classes together.
+</figcaption>
+</figure>
+<p>After LEACE is applied, an RBF-SVM can still recover the targeted
+concept at about 87%. The leftover covariance difference is small, but
+it’s exactly what the RBF reads. Small means cheap to remove: within
+LEACE’s own L2 budget, the agents’ best erasers drive that accuracy well
+below where LEACE leaves it. Better erasure doesn’t take a bigger budget
+than LEACE’s.</p>
+<p>Each algorithm family attacked the covariance difference, but what
+distinguished them was how much of the distribution they match. If the
+full distribution is matched, that suggests the target concept is
+encoded in the entire shape of the activations. The level of erasure
+needed to remove a concept is evidence of the concept’s representation
+geometry. In this way, families double as a taxonomy of the way concepts
+can be encoded in the model.</p>
+<h1 data-number="6"
+id="implications-for-ai-safety-interpretability"><span
+class="header-section-number">6</span> Implications for AI Safety &amp;
+Interpretability</h1>
+<p>In practice, guaranteeing linear guardedness does not achieve total
+concept erasure. LEACE and QLEACE can erase linear and quadratic probes,
+respectively, but their effectiveness is limited by the nonlinear nature
+of models. Target concepts may appear removed, but their capabilities
+remain recoverable by simple nonlinear detectors.</p>
+<p>While current concept erasure methods fall short, our agents offered
+a path forward by identifying novel algorithms that attacked
+higher-order structural differences. Without a reference solution or
+access to relevant papers, agents analyzed activation geometry,
+hypothesized about why LEACE and QLEACE fail, and identified
+higher-performance erasure methods.</p>
+<p>This study demonstrates that to erase a concept, we must understand
+how the model encodes it. This makes concept erasure research valuable
+not just for safety, but for interpretability, and we present this study
+as an example of the open-ended research we want agents to
+accelerate.</p>
+<h1 data-number="7" id="llm-disclosure"><span
+class="header-section-number">7</span> LLM Disclosure</h1>
+<p>Claude (Anthropic) assisted in preparing this post — helping to draft
+the writing and to create the figures for the final version. The
+research, experiments, and findings are the authors’ own.</p>
+<h1 data-number="8" id="appendix"><span
+class="header-section-number">8</span> Appendix</h1>
+<p>LEACE and best-agent performance for all 50 concepts, under the
+RBF-SVM.</p>
+<div class="chart-container tall">
+<div class="chart-title">
+SVM RBF accuracy by concept (lower is better erasure)
+</div>
+<canvas id="svmChart">
+</canvas>
+</div>
+<p>LEACE and best-agent performance for all 50 concepts, under the
+Random Forest classifier.</p>
+<div class="chart-container tall">
+<div class="chart-title">
+Random Forest accuracy by concept (lower is better erasure)
+</div>
+<canvas id="rfChart">
+</canvas>
+</div>
+<h1 data-number="9" id="references"><span
+class="header-section-number">9</span> References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent"
+data-entry-spacing="0" role="list">
+<div id="ref-belrose23" class="csl-entry" role="listitem">
+Belrose, Nora, David Schneider-Joseph, Shauli Ravfogel, Ryan Cotterell,
+Edward Raff, and Stella Biderman. 2023. <span>“<span>LEACE</span>:
+Perfect Linear Concept Erasure in Closed Form.”</span> <a
+href="https://arxiv.org/abs/2306.03819">https://arxiv.org/abs/2306.03819</a>.
+</div>
+<div id="ref-quirke25" class="csl-entry" role="listitem">
+Quirke, Lucia, and Nora Belrose. 2025. <span>“Slowing Learning by
+Erasing Simple Features.”</span> <a
+href="https://arxiv.org/abs/2502.02820">https://arxiv.org/abs/2502.02820</a>.
+</div>
+<div id="ref-ravfogel22" class="csl-entry" role="listitem">
+Ravfogel, Shauli, Francisco Vargas, Yoav Goldberg, and Ryan Cotterell.
+2022. <span>“Kernelized Concept Erasure.”</span> <a
+href="https://arxiv.org/abs/2201.12191">https://arxiv.org/abs/2201.12191</a>.
+</div>
+</div>
+<script>
+Chart.defaults.font.family = 'serif';
+const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+const DATA = {"concepts": ["abstraction", "agency", "agreement", "ambiguity", "authority", "causal", "certainty", "coherence", "completeness", "complexity", "conditional", "confrontation", "contradiction", "criticism", "curiosity", "empathy", "evaluative", "excitement", "figurative", "formality", "frustration", "gratitude", "hedging", "humor", "hypotheticality", "imperative", "inference", "intentionality", "lovability", "metacognition", "mischief", "nostalgia", "novelty", "numerical", "optimism", "paradox", "passive", "personal", "persuasion", "politeness", "reliability", "rhetorical", "sarcasm", "spatial", "specificity", "speculation", "technical", "temporal", "urgency", "vulnerability"], "original_svm": [1.0, 1.0, 0.9875, 0.9875, 1.0, 1.0, 0.975, 1.0, 1.0, 1.0, 1.0, 0.9875, 0.9375, 1.0, 0.9875, 0.9875, 0.9875, 1.0, 0.9875, 1.0, 0.975, 0.9625, 1.0, 1.0, 0.9875, 0.975, 0.9875, 1.0, 0.9625, 1.0, 0.975, 1.0, 1.0, 1.0, 1.0, 0.9625, 0.9375, 1.0, 0.9875, 0.9875, 0.9875, 0.9875, 0.9875, 1.0, 1.0, 1.0, 1.0, 0.9875, 1.0, 1.0], "leace_svm": [0.9125, 0.8875, 0.8, 0.925, 0.8875, 0.9625, 0.825, 0.875, 0.8625, 0.9875, 0.9375, 0.825, 0.8625, 0.8875, 0.925, 0.8375, 0.8625, 0.85, 0.775, 0.8375, 0.8, 0.775, 0.9, 0.9625, 0.85, 0.95, 0.95, 0.9, 0.9, 0.9625, 0.8125, 0.9, 0.9125, 0.9625, 0.8125, 0.825, 0.8, 0.8875, 0.9375, 0.8375, 0.8375, 0.9125, 0.7625, 0.975, 0.925, 0.975, 0.875, 0.8625, 0.775, 0.95], "agent_svm": [0.8125, 0.6625, 0.525, 0.8125, 0.6875, 0.6625, 0.5875, 0.7, 0.7375, 0.775, 0.675, 0.7375, 0.6875, 0.825, 0.6, 0.4875, 0.6375, 0.825, 0.6875, 0.7375, 0.6375, 0.6875, 0.8, 0.575, 0.75, 0.725, 0.5, 0.6375, 0.6625, 0.8, 0.6625, 0.85, 0.7, 0.7625, 0.5875, 0.725, 0.6875, 0.675, 0.6625, 0.775, 0.775, 0.7625, 0.7125, 0.7625, 0.75, 0.7, 0.575, 0.8125, 0.6, 0.8375], "original_rf": [1.0, 1.0, 0.9875, 1.0, 1.0, 1.0, 0.975, 0.975, 1.0, 1.0, 0.975, 0.9875, 0.9125, 1.0, 0.9875, 0.975, 0.9875, 1.0, 1.0, 1.0, 0.9875, 0.9625, 0.975, 0.9875, 1.0, 0.9625, 0.975, 0.975, 0.975, 1.0, 0.9625, 1.0, 1.0, 1.0, 0.9875, 0.9625, 0.925, 1.0, 0.9875, 1.0, 0.975, 0.975, 0.9625, 1.0, 1.0, 1.0, 1.0, 0.9875, 1.0, 1.0], "leace_rf": [0.8625, 0.85, 0.7625, 0.9, 0.8375, 0.8375, 0.725, 0.8, 0.8, 0.9375, 0.85, 0.8, 0.8125, 0.8625, 0.825, 0.8125, 0.825, 0.7125, 0.8, 0.775, 0.7375, 0.7125, 0.7875, 0.9125, 0.6875, 0.8625, 0.9125, 0.8625, 0.8625, 0.9125, 0.675, 0.8625, 0.825, 0.85, 0.75, 0.75, 0.7125, 0.85, 0.9375, 0.75, 0.8, 0.8125, 0.65, 0.95, 0.8875, 0.9375, 0.8, 0.825, 0.675, 0.925], "agent_rf": [0.775, 0.7125, 0.6125, 0.9625, 0.625, 0.625, 0.6, 0.6125, 0.75, 0.8125, 0.65, 0.775, 0.7375, 0.7125, 0.525, 0.7875, 0.7, 0.725, 0.7875, 0.7875, 0.6375, 0.6375, 0.75, 0.6, 0.6625, 0.975, 0.7, 0.5875, 0.675, 0.8125, 0.625, 0.8125, 0.7125, 0.775, 0.6375, 0.6625, 0.7, 0.65, 0.875, 0.775, 0.675, 0.8, 0.7, 0.775, 0.75, 0.775, 0.6125, 0.8, 0.6, 0.875]};
+
+function makeChart(canvasId, originalData, leaceData, agentData, label) {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    const idx = DATA.concepts.map((_, i) => i).sort((a, b) => DATA.concepts[a].localeCompare(DATA.concepts[b]));
+    const names = idx.map(i => DATA.concepts[i]);
+    const o = idx.map(i => originalData[i]);
+    const l = idx.map(i => leaceData[i]);
+    const a = idx.map(i => agentData[i]);
+    const dots = (arr, color, name) => ({
+        type: 'line', label: name, data: arr, showLine: false,
+        pointRadius: 4, pointHoverRadius: 6, clip: false, order: 1,
+        pointBackgroundColor: color, borderColor: color, pointBorderWidth: 0
+    });
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: names,
+            datasets: [
+                { type: 'bar', label: 'range', data: names.map((_, i) => [a[i], o[i]]),
+                  backgroundColor: 'rgba(0,0,0,0.13)', barThickness: 2, order: 3 },
+                dots(o, 'rgba(210,90,75,0.95)', 'No erasure'),
+                dots(l, 'rgba(224,162,66,0.95)', 'LEACE'),
+                dots(a, 'rgba(66,158,74,0.95)', 'Agents (best)')
+            ]
+        },
+        options: {
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            layout: { padding: { right: 12 } },
+            scales: {
+                x: { min: 0.4, max: 1.0,
+                     ticks: { color: '#555', callback: v => (v * 100).toFixed(0) + '%' },
+                     grid: { color: 'rgba(0,0,0,0.06)' } },
+                y: { ticks: { color: '#555', font: { size: 8 }, autoSkip: false },
+                     grid: { display: false } }
+            },
+            plugins: {
+                legend: { labels: { color: '#333', padding: 12, usePointStyle: true,
+                                    filter: it => it.text !== 'range' } },
+                tooltip: { callbacks: { label: c => c.dataset.label + ': ' + (c.parsed.x * 100).toFixed(1) + '%' } },
+                annotation: { annotations: { chance: {
+                    type: 'line', xMin: 0.5, xMax: 0.5,
+                    borderColor: 'rgba(70,70,70,0.9)', borderDash: [6, 3], borderWidth: 2,
+                    label: { display: true, content: '50% (chance)', position: 'start',
+                             backgroundColor: 'rgba(255,255,255,0.8)', color: '#333', font: { size: 10 } }
+                } } }
+            }
+        }
+    });
+}
+
+makeChart('svmChart', DATA.original_svm, DATA.leace_svm, DATA.agent_svm, 'SVM RBF');
+makeChart('rfChart', DATA.original_rf, DATA.leace_rf, DATA.agent_rf, 'Random Forest');
+
+function makeAvgChart(canvasId, oData, lData, aData) {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Original (no erasure)', 'LEACE', 'Agents (best)'],
+            datasets: [{
+                data: [mean(oData), mean(lData), mean(aData)],
+                backgroundColor: ['rgba(210,90,75,0.72)', 'rgba(224,162,66,0.75)', 'rgba(66,158,74,0.8)'],
+                borderColor: ['rgba(178,58,45,1)', 'rgba(188,128,40,1)', 'rgba(36,104,42,1)'],
+                borderWidth: 1, barPercentage: 0.6, categoryPercentage: 0.8
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: c => (c.parsed.y * 100).toFixed(1) + '%' } },
+                annotation: { annotations: { chance: {
+                    type: 'line', yMin: 0.5, yMax: 0.5,
+                    borderColor: 'rgba(70,70,70,0.9)', borderDash: [6, 3], borderWidth: 2,
+                    label: { display: true, content: '50% (chance)', position: 'end',
+                             backgroundColor: 'rgba(255,255,255,0.8)', color: '#333', font: { size: 10 } }
+                } } }
+            },
+            scales: {
+                x: { ticks: { color: '#555', font: { size: 11 } }, grid: { display: false } },
+                y: { min: 0, max: 1.0, ticks: { color: '#555', callback: v => (v * 100).toFixed(0) + '%' },
+                     grid: { color: 'rgba(0,0,0,0.06)' } }
+            }
+        }
+    });
+}
+makeAvgChart('svmAvgChart', DATA.original_svm, DATA.leace_svm, DATA.agent_svm);
+makeAvgChart('rfAvgChart', DATA.original_rf, DATA.leace_rf, DATA.agent_rf);
+
+const CLUSTERS = [{"name": "Gaussian Optimal Transport", "n": 6, "avg_svm": 0.7062499999999999, "best_svm": 0.5875, "best_concept": "certainty"}, {"name": "MMD-Optimized Affine Transform", "n": 12, "avg_svm": 0.634375, "best_svm": 0.4875, "best_concept": "empathy"}, {"name": "Neural Network + MMD Training", "n": 6, "avg_svm": 0.6604166666666667, "best_svm": 0.575, "best_concept": "humor"}, {"name": "Soft Prediction + Moment Matching", "n": 22, "avg_svm": 0.7431818181818183, "best_svm": 0.525, "best_concept": "agreement"}, {"name": "Point-Level Optimal Transport (Hungarian Matching)", "n": 3, "avg_svm": 0.7208333333333333, "best_svm": 0.6, "best_concept": "curiosity"}, {"name": "Quantile / Per-Dimension Transport", "n": 1, "avg_svm": 0.6875, "best_svm": 0.6875, "best_concept": "authority"}];
+const clusterCtx = document.getElementById('clusterChart').getContext('2d');
+const sortedClusters = [...CLUSTERS].sort((a, b) => b.n - a.n);
+new Chart(clusterCtx, {
+    type: 'bar',
+    data: {
+        labels: sortedClusters.map(c => c.name + ' (' + c.n + ')'),
+        datasets: [{
+            label: 'Avg SVM Accuracy',
+            data: sortedClusters.map(c => c.avg_svm),
+            backgroundColor: sortedClusters.map(c => c.avg_svm < 0.65 ? 'rgba(66,158,74,0.8)' : c.avg_svm < 0.72 ? 'rgba(224,162,66,0.78)' : 'rgba(210,90,75,0.72)'),
+            borderColor: sortedClusters.map(c => c.avg_svm < 0.65 ? 'rgba(36,104,42,1)' : c.avg_svm < 0.72 ? 'rgba(188,128,40,1)' : 'rgba(178,58,45,1)'),
+            borderWidth: 1
+        }]
+    },
+    options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        scales: {
+            x: { min: 0, max: 1.0, ticks: { color: '#555', callback: v => (v * 100).toFixed(0) + '%' }, grid: { color: 'rgba(0,0,0,0.06)' } },
+            y: { ticks: { color: '#333', font: { size: 11 } }, grid: { display: false } }
+        },
+        plugins: {
+            legend: { display: false },
+            annotation: { annotations: {
+                chance: { type: 'line', xMin: 0.5, xMax: 0.5, borderColor: 'rgba(70,70,70,0.9)', borderDash: [6, 3], borderWidth: 2,
+                          label: { display: true, content: '50% (chance)', position: 'start', backgroundColor: 'rgba(255,255,255,0.8)', color: '#333', font: { size: 10 } } },
+                leace: { type: 'line', xMin: 0.8803, xMax: 0.8803, borderColor: 'rgba(188,128,40,0.95)', borderDash: [6, 3], borderWidth: 2,
+                         label: { display: true, content: 'LEACE avg', position: 'start', backgroundColor: 'rgba(255,255,255,0.8)', color: '#8a6320', font: { size: 10 } } }
+            } }
+        }
+    }
+});
+</script>
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>The text below is a paraphrase conveying the general
+sentiment of the task, not the literal prompt given to the agent.<a
+href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+</body>
+</html>

@@ -1,0 +1,22 @@
+input-file:
+  - blog_post.md
+number-sections: true
+toc: true
+standalone: true
+output-file: index.html
+html-math-method:
+  method: katex
+css:
+  - pandoc.css
+  - sidenote.css
+  - toc-styles.css
+  - highlights-box.css
+  - charts.css
+filters:
+  - citeproc
+variables:
+  header-includes:
+    - "<script src=\"toc-script.js\"></script>"
+    - "<script src=\"sidenotes.js\"></script>"
+    - "<script src=\"https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js\"></script>"
+    - "<script src=\"https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js\"></script>"

@@ -52,7 +52,7 @@ We ran 560 independent rollouts across 50 concepts, ranging from "sarcasm" and "
 
 *SVM Accuracy* was our primary evaluation metric. An RBF-kernel SVM is trained on data the agent never saw and evaluated on a separate test set. An SVM Accuracy score of 50% is equal to random chance (i.e., perfect erasure). A score higher than 50% meant the target concept was recoverable.
 
-<div class="chart-container short"><div class="chart-title">Average SVM accuracy — baseline vs. LEACE vs. agents</div><canvas id="svmAvgChart"></canvas></div>
+<div class="chart-container short"><div class="chart-title">Average SVM Accuracy — Baseline vs. LEACE vs. Agents</div><canvas id="svmAvgChart"></canvas></div>
 
 For every concept, the best agent solution beat LEACE on SVM accuracy. On average, LEACE reduces the SVM Accuracy to 88%, while our agents reduced it to 70.1%. The [Appendix](#appendix) shows the per-concept SVM results for all 50 concepts.
 
@@ -60,7 +60,7 @@ For every concept, the best agent solution beat LEACE on SVM accuracy. On averag
 
 As a test of generalization, we also evaluated with a *Random Forest Classifier* (100 trees, max depth 10). This is a different nonlinear classifier family that the agents were not optimizing against. If a Random Forest also failed to recover the target concept, that indicated the agents found erasure that transfers beyond the specific SVM they were graded on. This result would suggest genuine distribution-matching rather than overfitting to one kernel.
 
-<div class="chart-container short"><div class="chart-title">Average Random Forest accuracy — baseline vs. LEACE vs. agents</div><canvas id="rfAvgChart"></canvas></div>
+<div class="chart-container short"><div class="chart-title">Average Random Forest Accuracy — Baseline vs. LEACE vs. Agents</div><canvas id="rfAvgChart"></canvas></div>
 
 Random Forest recovered some concepts the SVM could not, but our best agent solutions generally beat LEACE. On average, LEACE reduces Random Forest accuracy to 82.6%, while our agents reduced it to 71.9%. See the [Appendix](#appendix) for the matching per-concept Random Forest breakdown.
 
@@ -116,7 +116,7 @@ Pair each point with an opposite-class point (via the Hungarian matching algorit
 
 Work one activation dimension at a time: reshape each class's distribution along that axis onto a shared target by matching quantiles (1D optimal transport). This matches every per-dimension moment, not just the variance, but it ignores cross-dimension correlations. This makes it cheap and effective when the classes differ mainly dimension by dimension.
 
-<div class="chart-container short"><div class="chart-title">Average SVM accuracy by algorithm family</div><canvas id="clusterChart"></canvas></div>
+<div class="chart-container short"><div class="chart-title">Average SVM Accuracy by Algorithm Family</div><canvas id="clusterChart"></canvas></div>
 
 # Key Finding: Covariance Is the Strongest Signal
 
@@ -147,11 +147,11 @@ Claude (Anthropic) assisted in preparing this post — helping to draft the writ
 
 LEACE and best-agent performance for all 50 concepts, under the RBF-SVM.
 
-<div class="chart-container tall"><div class="chart-title">SVM RBF accuracy by concept</div><canvas id="svmChart"></canvas></div>
+<div class="chart-container tall"><div class="chart-title">SVM RBF Accuracy by Concept</div><canvas id="svmChart"></canvas></div>
 
 LEACE and best-agent performance for all 50 concepts, under the Random Forest classifier.
 
-<div class="chart-container tall"><div class="chart-title">Random Forest accuracy by concept</div><canvas id="rfChart"></canvas></div>
+<div class="chart-container tall"><div class="chart-title">Random Forest Accuracy by Concept</div><canvas id="rfChart"></canvas></div>
 
 # References
 
@@ -183,9 +183,9 @@ function makeChart(canvasId, originalData, leaceData, agentData, label) {
             datasets: [
                 { type: 'bar', label: 'range', data: names.map((_, i) => [a[i], o[i]]),
                   backgroundColor: 'rgba(0,0,0,0.13)', barThickness: 2, order: 3 },
-                dots(o, 'rgba(210,90,75,0.95)', 'No erasure'),
+                dots(o, 'rgba(210,90,75,0.95)', 'No Erasure'),
                 dots(l, 'rgba(224,162,66,0.95)', 'LEACE'),
-                dots(a, 'rgba(66,158,74,0.95)', 'Agents (best)')
+                dots(a, 'rgba(66,158,74,0.95)', 'Agents (Best)')
             ]
         },
         options: {
@@ -222,7 +222,7 @@ function makeAvgChart(canvasId, oData, lData, aData) {
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Original (no erasure)', 'LEACE', 'Agents (best)'],
+            labels: ['Original (No Erasure)', 'LEACE', 'Agents (Best)'],
             datasets: [{
                 data: [mean(oData), mean(lData), mean(aData)],
                 backgroundColor: ['rgba(210,90,75,0.72)', 'rgba(224,162,66,0.75)', 'rgba(66,158,74,0.8)'],
@@ -256,7 +256,7 @@ makeAvgChart('rfAvgChart', DATA.original_rf, DATA.leace_rf, DATA.agent_rf);
 
 const CLUSTERS = [{"name": "Gaussian Optimal Transport", "n": 6, "avg_svm": 0.7062499999999999, "best_svm": 0.5875, "best_concept": "certainty"}, {"name": "MMD-Optimized Affine Transform", "n": 12, "avg_svm": 0.634375, "best_svm": 0.4875, "best_concept": "empathy"}, {"name": "Neural Network + MMD Training", "n": 6, "avg_svm": 0.6604166666666667, "best_svm": 0.575, "best_concept": "humor"}, {"name": "Soft Prediction + Moment Matching", "n": 22, "avg_svm": 0.7431818181818183, "best_svm": 0.525, "best_concept": "agreement"}, {"name": "Point-Level Optimal Transport (Hungarian Matching)", "n": 3, "avg_svm": 0.7208333333333333, "best_svm": 0.6, "best_concept": "curiosity"}, {"name": "Quantile / Per-Dimension Transport", "n": 1, "avg_svm": 0.6875, "best_svm": 0.6875, "best_concept": "authority"}];
 const clusterCtx = document.getElementById('clusterChart').getContext('2d');
-const sortedClusters = [...CLUSTERS].sort((a, b) => b.n - a.n);
+const sortedClusters = [...CLUSTERS];  // section order (Gaussian OT → Quantile)
 new Chart(clusterCtx, {
     type: 'bar',
     data: {

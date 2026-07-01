@@ -272,7 +272,7 @@ chance (i.e., perfect erasure). A score higher than 50% meant the target
 concept was recoverable.</p>
 <div class="chart-container short">
 <div class="chart-title">
-Average SVM accuracy — baseline vs. LEACE vs. agents
+Average SVM Accuracy — Baseline vs. LEACE vs. Agents
 </div>
 <canvas id="svmAvgChart">
 </canvas>
@@ -292,7 +292,7 @@ SVM they were graded on. This result would suggest genuine
 distribution-matching rather than overfitting to one kernel.</p>
 <div class="chart-container short">
 <div class="chart-title">
-Average Random Forest accuracy — baseline vs. LEACE vs. agents
+Average Random Forest Accuracy — Baseline vs. LEACE vs. Agents
 </div>
 <canvas id="rfAvgChart">
 </canvas>
@@ -384,7 +384,7 @@ makes it cheap and effective when the classes differ mainly dimension by
 dimension.</p>
 <div class="chart-container short">
 <div class="chart-title">
-Average SVM accuracy by algorithm family
+Average SVM Accuracy by Algorithm Family
 </div>
 <canvas id="clusterChart">
 </canvas>
@@ -456,7 +456,7 @@ class="header-section-number">8</span> Appendix</h1>
 RBF-SVM.</p>
 <div class="chart-container tall">
 <div class="chart-title">
-SVM RBF accuracy by concept
+SVM RBF Accuracy by Concept
 </div>
 <canvas id="svmChart">
 </canvas>
@@ -465,7 +465,7 @@ SVM RBF accuracy by concept
 Random Forest classifier.</p>
 <div class="chart-container tall">
 <div class="chart-title">
-Random Forest accuracy by concept
+Random Forest Accuracy by Concept
 </div>
 <canvas id="rfChart">
 </canvas>
@@ -516,9 +516,9 @@ function makeChart(canvasId, originalData, leaceData, agentData, label) {
             datasets: [
                 { type: 'bar', label: 'range', data: names.map((_, i) => [a[i], o[i]]),
                   backgroundColor: 'rgba(0,0,0,0.13)', barThickness: 2, order: 3 },
-                dots(o, 'rgba(210,90,75,0.95)', 'No erasure'),
+                dots(o, 'rgba(210,90,75,0.95)', 'No Erasure'),
                 dots(l, 'rgba(224,162,66,0.95)', 'LEACE'),
-                dots(a, 'rgba(66,158,74,0.95)', 'Agents (best)')
+                dots(a, 'rgba(66,158,74,0.95)', 'Agents (Best)')
             ]
         },
         options: {
@@ -555,7 +555,7 @@ function makeAvgChart(canvasId, oData, lData, aData) {
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Original (no erasure)', 'LEACE', 'Agents (best)'],
+            labels: ['Original (No Erasure)', 'LEACE', 'Agents (Best)'],
             datasets: [{
                 data: [mean(oData), mean(lData), mean(aData)],
                 backgroundColor: ['rgba(210,90,75,0.72)', 'rgba(224,162,66,0.75)', 'rgba(66,158,74,0.8)'],
@@ -589,7 +589,7 @@ makeAvgChart('rfAvgChart', DATA.original_rf, DATA.leace_rf, DATA.agent_rf);
 
 const CLUSTERS = [{"name": "Gaussian Optimal Transport", "n": 6, "avg_svm": 0.7062499999999999, "best_svm": 0.5875, "best_concept": "certainty"}, {"name": "MMD-Optimized Affine Transform", "n": 12, "avg_svm": 0.634375, "best_svm": 0.4875, "best_concept": "empathy"}, {"name": "Neural Network + MMD Training", "n": 6, "avg_svm": 0.6604166666666667, "best_svm": 0.575, "best_concept": "humor"}, {"name": "Soft Prediction + Moment Matching", "n": 22, "avg_svm": 0.7431818181818183, "best_svm": 0.525, "best_concept": "agreement"}, {"name": "Point-Level Optimal Transport (Hungarian Matching)", "n": 3, "avg_svm": 0.7208333333333333, "best_svm": 0.6, "best_concept": "curiosity"}, {"name": "Quantile / Per-Dimension Transport", "n": 1, "avg_svm": 0.6875, "best_svm": 0.6875, "best_concept": "authority"}];
 const clusterCtx = document.getElementById('clusterChart').getContext('2d');
-const sortedClusters = [...CLUSTERS].sort((a, b) => b.n - a.n);
+const sortedClusters = [...CLUSTERS];  // section order (Gaussian OT → Quantile)
 new Chart(clusterCtx, {
     type: 'bar',
     data: {

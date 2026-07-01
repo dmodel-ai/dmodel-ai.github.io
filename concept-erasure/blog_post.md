@@ -52,7 +52,7 @@ We ran 560 independent rollouts across 50 concepts, ranging from "sarcasm" and "
 
 *SVM Accuracy* was our primary evaluation metric. An RBF-kernel SVM is trained on data the agent never saw and evaluated on a separate test set. An SVM Accuracy score of 50% is equal to random chance (i.e., perfect erasure). A score higher than 50% meant the target concept was recoverable.
 
-<div class="chart-container short"><div class="chart-title">Average SVM accuracy — baseline vs. LEACE vs. agents (lower is better erasure)</div><canvas id="svmAvgChart"></canvas></div>
+<div class="chart-container short"><div class="chart-title">Average SVM accuracy — baseline vs. LEACE vs. agents</div><canvas id="svmAvgChart"></canvas></div>
 
 For every concept, the best agent solution beat LEACE on SVM accuracy. On average, LEACE reduces the SVM Accuracy to 88%, while our agents reduced it to 70.1%. The [Appendix](#appendix) shows the per-concept SVM results for all 50 concepts.
 
@@ -60,7 +60,7 @@ For every concept, the best agent solution beat LEACE on SVM accuracy. On averag
 
 As a test of generalization, we also evaluated with a *Random Forest Classifier* (100 trees, max depth 10). This is a different nonlinear classifier family that the agents were not optimizing against. If a Random Forest also failed to recover the target concept, that indicated the agents found erasure that transfers beyond the specific SVM they were graded on. This result would suggest genuine distribution-matching rather than overfitting to one kernel.
 
-<div class="chart-container short"><div class="chart-title">Average Random Forest accuracy — baseline vs. LEACE vs. agents (lower is better erasure)</div><canvas id="rfAvgChart"></canvas></div>
+<div class="chart-container short"><div class="chart-title">Average Random Forest accuracy — baseline vs. LEACE vs. agents</div><canvas id="rfAvgChart"></canvas></div>
 
 Random Forest recovered some concepts the SVM could not, but our best agent solutions generally beat LEACE. On average, LEACE reduces Random Forest accuracy to 82.6%, while our agents reduced it to 71.9%. See the [Appendix](#appendix) for the matching per-concept Random Forest breakdown.
 
@@ -147,11 +147,11 @@ Claude (Anthropic) assisted in preparing this post — helping to draft the writ
 
 LEACE and best-agent performance for all 50 concepts, under the RBF-SVM.
 
-<div class="chart-container tall"><div class="chart-title">SVM RBF accuracy by concept (lower is better erasure)</div><canvas id="svmChart"></canvas></div>
+<div class="chart-container tall"><div class="chart-title">SVM RBF accuracy by concept</div><canvas id="svmChart"></canvas></div>
 
 LEACE and best-agent performance for all 50 concepts, under the Random Forest classifier.
 
-<div class="chart-container tall"><div class="chart-title">Random Forest accuracy by concept (lower is better erasure)</div><canvas id="rfChart"></canvas></div>
+<div class="chart-container tall"><div class="chart-title">Random Forest accuracy by concept</div><canvas id="rfChart"></canvas></div>
 
 # References
 
@@ -193,6 +193,7 @@ function makeChart(canvasId, originalData, leaceData, agentData, label) {
             layout: { padding: { right: 12 } },
             scales: {
                 x: { min: 0.4, max: 1.0,
+                     title: { display: true, text: 'Accuracy (lower is better erasure)', color: '#555' },
                      ticks: { color: '#555', callback: v => (v * 100).toFixed(0) + '%' },
                      grid: { color: 'rgba(0,0,0,0.06)' } },
                 y: { ticks: { color: '#555', font: { size: 8 }, autoSkip: false },
@@ -243,7 +244,8 @@ function makeAvgChart(canvasId, oData, lData, aData) {
             },
             scales: {
                 x: { ticks: { color: '#555', font: { size: 11 } }, grid: { display: false } },
-                y: { min: 0, max: 1.0, ticks: { color: '#555', callback: v => (v * 100).toFixed(0) + '%' },
+                y: { min: 0, max: 1.0, title: { display: true, text: 'Accuracy (lower is better erasure)', color: '#555' },
+                     ticks: { color: '#555', callback: v => (v * 100).toFixed(0) + '%' },
                      grid: { color: 'rgba(0,0,0,0.06)' } }
             }
         }

@@ -272,8 +272,7 @@ chance (i.e., perfect erasure). A score higher than 50% meant the target
 concept was recoverable.</p>
 <div class="chart-container short">
 <div class="chart-title">
-Average SVM accuracy — baseline vs. LEACE vs. agents (lower is better
-erasure)
+Average SVM accuracy — baseline vs. LEACE vs. agents
 </div>
 <canvas id="svmAvgChart">
 </canvas>
@@ -293,8 +292,7 @@ SVM they were graded on. This result would suggest genuine
 distribution-matching rather than overfitting to one kernel.</p>
 <div class="chart-container short">
 <div class="chart-title">
-Average Random Forest accuracy — baseline vs. LEACE vs. agents (lower is
-better erasure)
+Average Random Forest accuracy — baseline vs. LEACE vs. agents
 </div>
 <canvas id="rfAvgChart">
 </canvas>
@@ -458,7 +456,7 @@ class="header-section-number">8</span> Appendix</h1>
 RBF-SVM.</p>
 <div class="chart-container tall">
 <div class="chart-title">
-SVM RBF accuracy by concept (lower is better erasure)
+SVM RBF accuracy by concept
 </div>
 <canvas id="svmChart">
 </canvas>
@@ -467,7 +465,7 @@ SVM RBF accuracy by concept (lower is better erasure)
 Random Forest classifier.</p>
 <div class="chart-container tall">
 <div class="chart-title">
-Random Forest accuracy by concept (lower is better erasure)
+Random Forest accuracy by concept
 </div>
 <canvas id="rfChart">
 </canvas>
@@ -528,6 +526,7 @@ function makeChart(canvasId, originalData, leaceData, agentData, label) {
             layout: { padding: { right: 12 } },
             scales: {
                 x: { min: 0.4, max: 1.0,
+                     title: { display: true, text: 'Accuracy (lower is better erasure)', color: '#555' },
                      ticks: { color: '#555', callback: v => (v * 100).toFixed(0) + '%' },
                      grid: { color: 'rgba(0,0,0,0.06)' } },
                 y: { ticks: { color: '#555', font: { size: 8 }, autoSkip: false },
@@ -578,7 +577,8 @@ function makeAvgChart(canvasId, oData, lData, aData) {
             },
             scales: {
                 x: { ticks: { color: '#555', font: { size: 11 } }, grid: { display: false } },
-                y: { min: 0, max: 1.0, ticks: { color: '#555', callback: v => (v * 100).toFixed(0) + '%' },
+                y: { min: 0, max: 1.0, title: { display: true, text: 'Accuracy (lower is better erasure)', color: '#555' },
+                     ticks: { color: '#555', callback: v => (v * 100).toFixed(0) + '%' },
                      grid: { color: 'rgba(0,0,0,0.06)' } }
             }
         }

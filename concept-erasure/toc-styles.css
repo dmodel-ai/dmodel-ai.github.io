@@ -88,8 +88,11 @@ body.at-top #TOC {
   padding-left: 5px;
 }
 
-/* Responsive behavior for smaller screens */
-@media screen and (max-width: 1000px) {
+/* Responsive behavior for smaller screens.
+   Breakpoint set above the width where centered content (text ~1226px, and the
+   ~864px break-out graphics ~1514px) would slide under the 300px fixed sidebar,
+   so the ToC drops to the top before it can overlap either. */
+@media screen and (max-width: 1550px) {
   body {
     padding-left: 0;
   }

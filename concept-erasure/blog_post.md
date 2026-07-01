@@ -1,6 +1,6 @@
 ---
 title: Discovering Concept-Editing Algorithms With LLM Agents
-author: 'Adam Scherlis^\*^, Alex Bishka^\*^, Aditya Vasantharao, Ajit Sivakumar, Alex Sanchez-Stern, Alexana Dubois, Anish Tondwalkar, Arjun Pagidi, Autumn Sinclair, Curry Winter, Dalton Combs, Daniel Moon, David Cao, Felix Michalak, Jeff Coggshall, Kunal Bham, Mohit Tekriwal, Ritesh Bhalerao, Shaurya Jain, Tyra Burgess, Yueru Yan, Zhanna Kaufman<br><span class="author-note">\* Core contributors</span>'
+author: 'Adam Scherlis^\*^, Alex Bishka^\*^, Aditya Vasantharao, Ajit Sivakumar, Alex Sanchez-Stern, Alexana Dubois, Arjun Pagidi, Autumn Sinclair, Curry Winter, Dalton Combs, Daniel Moon, David Cao, Felix Michalak, Jeff Coggshall, Kunal Bham, Mohit Tekriwal, Ritesh Bhalerao, Shaurya Jain, Tyra Burgess, Yueru Yan, Zhanna Kaufman, Anish Tondwalkar<br><span class="author-note">\* Core contributors</span>'
 date: '$d_{\text{model}}$'
 bibliography: all.bib
 abstract: |

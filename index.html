@@ -325,27 +325,76 @@
       font-weight: bold;
       text-align: center;
     }
-
-    .team-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 140px);
-      justify-content: center;
-      gap: 24px 40px;
-    }
-    .team-grid .new-row {
-      grid-column: 1;
-    }
-    .member a {
-      color: var(--fg);
+    /* Team: grouped by org */
+    .team-group h3 {
+      margin: 0 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--muted-border);
+      font-size: 15px;
+      font-weight: bold;
+      text-align: center;
     }
 
-    .member strong {
-      display: block;
+    .team-group ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
     }
 
-    .member i {
-      font-size: 13px;
+    .team-group li {
+      font-size: 15px;
+      font-style: italic;
       color: var(--dim);
+    }
+
+    .team-group a {
+      color: var(--dim);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .team-group a:hover {
+      color: var(--accent-fg);
+    }
+
+    .team-founders {
+      width: 260px;
+      margin: 24px auto 48px;
+    }
+
+    .team-group ul.team-row {
+      flex-direction: row;
+      justify-content: center;
+      gap: 48px;
+    }
+
+    .team-orgs {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+      gap: 32px;
+      align-items: start;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    /* adam + alex: centered pair above the research lists */
+    .team-group ul.team-leads {
+      margin-bottom: 20px;
+    }
+
+    /* research: two alphabetical lists that read top-to-bottom */
+    .team-group ul.team-research {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: repeat(9, auto);
+      grid-auto-flow: column;
+      justify-items: center;
+      column-gap: 16px;
+      row-gap: 10px;
     }
 
     .hiring {
@@ -380,9 +429,10 @@
       }
     }
 
-    @media (max-width: 500px) {
-      .team-grid {
-        grid-template-columns: repeat(2, 1fr);
+    @media (max-width: 700px) {
+      .team-orgs {
+        grid-template-columns: 1fr;
+        gap: 32px;
       }
     }
   </style>
@@ -456,118 +506,60 @@
 
   <div class="team-section">
     <h2>Team</h2>
-    <div class="team-grid">
-      <div class="member">
-        <a href="https://ani.sh/"><strong>anish</strong></a>
-        <i>co-founder</i>
+
+    <div class="team-group team-founders">
+      <h3>co-founders</h3>
+      <ul class="team-row">
+        <li><a href="https://ani.sh/">anish</a></li>
+        <li><a href="https://www.linkedin.com/in/d-moon/">dmoon</a></li>
+      </ul>
+    </div>
+
+    <div class="team-orgs">
+      <div class="team-group">
+        <h3>supercomputing</h3>
+        <ul>
+          <li><a href="#">dalton</a></li>
+          <li>arjun s.</li>
+          <li>suraj</li>
+        </ul>
       </div>
-      <div class="member">
-        <a href="https://www.linkedin.com/in/d-moon/"><strong>dmoon</strong></a>
-        <i>co-founder</i>
+
+      <div class="team-group">
+        <h3>research</h3>
+        <ul class="team-row team-leads">
+          <li><a href="https://adam.scherl.is/">adam</a></li>
+          <li><a href="https://www.alexsanchezstern.com/">alex</a></li>
+        </ul>
+        <ul class="team-research">
+          <li>aditya</li>
+          <li>ajit</li>
+          <li>arjun p.</li>
+          <li>autumn</li>
+          <li>bishka</li>
+          <li>cameron</li>
+          <li>david c.</li>
+          <li>david r.</li>
+          <li>ev</li>
+          <li>evan</li>
+          <li>felix</li>
+          <li>govind</li>
+          <li>ritesh</li>
+          <li>ryan</li>
+          <li>shaurya</li>
+          <li>tyra</li>
+          <li>yueru</li>
+        </ul>
       </div>
-      <div class="member">
-        <a href="https://www.alexsanchezstern.com/"><strong>alex</strong></a>
-        <i>research</i>
-      </div>
-      <div class="member">
-        <a href="https://adam.scherl.is/"><strong>adam</strong></a>
-        <i>research</i>
-      </div>
-      <div class="member">
-        <strong>aditya</strong>
-        <i>research</i>
-      </div>
-      <div class="member">
-        <strong>ajit</strong>
-        <i>research</i>
-      </div>
-      <div class="member">
-        <strong>arjun p.</strong>
-        <i>research</i>
-      </div>
-      <div class="member">
-        <strong>arjun s.</strong>
-        <i>research</i>
-      </div>
-      <div class="member">
-        <strong>autumn</strong>
-        <i>research</i>
-      </div>
-      <div class="member">
-        <strong>bishka</strong>
-        <i>research</i>
-      </div>
-      <div class="member">
-        <strong>cameron</strong>
-        <i>research</i>
-      </div>
-      <div class="member">
-        <strong>david c.</strong>
-        <i>research</i>
-      </div>
-        <div class="member">
-        <strong>david r.</strong>
-        <i>research</i>
-      </div>
-      <div class="member">
-        <strong>ev</strong>
-        <i>research</i>
-      </div>
-      <div class="member">
-        <strong>evan</strong>
-        <i>research</i>
-      </div>
-      <div class="member">
-        <strong>felix</strong>
-        <i>research</i>
-      </div>
-      <div class="member">
-        <strong>govind</strong>
-        <i>research</i>
-      </div>
-      <div class="member">
-        <strong>ritesh</strong>
-        <i>research</i>
-      </div>
-      <div class="member">
-        <strong>ryan</strong>
-        <i>research</i>
-      </div>
-      <div class="member">
-        <strong>shaurya</strong>
-        <i>research</i>
-      </div>
-      <div class="member">
-        <strong>tyra</strong>
-        <i>research</i>
-      </div>
-      <div class="member">
-        <strong>yueru</strong>
-        <i>research</i>
-      </div>
-        <div class="member new-row">
-        <strong>aleks</strong>
-        <i>operations</i>
-      </div>
-      <div class="member">
-        <strong>alexana</strong>
-        <i>operations</i>
-      </div>
-      <div class="member">
-        <strong>curry</strong>
-        <i>operations</i>
-      </div>
-      <div class="member">
-        <strong>tommy</strong>
-        <i>operations</i>
-      </div>
-      <div class="member">
-        <strong>dalton</strong>
-        <i>supercomputing</i>
-      </div>
-      <div class="member">
-        <strong>suraj</strong>
-        <i>supercomputing</i>
+
+      <div class="team-group">
+        <h3>operations</h3>
+        <ul>
+          <li><a href="#">aleks</a></li>
+          <li>alexana</li>
+          <li>curry</li>
+          <li>tommy</li>
+        </ul>
       </div>
     </div>
   </div>

@@ -113,32 +113,11 @@
     .bg-art {
       position: fixed;
       inset: 0;
+      width: 100%;
+      height: 100%;
       pointer-events: none;
       z-index: -1;
-      overflow: hidden;
       opacity: 0.3;
-    }
-
-    .bg-art-track {
-      display: flex;
-      width: max-content;
-      height: 100%;
-      animation: marquee 120s linear infinite;
-    }
-
-    .bg-art-track img {
-      height: 100%;
-      width: auto;
-      display: block;
-    }
-
-    .bg-art-track img:nth-child(even) {
-      transform: scaleX(-1);
-    }
-
-    @keyframes marquee {
-      from { transform: translateX(-50%); }
-      to   { transform: translateX(0); }
     }
 
     .header {
@@ -451,14 +430,112 @@
     })();
   </script>
 
-  <div class="bg-art" aria-hidden="true">
-    <div class="bg-art-track">
-      <img src="/art/tshirt-back.svg" alt="">
-      <img src="/art/tshirt-back.svg" alt="">
-      <img src="/art/tshirt-back.svg" alt="">
-      <img src="/art/tshirt-back.svg" alt="">
-    </div>
-  </div>
+  <canvas class="bg-art" aria-hidden="true"></canvas>
+  <script>
+    // Background watermark: the t-shirt art, mirror-tiled, slowly scrolling
+    // right (one art width per 60s) and writhing under a drifting Perlin
+    // displacement field. Done in one fragment shader so it costs a couple of
+    // texture reads per pixel instead of re-running an SVG filter each frame,
+    // and the drift never wraps, so there are no periodic jumps.
+    (function () {
+      var canvas = document.querySelector('.bg-art');
+      var gl = canvas.getContext('webgl');
+      if (!gl) return;
+
+      function shader(type, src) {
+        var sh = gl.createShader(type);
+        gl.shaderSource(sh, src);
+        gl.compileShader(sh);
+        return sh;
+      }
+      var prog = gl.createProgram();
+      gl.attachShader(prog, shader(gl.VERTEX_SHADER, 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}'));
+      gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, [
+        '#ifdef GL_FRAGMENT_PRECISION_HIGH', 'precision highp float;', '#else', 'precision mediump float;', '#endif',
+        'uniform sampler2D art,noise;uniform vec2 res,drift;uniform float artW,slide;',
+        'void main(){',
+        '  vec2 px=vec2(gl_FragCoord.x,res.y-gl_FragCoord.y);',
+        '  vec2 uv=vec2(px.x/artW-slide,px.y/res.y);',               // art-space; x counts tiles
+        // Perlin cells are 20x5.56 units on the 691x480 art, i.e. 34.55x86.4 per tile; the
+        // noise texture spans 32 cells. Displacement +-3.5 units along the (1,-1) diagonal,
+        // matching the original feDisplacementMap (scale 70 on a 0.1-scaled, y-flipped group).
+        '  float d=(texture2D(noise,uv*vec2(34.55,86.4)/32.+drift).r-.5)*7.;',
+        '  uv+=vec2(d/691.,-d/480.);',
+        '  uv.x=1.-abs(mod(uv.x,2.)-1.);',                          // mirror-tile in x
+        '  gl_FragColor=texture2D(art,uv);',
+        '}'].join('\n')));
+      gl.linkProgram(prog);
+      gl.useProgram(prog);
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+      var loc = gl.getAttribLocation(prog, 'p');
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+      var u = {};
+      ['res', 'drift', 'artW', 'slide', 'art', 'noise'].forEach(function (n) { u[n] = gl.getUniformLocation(prog, n); });
+
+      function texture(unit, wrap) {
+        gl.activeTexture(gl.TEXTURE0 + unit);
+        gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
+      }
+
+      // 32x32-cell tileable Perlin noise, 8 texels per cell, stored as (noise+1)/2 like feTurbulence.
+      var C = 32, T = 8, N = C * T, grad = [], tex = new Uint8Array(N * N);
+      for (var i = 0; i < C * C; i++) { var a = Math.random() * 6.2832; grad.push(Math.cos(a), Math.sin(a)); }
+      function fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+      for (var y = 0; y < N; y++) for (var x = 0; x < N; x++) {
+        var cx = x / T | 0, cy = y / T | 0, fx = (x % T + 0.5) / T, fy = (y % T + 0.5) / T, v = 0;
+        for (var j = 0; j < 2; j++) for (var k = 0; k < 2; k++) {
+          var g = (((cy + j) % C) * C + (cx + k) % C) * 2;
+          v += (k ? fade(fx) : 1 - fade(fx)) * (j ? fade(fy) : 1 - fade(fy)) * (grad[g] * (fx - k) + grad[g + 1] * (fy - j));
+        }
+        tex[y * N + x] = 128 + v * 128;
+      }
+      texture(1, gl.REPEAT);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, N, N, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, tex);
+      gl.uniform1i(u.noise, 1);
+
+      texture(0, gl.CLAMP_TO_EDGE);
+      gl.uniform1i(u.art, 0);
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+      var img = new Image();
+      var scratch = document.createElement('canvas');
+      function fit() {
+        var dpr = Math.min(devicePixelRatio || 1, 2);
+        var w = canvas.width = Math.round(canvas.clientWidth * dpr);
+        var h = canvas.height = Math.round(canvas.clientHeight * dpr);
+        var artW = Math.round(h * 691 / 480);
+        scratch.width = artW;
+        scratch.height = h;
+        scratch.getContext('2d').drawImage(img, 0, 0, artW, h);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, scratch);
+        gl.viewport(0, 0, w, h);
+        gl.uniform2f(u.res, w, h);
+        gl.uniform1f(u.artW, artW);
+      }
+
+      var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      function frame(now) {
+        var t = now / 1000;
+        gl.uniform1f(u.slide, t / 60 % 2);
+        // Noise drifts right/down at the original 0.87 x 0.435 cells/s; wrapped here, not in the shader.
+        gl.uniform2f(u.drift, -(0.87 / C * t % 1), -(0.435 / C * t % 1));
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        if (!still) requestAnimationFrame(frame);
+      }
+      img.onload = function () {
+        fit();
+        addEventListener('resize', fit);
+        requestAnimationFrame(frame);
+      };
+      img.src = '/art/tshirt-back.svg';
+    })();
+  </script>
 
   <div class="header">
     <h1 class="logo">d<sub>model</sub></h1>

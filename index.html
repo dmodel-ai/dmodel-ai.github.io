@@ -365,7 +365,22 @@
       width: 260px;
       margin: 24px auto 48px;
     }
-
+    /* interns: centered row at the bottom, mirrors co-founders */
+    .team-interns {
+      max-width: 760px;          /* same width as .team-orgs */
+      margin: 56px auto 0;
+    }
+    
+    .team-interns h3 {
+      max-width: 260px;          /* same short divider as co-founders */
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .team-group.team-interns ul.team-row {
+      flex-wrap: wrap;           /* wraps into extra rows if the list grows */
+      gap: 10px 40px;            /* row gap, column gap */
+    }
     .team-group ul.team-row {
       flex-direction: row;
       justify-content: center;
@@ -561,6 +576,18 @@
           <li>curry</li>
         </ul>
       </div>
+
+    <div class="team-group team-interns">
+      <h3>summer 2027 interns</h3>
+      <ul class="team-row">
+        <li>aayan</li>
+        <li>aarush</li>
+        <li>avnith</li>
+        <li>clinton</li>
+        <li>mihir</li>
+        <li>raymond</li>
+      </ul>
+    </div>
     </div>
   </div>
 </body>

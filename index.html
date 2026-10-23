@@ -391,9 +391,8 @@
       row-gap: 10px;
     }
 
-    /* interns: centered row at the bottom, mirrors co-founders */
     .team-interns {
-      max-width: 760px;          /* same width as .team-orgs */
+      max-width: none;           /* use the full 1040px team section width */
       margin: 56px auto 0;
     }
     
@@ -404,8 +403,8 @@
     }
     
     .team-group.team-interns ul.team-row {
-      flex-wrap: wrap;           /* wraps into extra rows if the list grows */
-      gap: 10px 40px;            /* row gap, column gap */
+      flex-wrap: wrap;           /* still lets it wrap on phones */
+      gap: 10px 28px;            /* row gap, column gap — was 40px */
     }
     .team-group ul.team-row {
       flex-direction: row;

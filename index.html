@@ -213,7 +213,36 @@
       color: var(--accent-fg);
       text-decoration: underline;
     }
+    /* Open roles (About column) */
+    .col-roles h2 {
+      margin-top: 40px;
+    }
 
+    .role {
+      display: block;
+      padding: 14px 16px;
+      background: var(--muted-bg);
+      border-bottom: 1px solid var(--muted-border);
+      color: var(--fg);
+      text-decoration: none;
+    }
+
+    .role:hover {
+      padding-left: 14px;
+      border-left: 2px solid var(--fg);
+    }
+
+    .role h3 {
+      margin: 0;
+      font-size: 100%;
+    }
+
+    .role .team {
+      display: block;
+      font-style: italic;
+      color: var(--dim);
+    }
+    
     .cite {
       font-size: 0.7em;
       vertical-align: super;
@@ -488,6 +517,23 @@
       <p>We build RL environments for open-ended interpretability tasks. These environments teach agents how to do cutting-edge research, not how to reward-hack.</p>
       <p>You've already used LLMs trained on our environments. Help us train the next generation.</p>
       <p>Interested in career opportunities? Fill out our <a class="contact-link" href="https://docs.google.com/forms/d/e/1FAIpQLScyJSOpvINAfKiqBS-llUJu0eP6JvVtbA9D3JsYmwwlHJyqxA/viewform?usp=preview" target="_blank" rel="noopener noreferrer">Hiring Interest Form</a></p>    
+         
+      <div class="col-roles">
+        <h2>Open Roles</h2>
+        <a class="role" href="https://jobs.ashbyhq.com/dmodel/f9e14143-4668-4836-a69a-8d545e61f44a" target="_blank" rel="noopener noreferrer">
+          <h3>Member of Technical Staff</h3>
+          <span class="team">shaurya's team</span>
+        </a>
+        <a class="role" href="https://jobs.ashbyhq.com/dmodel/21a29e31-ca63-4b31-a0be-50b8f6416def" target="_blank" rel="noopener noreferrer">
+          <h3>Member of Technical Staff: Alignment</h3>
+          <span class="team">adi's team</span>
+        </a>
+        <a class="role" href="https://jobs.ashbyhq.com/dmodel/b325d0db-a690-4965-ae0a-26692d5b4dc4" target="_blank" rel="noopener noreferrer">
+          <h3>Member of Technical Staff, Generalist</h3>
+          <span class="team">dalton's team</span>
+        </a>
+      </div>
+      
     </div>
 
     <div class="col col-blog">
